@@ -6,6 +6,7 @@ ifeq ($(KERNELRELEASE),)
 # current directory is driver
 CFGDIR = $(PWD)/../../../config
 
+
 include $(CFGDIR)/build_config.cfg
 include $(CFGDIR)/rules.make
 
