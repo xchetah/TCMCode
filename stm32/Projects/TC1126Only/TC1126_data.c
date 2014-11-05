@@ -2639,7 +2639,7 @@ void DataProc_PressKeyDetect()
     
     if(bdt.FingerDetectNum)
     {
-    #if (KXMTR_NUM == 1)
+    #if 0
         if(bdt.DeltaDat16A[KEY_TX_LOC][KEY_MENU_RXLOC] > KEY_MENU_RXLOCATION) 
         {
             bdt.PressKeyFlag.MenuKey   = 1;
@@ -2668,33 +2668,28 @@ void DataProc_PressKeyDetect()
     #endif
 
 
-    #if 0 // (KRECV_NUM == 1)
-        if(   (bdt.DeltaDat_kp[3] > KEY_MENU_RXLOCATION) 
-           || (bdt.DeltaDat_kp[4] > KEY_MENU_RXLOCATION) 
-           || (bdt.DeltaDat_kp[3]+bdt.DeltaDat_kp[4] > KEY_MENU_RXLOCATION) 
+    #if 1 // (KRECV_NUM == 1)
+
+//        printk("key1:(%d,%d),key2:(%d,%d),key3:%d,key4:(%d,%d)\n",bdt.DeltaDat_kp[3],bdt.DeltaDat_kp[4],bdt.DeltaDat_kp[8],bdt.DeltaDat_kp[9]
+ //               ,bdt.DeltaDat_kp[11],bdt.DeltaDat_kp[13],bdt.DeltaDat_kp[14]);
+        if((bdt.DeltaDat_kp[3] > KEY_MENU_RXLOCATION)|| (bdt.DeltaDat_kp[4] > KEY_MENU_RXLOCATION))
         {
-            bdt.PressKeyFlag.MenuKey   = 1;
+              bdt.PressKeyFlag1 = TOUCH_KEY_1;
         }
-        if(bdt.DeltaDat16A[KEY_TX_LOC][KEY_HOME_RXLOC] > KEY_HOME_RXLOCATION)
-        {   
-            bdt.PressKeyFlag.HomeKey   = 1;
-        }
-        if(bdt.DeltaDat16A[KEY_TX_LOC][KEY_RET_RXLOC]  > KEY_RET_RXLOCATION) 
+
+        if((bdt.DeltaDat_kp[8] > KEY_MENU_RXLOCATION)|| (bdt.DeltaDat_kp[9] > KEY_MENU_RXLOCATION))
         {
-            bdt.PressKeyFlag.ReturnKey = 1;
+              bdt.PressKeyFlag1 = TOUCH_KEY_2;
         }
-        
-        if(1 == bdt.PressKeyFlag.MenuKey)
-        { 
-            bdt.PressKeyFlag1 = MENU_KEY_PRESSED;
-        }
-        else if(1 == bdt.PressKeyFlag.HomeKey)
+
+        if((bdt.DeltaDat_kp[11] > KEY_MENU_RXLOCATION))
         {
-            bdt.PressKeyFlag1 = HOME_KEY_PRESSED;
+              bdt.PressKeyFlag1 = TOUCH_KEY_3;
         }
-        else if(1 == bdt.PressKeyFlag.ReturnKey)
+
+        if((bdt.DeltaDat_kp[13] > KEY_MENU_RXLOCATION)|| (bdt.DeltaDat_kp[14] > KEY_MENU_RXLOCATION))
         {
-            bdt.PressKeyFlag1 = RETURN_KEY_PRESSED;
+              bdt.PressKeyFlag1 = TOUCH_KEY_4;
         }
     #endif
 

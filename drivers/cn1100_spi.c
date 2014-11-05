@@ -25,16 +25,25 @@ uint16_t chip_addr = 0x5d;
 #define CTP_HAVE_TOUCH_KEY
 #ifdef CTP_HAVE_TOUCH_KEY
 
-static int key_pressed[5] = {0};
-static bool point_is_down = false;
-static int touch_keys[] = {
-    KEY_BACK,KEY_HOMEPAGE,KEY_MENU,KEY_SEARCH,
+uint16_t key_pressed = 0;
+//static int touch_keys[] = {
+//    KEY_BACK,KEY_HOME,KEY_MENU,KEY_SEARCH,
+//};
+
+struct keys{
+    uint16_t key;
+    uint16_t value;
 };
 
-#define MAX_KEY_NUM ((sizeof(touch_keys))/(sizeof(touch_keys[0])))
+static struct keys chm_ts_keys[]={
+    {KEY_BACK,TOUCH_KEY_1},
+    {KEY_HOMEPAGE,TOUCH_KEY_2},
+    {KEY_MENU,TOUCH_KEY_3},
+};
+
+#define MAX_KEY_NUM ((sizeof(chm_ts_keys)/sizeof(chm_ts_keys[0])))
 
 static int touch_key_pressed = 0;
-
 #endif
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
@@ -372,26 +381,18 @@ out:
 }
 
 #ifdef CTP_HAVE_TOUCH_KEY
-void report_key(int X,int Y,int id)
+void report_key(void)
 {
-     if(X>=0&&X<=200){
-         printk("KEY_MENU pressed\n");
-         input_report_key(spidev->dev,KEY_MENU,1);
-         key_pressed[id] = KEY_MENU;
-     }else if(X>200&&X<=400){
-         printk("KEY_BACK pressed\n");
-         input_report_key(spidev->dev,KEY_BACK,1);
-         key_pressed[id] = KEY_BACK;
-     }else if(X>400&&X<=600){
-         printk("KEY_HOME pressed\n");
-         input_report_key(spidev->dev,2,1);
-         key_pressed[id] = KEY_HOME;
-     }else if(X>600&&X<=800){
-         printk("KEY_SEARCH pressed\n");
-         input_report_key(spidev->dev,KEY_SEARCH,1);
-         key_pressed[id] = KEY_SEARCH;
-     }
-     touch_key_pressed = 1;
+    int i = 0;
+    for(i = 0;i < MAX_KEY_NUM;i++){
+        if(chm_ts_keys[i].value == bdt.PressKeyFlag1){
+            input_report_key(spidev->dev,chm_ts_keys[i].key,1);
+            key_pressed = chm_ts_keys[i].key;
+            touch_key_pressed = 1;
+            printk("KEY_PRESSED:%d\n",chm_ts_keys[i].key);
+            break;
+        }
+    }
 }
 #endif
 
@@ -401,15 +402,6 @@ void Report_Coordinate_Wait4_SingleTime(int id,int X, int Y)
      X  = (uint16_t)(( ((uint32_t)X) * XMTR_SCALE )>>16);
         
     if(X > 0 || Y > 0){ 
-         #ifdef CTP_HAVE_TOUCH_KEY
-         if(Y>=400&&Y<=480){
-             report_key(X,Y,id);    
-             return;
-         }
-         if(touch_key_pressed){
-             return;
-         }
-         #endif
 #ifdef REPORT_DATA_ANDROID_4_0
         input_mt_slot(spidev->dev,id);
         input_mt_report_slot_state(spidev->dev,MT_TOOL_FINGER,true);
@@ -437,14 +429,6 @@ void Report_Coordinate_Wait4_SingleTime(int id,int X, int Y)
 #else
         input_mt_sync(spidev->dev);
 #endif
-        #ifdef CTP_HAVE_TOUCH_KEY
-        if(key_pressed[id]){
-            input_report_key(spidev->dev,key_pressed[id],0);
-            input_sync((spidev->dev));
-            key_pressed[id] = 0;
-            touch_key_pressed = 0;
-        }
-        #endif
     }   
 }
 uint16_t FingProc_Dist2PMeasure(int16_t x1, int16_t y1, int16_t x2, int16_t y2);
@@ -457,6 +441,21 @@ void Report_Coordinate()
     for(i=0; i<fnum; i++) {
         if(bdt.DPD[i].JustPassStateFlag4) Wait4Flag = 1;
     }
+    #ifdef CTP_HAVE_TOUCH_KEY
+    if(bdt.PressKeyFlag1){
+        report_key();    
+    }
+    if(touch_key_pressed&&(!bdt.PressKeyFlag1)){
+        input_report_key(spidev->dev,key_pressed,0);
+        input_sync((spidev->dev));
+        key_pressed = 0;
+        touch_key_pressed = 0;
+    }
+
+    if(touch_key_pressed){
+        return;
+    }
+    #endif
 
     if(Wait4Flag)
     {
@@ -621,7 +620,7 @@ static int chm_ts_probe(struct i2c_client *client, const struct i2c_device_id *i
 #ifdef CTP_HAVE_TOUCH_KEY
     for (index = 0; index < MAX_KEY_NUM; index++)
     {    
-        input_set_capability(spidev->dev,EV_KEY,touch_keys[index]);  
+        input_set_capability(spidev->dev,EV_KEY,chm_ts_keys[index].key);  
     }    
 #endif
 

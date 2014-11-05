@@ -15,6 +15,10 @@
 #define BE30PERCENT         3         // Threshold for Valid Finger Signal
 #define BE40PERCENT         4         // Threshold for Valid Finger Signal
 
+#define TOUCH_KEY_1 0x1
+#define TOUCH_KEY_2 0x3
+#define TOUCH_KEY_3 0x7
+#define TOUCH_KEY_4 0xf
 
 /************************************************************************
 *******1111111111111111111111111111111111111111111111111111111111********

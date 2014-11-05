@@ -23,12 +23,19 @@ static int exchange_x_y_flag = 0;
 #define CTP_HAVE_TOUCH_KEY
 
 #ifdef CTP_HAVE_TOUCH_KEY
-static const uint16_t touch_keys={
-        KEY_MENU,
-        KEY_HOME,
-        KEY_BACK,
-        KEY_SEND,
+uint16_t key_pressed = 0;
+struct keys{
+    uint16_t key;
+    uint16_t value;
 };
+static struct keys chm_ts_keys[]={
+    {KEY_BACK,TOUCH_KEY_1},
+    {KEY_HOMEPAGE,TOUCH_KEY_2},
+    {KEY_MENU,TOUCH_KEY_3},
+};
+#define MAX_KEY_NUM ((sizeof(chm_ts_keys)/sizeof(chm_ts_keys[0])))
+
+static int touch_key_pressed = 0;
 #endif
 
 #define CTP_IRQ_NUMBER                  (config_info.irq_gpio_number)
@@ -236,6 +243,22 @@ out:
     return status;
 }
 
+#ifdef CTP_HAVE_TOUCH_KEY
+void report_key(void)
+{
+    int i = 0;
+    for(i = 0;i < MAX_KEY_NUM;i++){
+        if(chm_ts_keys[i].value == bdt.PressKeyFlag1){
+            input_report_key(spidev->dev,chm_ts_keys[i].key,1);
+            key_pressed = chm_ts_keys[i].key;
+            touch_key_pressed = 1;
+            printk("KEY_PRESSED:%d\n",chm_ts_keys[i].key);
+            break;
+        }
+    }
+}
+#endif
+
 void Report_Coordinate_Wait4_SingleTime(int id,int X, int Y)
 {
     Y  = (uint16_t)(( ((uint32_t)Y) * RECV_SCALE )>>16);
@@ -281,6 +304,21 @@ void Report_Coordinate()
     for(i=0; i<fnum; i++) {
         if(bdt.DPD[i].JustPassStateFlag4) Wait4Flag = 1;
     }
+    #ifdef CTP_HAVE_TOUCH_KEY
+    if(bdt.PressKeyFlag1){
+        report_key();    
+    }
+    if(touch_key_pressed&&(!bdt.PressKeyFlag1)){
+        input_report_key(spidev->dev,key_pressed,0);
+        input_sync((spidev->dev));
+        key_pressed = 0;
+        touch_key_pressed = 0;
+    }
+
+    if(touch_key_pressed){
+        return;
+    }
+    #endif
 
     if(Wait4Flag)
     {
@@ -424,6 +462,13 @@ static int chm_ts_probe(struct i2c_client *client, const struct i2c_device_id *i
     set_bit(ABS_MT_POSITION_Y, spidev->dev->absbit);              
     set_bit(ABS_MT_WIDTH_MAJOR, spidev->dev->absbit);                     
     set_bit(ABS_MT_TRACKING_ID,spidev->dev->absbit);
+
+#ifdef CTP_HAVE_TOUCH_KEY
+    for (status = 0; status < MAX_KEY_NUM; status++)
+    {    
+        input_set_capability(spidev->dev,EV_KEY,chm_ts_keys[status].key);  
+    }    
+#endif
 
     input_set_abs_params(spidev->dev, ABS_MT_POSITION_X, 0, screen_max_x, 0, 0);  
     input_set_abs_params(spidev->dev, ABS_MT_POSITION_Y, 0, screen_max_y, 0, 0);  
