@@ -7,6 +7,7 @@ ifeq ($(KERNELRELEASE),)
 CFGDIR = $(PWD)/../../../config
 
 
+
 include $(CFGDIR)/build_config.cfg
 include $(CFGDIR)/rules.make
 
