@@ -1,0 +1,51 @@
+
+                    CN1100 Only Update History
+
+*******************************************************************************
+
+Model: TC1126                                   Platform: Truecore 
+Microelectronics
+
+IC Version: TC1126
+*******************************************************************************
+
+=============================================================================
+Revision: 00003           Date:  10-14-2014 (QFU)
+=============================================================================
+Description:
+    1. Code for AUTO_FACEDETECTION ia added and it works
+    2. commom/GlobalVars header changed
+    3. data/hwDebug/hwService c code changed
+
+=============================================================================
+Revision: 00002           Date:  10-14-2014 (QFU)
+=============================================================================
+Description:
+    1. Change code based on the old files (CN1100Only database)
+    2. The core C files are changed to just 4 files (main,data, hwservice and 
+       hwsdebug);
+    3. All header file are changed to function/common/reg/ctp.../TxRxMap.../ 
+       and GlobalVar/linux/stm32 etc;
+    4. LCD files are moved to sub folder LcdModule;
+    5. Only two projects are setup
+
+=============================================================================
+Revision: 00001           Date:  10-09-2014 (QFU)
+=============================================================================
+Description:
+    1. Add code for SH_FEATUREPHONE_13X9. it is feature cell phone Platform, 
+       TX=13, RX=9
+    2. The 3 keys is virtual key, which is defined as location only 
+Name:
+    QFu
+
+Changed Files:
+    1. SPI_FLASH\cn1000_data.c
+       SPI_FLASH\cn1000_init.c
+       SPI_FLASH\include\cn1000_board.h
+       SPI_FLASH\include\TC1126s_TMap_TC1680SB.h
+       SPI_FLASH\include\TC1126s_TMap_TC960SB.h
+Added Files:
+       SPI_FLASH\include\board_SH_FEATUREPHONE_13X9.h
+
+

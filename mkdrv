@@ -1,0 +1,175 @@
+#!/usr/bin/python
+import os
+import sys
+import tarfile
+import platform
+import time
+
+global user
+prefix="/opt/CN1100/Kernels/"
+msg='''
+plats:save platforms and correspond directory
+	Platform	Macro	Driver	Lib	   Kernel	Toolchain
+sys.argv:
+	0:script name
+	1:action:
+		c:compile
+		p:package
+	2:platform:
+		a|--all:all
+		k:save ko
+		s:save source file
+		A23:Allwinner A23 platform
+		A33:Allwinner A33 platform
+		RK30:Rockchip RK30 platform
+		RK29:Rockchip RK29 platform
+		LX:Datang lianxin platform
+		ATM:Action platform
+		NUF:New Front platform
+		S5P:Samsung S5PV210
+'''
+platforms={}
+def ditinit():
+	f=open("configs/config.mk","r");
+	for line in f.readlines():
+		for i in range(0,len(line.split())):
+			if i == 0:
+				platforms[line.split()[0]]=[]
+			else:
+				platforms[line.split()[0]].append(line.split()[i])
+	f.close()
+
+def mkgen(p):
+	macro=platforms[p][0]
+	driver=platforms[p][1]
+	lib=platforms[p][2]
+
+	f=open("scripts/Makefile","w+")
+	f.write("TARGET_NAME=cn1100_linux\n")
+	f.write("EXTRA_CFLAGS+=-DCN1100_LINUX\n")
+	f.write("EXTRA_CFLAGS+=-DBUILD_DATE=$(shell date +%s)\n")
+	f.write("EXTRA_CFLAGS+=-D%s\n" %macro)
+	f.write("$(TARGET_NAME)-objs = %s.o TC1126_hwService.o TC1126_main.o debug_proc.o %s\n" %(driver,lib))
+	f.write("obj-$(CONFIG_TOUCHSCREEN_TC1126) += $(TARGET_NAME).o\n")
+	f.close()
+
+def cmpdrv(p,action):
+	for i in range(0,len(p)):
+		macro=platforms[p[i]][0]
+		driver=platforms[p[i]][1]
+		lib=platforms[p[i]][2]
+		kernel=platforms[p[i]][3]
+		toolchain=platforms[p[i]][4]
+
+		cmd = "make TOOLCHAIN=%s/%s KERNEL=%s/%s MACRO=%s DRV=%s SLIB=%s" %(prefix,toolchain,prefix,kernel,macro,driver,lib)
+		os.system(cmd)
+		if not os.path.exists("/opt/CN1100/out/%s" %user):
+			os.mkdir("/opt/CN1100/out/%s" %user);
+		cmd = "cp cn1100_linux.ko /opt/CN1100/out/%s" %user
+		os.system(cmd)
+		if (p[i] == "RK29") or (p[i] == "RK30"):
+			cmd = "make kernel.img KERNEL=%s/%s" %(prefix,kernel)
+			os.system(cmd)
+
+		if action >= 0:
+			topdir="/opt/CN1100/out/%s" %user
+			if not os.path.exists(topdir):
+				os.mkdir(topdir)
+
+			platdir="%s/%s" %(topdir,p[i])
+			if not os.path.exists(platdir):
+				os.mkdir(platdir)
+			if action == 0:
+
+				ymd=getFormatTime("%Y-%m-%d")
+				ymddir="%s/%s" %(platdir,ymd)
+				if not os.path.exists(ymddir):
+					os.mkdir(ymddir)
+				
+				hms=getFormatTime("%H.%M.%S")
+				hmsdir="%s/%s" %(ymddir,hms)
+				if not os.path.exists(hmsdir):
+					os.mkdir(hmsdir)
+				cmd = "mv cn1100_linux.ko %s" %hmsdir
+				os.system(cmd)
+			elif action == 1:
+				ymd=getFormatTime("%Y-%m-%d")
+				ymddir="%s/%s" %(platdir,ymd)
+				if not os.path.exists(ymddir):
+					os.mkdir(ymddir)
+
+				ymdhm=getFormatTime("%y%m%d%H%M")
+				filename="TC1126-%s-%s.tar.gz" %(p[i],ymdhm)
+				tar = tarfile.open(filename,"w")
+
+				os.mkdir("TC1126")
+				f=open("scripts/pkg_files")
+				for line in f.readlines():
+					cmd="cp %s TC1126" %line.strip()
+					os.system(cmd)
+				f.close()
+
+				cmd="cp drivers/%s.c TC1126" %driver
+				os.system(cmd)
+
+				if p[i] == "ATM":
+					cmd = "cp scripts/Makefile.ATM TC1126/Makefile"
+					os.system(cmd)
+				else:
+					mkgen(p[i])
+					cmd="mv scripts/Makefile TC1126"
+					os.system(cmd)
+				
+				cmd="mv %s TC1126" %lib
+				os.system(cmd)
+
+				for ff in os.listdir("TC1126"):
+					tar.add("TC1126/%s" %ff)
+				
+				tar.close()
+
+				cmd = "mv %s %s" %(filename,ymddir)
+				os.system(cmd)
+
+				cmd = "rm -rf TC1126"
+				os.system(cmd)
+
+
+def mkpkg(p,action):
+	if len(p) == 0:
+		action = 2;
+	cmpdrv(p,action)
+
+def mksymbolink(p):
+	pass
+
+def getFormatTime(fmt):
+        curtime = time.strftime("%s" %fmt,time.localtime())
+        return curtime
+
+def help():
+	print msg
+
+
+if __name__ == "__main__":
+	user = os.getlogin()
+	p=[]
+
+	ditinit()
+
+	if len(sys.argv) < 2:
+		help()
+	else:
+		if sys.argv[1] == "c":
+			p = sys.argv[2:]
+		elif sys.argv[1] == "k":
+			p = sys.argv[2:]
+			mkpkg(p,0)
+		elif sys.argv[1] == "s":
+			p = sys.argv[2:]
+			mkpkg(p,1)
+		elif sys.argv[1] in platforms.keys():
+			p=sys.argv[1:]
+			cmpdrv(p,-1)
+
+
