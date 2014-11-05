@@ -372,6 +372,9 @@ ssize_t chm_proc_read(struct file *file, char __user *buf, size_t size, loff_t *
             }
             break;
         }
+        default:
+        len = 0;
+        break;
     }
     
     return len;

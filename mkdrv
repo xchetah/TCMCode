@@ -44,7 +44,7 @@ def mkgen(p):
 	driver=platforms[p][1]
 	lib=platforms[p][2]
 
-	f=open("scripts/Makefile","w+")
+	f=open("configs/Makefile","w+")
 	f.write("TARGET_NAME=cn1100_linux\n")
 	f.write("EXTRA_CFLAGS+=-DCN1100_LINUX\n")
 	f.write("EXTRA_CFLAGS+=-DBUILD_DATE=$(shell date +%s)\n")
@@ -103,7 +103,7 @@ def cmpdrv(p,action):
 				tar = tarfile.open(filename,"w")
 
 				os.mkdir("TC1126")
-				f=open("scripts/pkg_files")
+				f=open("configs/pkg_files")
 				for line in f.readlines():
 					cmd="cp %s TC1126" %line.strip()
 					os.system(cmd)
@@ -113,11 +113,11 @@ def cmpdrv(p,action):
 				os.system(cmd)
 
 				if p[i] == "ATM":
-					cmd = "cp scripts/Makefile.ATM TC1126/Makefile"
+					cmd = "cp configs/Makefile.ATM TC1126/Makefile"
 					os.system(cmd)
 				else:
 					mkgen(p[i])
-					cmd="mv scripts/Makefile TC1126"
+					cmd="mv configs/Makefile TC1126"
 					os.system(cmd)
 				
 				cmd="mv %s TC1126" %lib

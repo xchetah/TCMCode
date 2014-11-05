@@ -2328,6 +2328,18 @@ void CN1100_SysTick_ISR(void)
     #endif
     
     #ifdef CN1100_LINUX
+    if(!(spidev->mode & CN1100_IS_DOZE)){
+        if(!(spidev->mode & CN1100_IS_SUSPENDED))
+            spidev->ticks++;
+    }    
+    #if defined(CN1100_RESET_ENABLE)
+        if((spidev->ticks>5000)){
+                printk("%d\n",spidev->ticks);
+                spidev->ticks = 0; 
+                queue_work(spidev->workqueue,&spidev->reset_work);
+        }    
+    #endif
+    hrtimer_start(&spidev->systic, ktime_set(0, 1000000), HRTIMER_MODE_REL);
     #endif
     
     switch(bdt.ModeSelect)
@@ -2459,6 +2471,7 @@ void CN1100_FrameScanDoneInt_ISR()
         case iAUTOSCAN_MODE:
         {
             #ifdef CN1100_LINUX
+            spidev->ticks = 0;
             if(spidev->mode & CN1100_IS_DOZE)
             {
                 spidev->mode &= ~(CN1100_IS_DOZE);

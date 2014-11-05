@@ -24,11 +24,10 @@ static int revert_y_flag = 0;
 static int twi_id = 0;
 static int exchange_x_y_flag = 0;
 
-#define CTP_HAVE_TOUCH_KEY
+//#define CTP_HAVE_TOUCH_KEY
 #ifdef CTP_HAVE_TOUCH_KEY
 
 static int key_pressed[5] = {0};
-static bool point_is_down = false;
 //static int touch_keys[] = {
 //    KEY_BACK,KEY_HOME,KEY_MENU,KEY_SEARCH,
 //};
