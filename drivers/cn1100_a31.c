@@ -32,6 +32,7 @@ static struct keys chm_ts_keys[]={
     {KEY_BACK,TOUCH_KEY_1},
     {KEY_HOMEPAGE,TOUCH_KEY_2},
     {KEY_MENU,TOUCH_KEY_3},
+    {KEY_ENTER,TOUCH_KEY_4},
 };
 #define MAX_KEY_NUM ((sizeof(chm_ts_keys)/sizeof(chm_ts_keys[0])))
 
