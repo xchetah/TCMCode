@@ -46,3 +46,5 @@ stm32/Projects/TC1126Only/MDK/Debug
 *.WK3
 *.pub
 *.dep
+*.bak
+*.Administrator
