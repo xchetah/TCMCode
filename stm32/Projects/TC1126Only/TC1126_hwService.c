@@ -1072,7 +1072,7 @@ void TC1126_Init_GlobalVariables(void)
         bdt.TxAveValue[i] = 0;        
         bdt.TxAbnormalCh[i] = -1;    //不能初始化为0，因为我们需要0通道
     }
-    for(j=0; j<RECV_NUM; j++)
+    for(j=0; j<SRECV_NUM; j++)
     {
         bdt.RxAveValue[j] = 0;
         bdt.RxAbnormalCh[j] = -1;
@@ -1470,9 +1470,8 @@ void TC1126_Init_AbsModeSetting(void)
 *******************************************************************************/
 void TC1126_Init_TransModeSetting(void)
 {
-    /* uint32_t temp32;*/
     #ifdef COEF_SCALE_ENABLE
-    uint32_t fcapvalue;
+    uint16_t fcapvalue;
     fcapvalue = (bdt.PCBA.RcvmRcvrFcapSet<<2);
     SPI_write_singleData(TFC0_REG, TFC0_T0R0_FCAP_COEF(fcapvalue) | TFC0_T0R1_FCAP_COEF(fcapvalue)
                         | TFC0_T0R2_FCAP_COEF(fcapvalue) | TFC0_T0R3_FCAP_COEF(fcapvalue));  
@@ -1513,6 +1512,9 @@ void TC1126_ChAdaptive_RefHLRegWRITE(void)
     SPI_write_singleData(REFH_REG, high);
     SPI_write_singleData(REFL_REG, low); 
 }
+
+
+#ifdef CHANNEL_ADAPTIVE
 /*******************************************************************************
 * Function Name  : TC1126_RxChAdaptive_TransModeSetting
 * Description    : 往寄存器写入每个Rx通道FCAP的值
@@ -1528,23 +1530,21 @@ void TC1126_RxChAdaptive_TransModeSetting(void)
     SPI_write_singleData(TFC1_REG, TFC1_T0R4_FCAP_COEF((bdt.RxFcapValue[4]<<2)) | TFC1_T0R5_FCAP_COEF((bdt.RxFcapValue[5]<<2))
                          | TFC1_T0R6_FCAP_COEF((bdt.RxFcapValue[6]<<2)) | TFC1_T0R7_FCAP_COEF((bdt.RxFcapValue[7]<<2)));  
     SPI_write_singleData(TFC2_REG, TFC2_T0R8_FCAP_COEF((bdt.RxFcapValue[8]<<2)) | TFC2_T0R9_FCAP_COEF((bdt.RxFcapValue[9]<<2))
-                         | TFC2_TNR0_FCAP_COEF((bdt.RxFcapValue[0]<<2)) | TFC2_SPECIAL_RXI_COORD(INVALID_CHORPOINT)); 
+                         | TFC2_TNR0_FCAP_COEF((bdt.RxFcapValue[0]<<2)) | TFC2_SPECIAL_RXI_COORD(INVALID_CHORPOINT));
 }
 
 /*******************************************************************************
 * Function Name  : TC1126_ChAdaptive_TransModeSetting
 * Description    : 往寄存器写入需要调节的异常通道或者异常点的FCAP值
-* Input          :     TxorRxFlag：标记SCALE_MODE类型；
+* Input          : TxorRxFlag：标记SCALE_MODE类型；
 * Output         : 
 * Return         : 
 *******************************************************************************/
 void TC1126_ChAdaptive_TransModeSetting(uint32_t TxorRxFlag)
 {
     uint16_t RegValue;
-    #ifdef CHANNEL_ADAPTIVE
-    uint32_t FcapValue;
-    uint32_t FcapValue1;
-    #endif
+    uint16_t FcapValue;
+    uint16_t FcapValue1;
 
     RegValue = ((SPI_read_singleData(REFH_REG))&(0xcfff));
     RegValue |= REFH_SCALE_EN;                                // 打开COEF_SCALE_ENABLE
@@ -1556,7 +1556,6 @@ void TC1126_ChAdaptive_TransModeSetting(uint32_t TxorRxFlag)
     SPI_write_singleData(TFC1_REG, TFC1_T0R4_FCAP_COEF((bdt.RxFcapValue[4]<<2)) | TFC1_T0R5_FCAP_COEF((bdt.RxFcapValue[5]<<2))
                         | TFC1_T0R6_FCAP_COEF((bdt.RxFcapValue[6]<<2)) | TFC1_T0R7_FCAP_COEF((bdt.RxFcapValue[7]<<2)));
          
-    #ifdef CHANNEL_ADAPTIVE
     if( TxorRxFlag == SCALE_MODE_2_SPRX)        //SCALE_MODE_2_SPRX
     {
         if((bdt.AbnormalTxChNum == 0)&&(bdt.AbnormalRxChNum == 1))
@@ -1638,9 +1637,8 @@ void TC1126_ChAdaptive_TransModeSetting(uint32_t TxorRxFlag)
                         | TXMAPTO16M_RXJ_CORD(bdt.AbPointRxjCoord) | TXMAPTO16M_TXRXJ_FCAP(bdt.TxRxiFCAP));
         }   
     }
-    #endif
 }
-
+#endif
 
 
 /*******************************************************************************

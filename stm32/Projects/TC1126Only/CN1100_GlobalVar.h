@@ -334,9 +334,9 @@ typedef struct BasData {
 #ifdef CHANNEL_ADAPTIVE
     uint16_t  AllAveValue;	                       // 总的平均值
     uint16_t  TxAveValue[SXMTR_NUM];               // TX各个通道的平均值 
-    uint16_t  RxAveValue[RECV_NUM];                // RX各个通道的平均值
+    uint16_t  RxAveValue[SRECV_NUM];                // RX各个通道的平均值
     int16_t   TxAbnormalCh[SXMTR_NUM];             // 标记异常通道
-    int16_t   RxAbnormalCh[RECV_NUM];
+    int16_t   RxAbnormalCh[SRECV_NUM];
     uint16_t  AbnormalTxChNum;                     // 异常的Tx计数
     uint16_t  AbnormalRxChNum;                     // 异常的Rx计数
     int32_t   RealAbnormalTxCh[2];                 // 存储需要调节的通道号

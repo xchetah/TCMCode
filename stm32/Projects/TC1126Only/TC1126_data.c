@@ -2639,7 +2639,7 @@ void DataProc_PressKeyDetect()
     
     if(bdt.FingerDetectNum)
     {
-    #if (KXMTR_NUM == 1)
+    #if 0
         if(bdt.DeltaDat16A[KEY_TX_LOC][KEY_MENU_RXLOC] > KEY_MENU_RXLOCATION) 
         {
             bdt.PressKeyFlag.MenuKey   = 1;
@@ -2668,33 +2668,27 @@ void DataProc_PressKeyDetect()
     #endif
 
 
-    #if 0 // (KRECV_NUM == 1)
-        if(   (bdt.DeltaDat_kp[3] > KEY_MENU_RXLOCATION) 
-           || (bdt.DeltaDat_kp[4] > KEY_MENU_RXLOCATION) 
-           || (bdt.DeltaDat_kp[3]+bdt.DeltaDat_kp[4] > KEY_MENU_RXLOCATION) 
+    #if 1 // (KRECV_NUM == 1)
+        printk("key detect\n");
+	    printk("if conflict,then fix it\n");
+        if((bdt.DeltaDat_kp[3] > KEY_MENU_RXLOCATION)|| (bdt.DeltaDat_kp[4] > KEY_MENU_RXLOCATION))
         {
-            bdt.PressKeyFlag.MenuKey   = 1;
+              bdt.PressKeyFlag1 = TOUCH_KEY_1;
         }
-        if(bdt.DeltaDat16A[KEY_TX_LOC][KEY_HOME_RXLOC] > KEY_HOME_RXLOCATION)
-        {   
-            bdt.PressKeyFlag.HomeKey   = 1;
-        }
-        if(bdt.DeltaDat16A[KEY_TX_LOC][KEY_RET_RXLOC]  > KEY_RET_RXLOCATION) 
+
+        if((bdt.DeltaDat_kp[8] > KEY_MENU_RXLOCATION)|| (bdt.DeltaDat_kp[9] > KEY_MENU_RXLOCATION))
         {
-            bdt.PressKeyFlag.ReturnKey = 1;
+              bdt.PressKeyFlag1 = TOUCH_KEY_2;
         }
-        
-        if(1 == bdt.PressKeyFlag.MenuKey)
-        { 
-            bdt.PressKeyFlag1 = MENU_KEY_PRESSED;
-        }
-        else if(1 == bdt.PressKeyFlag.HomeKey)
+
+        if((bdt.DeltaDat_kp[11] > KEY_MENU_RXLOCATION))
         {
-            bdt.PressKeyFlag1 = HOME_KEY_PRESSED;
+              bdt.PressKeyFlag1 = TOUCH_KEY_3;
         }
-        else if(1 == bdt.PressKeyFlag.ReturnKey)
+
+        if((bdt.DeltaDat_kp[13] > KEY_MENU_RXLOCATION)|| (bdt.DeltaDat_kp[14] > KEY_MENU_RXLOCATION))
         {
-            bdt.PressKeyFlag1 = RETURN_KEY_PRESSED;
+              bdt.PressKeyFlag1 = TOUCH_KEY_4;
         }
     #endif
 
@@ -4374,10 +4368,10 @@ uint32_t DataProc_CircleScreenAdaptive(void)
     {
         if((bdt.PCBA.HighRefGainSet == 3)&&(bdt.PCBA.LowRefGainSet == 3))    // 标记穷举结束
         {
-            bdt.PCBA.HighRefGainSet = 0;                        // 恢复到初始化值
+            bdt.PCBA.HighRefGainSet = 0;                                      // 恢复到初始化值
             bdt.PCBA.LowRefGainSet = 0;
-            bdt.PCBA.RefHLSetCount = CIRCLE_MAXCOUNT+1;            // 置为无效的数据
-            return 2;                                            // 穷举结束
+            bdt.PCBA.RefHLSetCount = CIRCLE_MAXCOUNT+1;                       // 置为无效的数据
+            return 2;                                                        // 穷举结束
         }
         else
         {
@@ -4385,15 +4379,15 @@ uint32_t DataProc_CircleScreenAdaptive(void)
             {
                 if(bdt.PCBA.LowRefGainSet == 3)
                 {
-                    bdt.PCBA.HighRefGainSet++;        // 一轮内层循环结束，外层计数加一
-                    bdt.PCBA.LowRefGainSet = -1;    // 保证下一次计数LowRefGainSet从0开始
+                    bdt.PCBA.HighRefGainSet++;                   // 一轮内层循环结束，外层计数加一
+                    bdt.PCBA.LowRefGainSet = -1;                // 保证下一次计数LowRefGainSet从0开始
                     break;
                 }
                 else
                 {
                     bdt.PCBA.LowRefGainSet++;
-                    bdt.PCBA.RefHLSetCount++;        // 计数加一
-                    return 1;                        // 一次结束
+                    bdt.PCBA.RefHLSetCount++;                  // 计数加一
+                    return 1;                                 // 一次结束
                 }
             }
         }
@@ -4409,15 +4403,14 @@ uint32_t DataProc_CircleScreenAdaptive(void)
 *******************************************************************************/
 void DataProc_CalRefHLSetAverageValue(uint16_t *buffer)
 {
-    uint32_t i, j;
+    uint16_t i, j;
     uint32_t Allsum = 0;
     for(i=0; i<SXMTR_NUM; i++)
     {
-        for(j=0; j<RECV_NUM; j++)
+        for(j=0; j<SRECV_NUM; j++)
             Allsum += (int16_t)(buffer[i*RECV_NUM+j]);
     }
-    bdt.PCBA.RefHLSetAve[bdt.PCBA.RefHLSetCount] = Allsum/(SXMTR_NUM*RECV_NUM);
-//     CN1100_print("RefHLSetAve[%d]=%d\n", bdt.PCBA.RefHLSetCount,bdt.PCBA.RefHLSetAve[bdt.PCBA.RefHLSetCount]);
+    bdt.PCBA.RefHLSetAve[bdt.PCBA.RefHLSetCount] = Allsum/(SXMTR_NUM*SRECV_NUM);
 }
 
 /*******************************************************************************
@@ -4429,9 +4422,9 @@ void DataProc_CalRefHLSetAverageValue(uint16_t *buffer)
 *******************************************************************************/
 void DataProc_SetRefHLEnd(void)
 {
-    uint32_t i,index=0;
-    uint32_t min = 4095;
-    uint32_t temp = 0;    
+    uint16_t i,index=0;
+    uint16_t min = 4095;
+    uint16_t temp = 0;    
     for(i=0; i<CIRCLE_MAXCOUNT; i++)
     {
         temp = abs16(bdt.PCBA.RefHLSetAve[i] - REASONABLE_VALUE);
@@ -4773,16 +4766,17 @@ void DataProc_FindMaxAndMinValue(void)
 * Output         : 
 * Return         : 
 *******************************************************************************/
-void DataProc_FindSpecialValue(uint16_t *buffer, uint16_t *max, uint16_t *max1, uint16_t *min, uint16_t *min1)
+void DataProc_FindSpecialValue(uint16_t *buffer, uint16_t *max, uint16_t *min, uint16_t *max1, uint16_t *min1)
 {
     uint16_t i,j;
     *max=0;
     *min=4095;
     *max1=0;
     *min1=4095;
+
     for (i = 0;i < SXMTR_NUM;i++)                          // 查找最大值max，最小值min
     {
-        for (j = 0;j < RECV_NUM;j++)
+        for (j = 0;j < SRECV_NUM;j++)
         {
              if(buffer[i*RECV_NUM+j]>*max)
              { 
@@ -4802,7 +4796,7 @@ void DataProc_FindSpecialValue(uint16_t *buffer, uint16_t *max, uint16_t *max1, 
      }
     for(i=0; i<SXMTR_NUM; i++)                             // 查找次大值max1，次小值min1
     {
-        for(j=0; j<RECV_NUM; j++)
+        for(j=0; j<SRECV_NUM; j++)
         {
             if(buffer[i*RECV_NUM+j]>*max1)
             {
@@ -4839,20 +4833,18 @@ void DataProc_FindSpecialValue(uint16_t *buffer, uint16_t *max, uint16_t *max1, 
 *******************************************************************************/
 void DataProc_CalTxAverageValue(uint16_t *buffer)
 {
-    uint32_t i, j;
+    uint16_t i, j;
     uint32_t Txsum = 0;
     uint32_t Allsum = 0;
     for(i=0; i<SXMTR_NUM; i++)
     {
-        for(j=0; j<RECV_NUM; j++)
+        for(j=0; j<SRECV_NUM; j++)
             Txsum += (int16_t)(buffer[i*RECV_NUM+j]);
         Allsum += Txsum;
-        bdt.TxAveValue[i] = Txsum/RECV_NUM;
-//         CN1100_print("TxAveValue[%d]=%d\n", i, bdt.TxAveValue[i]);
+        bdt.TxAveValue[i] = Txsum/SRECV_NUM;
         Txsum = 0;
     }
-    bdt.AllAveValue = Allsum/(SXMTR_NUM*RECV_NUM);
-//     CN1100_print("allave=%d\n", bdt.AllAveValue);
+    bdt.AllAveValue = Allsum/(SXMTR_NUM*SRECV_NUM);
 }
 /*******************************************************************************
 * Function Name  : DataProc_CalRxAverageValue
@@ -4863,20 +4855,18 @@ void DataProc_CalTxAverageValue(uint16_t *buffer)
 *******************************************************************************/
 void DataProc_CalRxAverageValue(uint16_t *buffer)
 {
-    uint32_t i, j;
+    uint16_t i, j;
     uint32_t Rxsum = 0;
     uint32_t Allsum = 0;
-    for(j=0; j<RECV_NUM; j++)
+    for(j=0; j<SRECV_NUM; j++)
     {
         for(i=0; i<SXMTR_NUM; i++)
             Rxsum += (int16_t)(buffer[i*RECV_NUM+j]);
         Allsum += Rxsum;
         bdt.RxAveValue[j] = Rxsum/SXMTR_NUM;
-//         CN1100_print("RxAveValue[%d]=%d\n", j, bdt.RxAveValue[j]);
         Rxsum = 0;
     }
-    bdt.AllAveValue = Allsum/(SXMTR_NUM*RECV_NUM);
-//     CN1100_print("allave=%d\n", bdt.AllAveValue);
+    bdt.AllAveValue = Allsum/(SXMTR_NUM*SRECV_NUM);
 }
 
 
@@ -4889,26 +4879,27 @@ void DataProc_CalRxAverageValue(uint16_t *buffer)
 *******************************************************************************/
 void DataProc_AdjustRxChannelFcap(void)
 {
-    uint32_t j;
+    uint16_t j;
     int32_t temp;
-    for(j=0; j<RECV_NUM; j++)
+    for(j=0; j<SRECV_NUM; j++)
     {
         temp = bdt.RxAveValue[j] - bdt.AllAveValue;
-        if((temp>0) && ((temp)>RXCHANNEL_THRESHOLD))        // 原始值过大，FCAP加1
+        if((temp>0) && ((temp)>RXCHANNEL_THRESHOLD))           // 原始值过大，FCAP加1
         {
             bdt.RxFcapValue[j] = bdt.PCBA.RcvmRcvrFcapSet+1;
+            bdt.AdjustRxChFlag = 1;                             // 可以调整Rx通道
         }
         else if((temp<0) && ((-temp)>RXCHANNEL_THRESHOLD))    // 原始值过小，FCAP减1
         {
             bdt.RxFcapValue[j] = bdt.PCBA.RcvmRcvrFcapSet-1;
+            bdt.AdjustRxChFlag = 1;
         }
         else
         {
             bdt.RxFcapValue[j] = bdt.PCBA.RcvmRcvrFcapSet;    // 原始值合理，FCAP不变
+            bdt.AdjustRxChFlag = 0;                           // 无需调整Rx通道
         }
-//         CN1100_print("bdt.RxFcapValue[%d]=%d\n", j, bdt.RxFcapValue[j]);
     }
-    bdt.AdjustRxChFlag = 1;                    // 可以调整Rx通道
 }
 
 
@@ -4921,46 +4912,44 @@ void DataProc_AdjustRxChannelFcap(void)
 *******************************************************************************/
 void DataProc_FindAbnormalChannel(void)
 {
-    uint32_t i,j;
+    uint16_t i,j;
     for(i=0; i<SXMTR_NUM; i++)
     {
-        if(bdt.TxAveValue[i] != 0)                                //排除由于接线不稳定导致通道为0的状况
+        if(bdt.TxAveValue[i] != 0)                                                   // 排除由于接线不稳定导致通道为0的状况
         {
             if(abs16(bdt.AllAveValue-bdt.TxAveValue[i]) > ABCHVALUE_THRESHOLD)
             {
                 if(bdt.AllAveValue > bdt.TxAveValue[i])
-                    bdt.TxAbnormalCh[i] = bdt.PCBA.RcvmRcvrFcapSet-1;                            //标记i通道原始值偏小
+                    bdt.TxAbnormalCh[i] = bdt.PCBA.RcvmRcvrFcapSet-1;                // 标记i通道原始值偏小
                 else
-                    bdt.TxAbnormalCh[i] = bdt.PCBA.RcvmRcvrFcapSet+1;                            //标记i通道原始值偏大
-                bdt.AbnormalTxChNum++;                                    // Tx异常通道数目
-                if(bdt.AbnormalTxChNum >= ABCHANDPOINT_MAXNUM)            //最多只处理其中的两个通道，其他的通道暂时无法支持
+                    bdt.TxAbnormalCh[i] = bdt.PCBA.RcvmRcvrFcapSet+1;                // 标记i通道原始值偏大
+                bdt.AbnormalTxChNum++;
+                if(bdt.AbnormalTxChNum >= ABCHANDPOINT_MAXNUM)                       // 最多只处理其中的两个通道，其他的通道暂时无法支持
                     break;
             }
         }
-//         CN1100_print("TxAbnormalCh[%d]=%d\n", i, bdt.TxAbnormalCh[i]);
     }   
-    if(bdt.AbnormalTxChNum >= ABCHANDPOINT_MAXNUM)                    //当Tx异常通道数目>2之后不再进行Rx的相关计算
+    if(bdt.AbnormalTxChNum >= ABCHANDPOINT_MAXNUM)                                   // 当Tx异常通道数目>2之后不再进行Rx的相关计算
     {
         //do nothing
     }
     else
     {
-        for(j=0; j<RECV_NUM; j++)
+        for(j=0; j<SRECV_NUM; j++)
         {
-            if(bdt.RxAveValue[j] != 0 )                                    //排除由于接线不稳定导致通道为0的状况
+            if(bdt.RxAveValue[j] != 0 )
             {
                 if(abs16(bdt.AllAveValue-bdt.RxAveValue[j]) > ABCHVALUE_THRESHOLD)
                 {
                     if(bdt.AllAveValue > bdt.RxAveValue[j])
-                        bdt.RxAbnormalCh[j] = bdt.RxFcapValue[j]-1;                        //标记j通道原始值偏小
+                        bdt.RxAbnormalCh[j] = bdt.RxFcapValue[j]-1;                  // 标记j通道原始值偏小
                     else
-                        bdt.RxAbnormalCh[j] = bdt.RxFcapValue[j]+1;                        //标记j通道原始值偏大
+                        bdt.RxAbnormalCh[j] = bdt.RxFcapValue[j]+1;                  //标记j通道原始值偏大
                     bdt.AbnormalRxChNum++;
-                    if((bdt.AbnormalTxChNum+bdt.AbnormalRxChNum) >= ABCHANDPOINT_MAXNUM)        //最多只处理其中的两个通道，其他的通道暂时无法支持
+                    if((bdt.AbnormalTxChNum+bdt.AbnormalRxChNum) >= ABCHANDPOINT_MAXNUM)
                         break;
                 }
             }
-//             CN1100_print("RxAbnormalCh[%d]=%d\n", j, bdt.RxAbnormalCh[j]);
         }
     }
     bdt.FindOkFlag = 1;
@@ -4974,7 +4963,7 @@ void DataProc_FindAbnormalChannel(void)
 *******************************************************************************/
 void DataProc_AdjustAbnormalChannel(void)
 {
-    uint32_t i,j;
+    uint16_t i,j;
     for(i=0,j=0; i<SXMTR_NUM; i++)
     {
         if(-1 != bdt.TxAbnormalCh[i])
@@ -4985,7 +4974,7 @@ void DataProc_AdjustAbnormalChannel(void)
                 break;
         }
     }
-    for(i=0,j=0; i<RECV_NUM; i++)
+    for(i=0,j=0; i<SRECV_NUM; i++)
     {
         if(-1 != bdt.RxAbnormalCh[i])
         {
@@ -5005,19 +4994,16 @@ void DataProc_AdjustAbnormalChannel(void)
 *******************************************************************************/
 void DataProc_FindAbnormalPonit(uint16_t max,uint16_t min,uint16_t max1,uint16_t min1)
 {
-//     uint32_t i;
-    uint32_t fcap;
-    uint32_t rxloc;
-//     CN1100_print("max=%d,max1=%d,min=%d,min1=%d\n",max,max1,min,min1);
-    
-    if(max > ABPOINTMAX_THRESHOLD)                     // max过大，需把该点调小，FCAP增加
+    uint16_t fcap;
+    uint16_t rxloc;
+    if(max > ABPOINTMAX_THRESHOLD)                      // max过大，需把该点调小，FCAP增加
     {
         rxloc = (bdt.AbnormalPoint[0]%256)%16;         // 定位到max所在的Rx通道
-        fcap = bdt.RxFcapValue[rxloc]+1;               // 获取该Rx通道的fcap值，增加FCAP
+        fcap = bdt.RxFcapValue[rxloc]+1;                // 获取该Rx通道的fcap值，增加FCAP
         bdt.AbnormalPointNum++;
         bdt.AbnormalPoint[0] = (fcap<<8)|bdt.AbnormalPoint[0];
     }
-    if(max1 > ABPOINTMAX_THRESHOLD)                    //max1过大，需把该点调小
+    if(max1 > ABPOINTMAX_THRESHOLD)                     // max1过大，需把该点调小
     {
         rxloc = (bdt.AbnormalPoint[2]%256)%16;         // 定位到max1所在的Rx通道
         fcap = bdt.RxFcapValue[rxloc]+1;
@@ -5025,9 +5011,9 @@ void DataProc_FindAbnormalPonit(uint16_t max,uint16_t min,uint16_t max1,uint16_t
         bdt.AbnormalPoint[2] = (fcap<<8)|bdt.AbnormalPoint[2];
     }
     
-    if(bdt.AbnormalPointNum < ABCHANDPOINT_MAXNUM)     //最多只能调节2个异常点
+    if(bdt.AbnormalPointNum < ABCHANDPOINT_MAXNUM)      // 最多只能调节2个异常点
     {
-        if(min < ABPOINTMIN_THRESHOLD)                 //min过小，需把该点调大，FCAP减小
+        if(min < ABPOINTMIN_THRESHOLD)                  // min过小，需把该点调大，FCAP减小
         {
             bdt.AbnormalPointNum++;
             rxloc = (bdt.AbnormalPoint[1]%256)%16;
@@ -5036,7 +5022,7 @@ void DataProc_FindAbnormalPonit(uint16_t max,uint16_t min,uint16_t max1,uint16_t
         }
         if(bdt.AbnormalPointNum < ABCHANDPOINT_MAXNUM)
         {
-            if(min1 < ABPOINTMIN_THRESHOLD)    //min过小，需把该点调大，FCAP=1
+            if(min1 < ABPOINTMIN_THRESHOLD)             // min过小，需把该点调大，FCAP=1
             {
                 bdt.AbnormalPointNum++;
                 rxloc = (bdt.AbnormalPoint[3]%256)%16;
@@ -5045,9 +5031,6 @@ void DataProc_FindAbnormalPonit(uint16_t max,uint16_t min,uint16_t max1,uint16_t
             }
         }
     }
-//     for(i=0; i<4; i++)
-//         CN1100_print("AbP[%d]=%d\n", i, bdt.AbnormalPoint[i]);
-//     CN1100_print("AbNum=%d\n", bdt.AbnormalPointNum);
 }
 
 /*******************************************************************************
@@ -5059,21 +5042,21 @@ void DataProc_FindAbnormalPonit(uint16_t max,uint16_t min,uint16_t max1,uint16_t
 *******************************************************************************/
 void DataProc_AdjustAbnormalPoint(void)
 {
-    uint32_t i,count=0;
-    uint32_t temp=0;
+    uint16_t i,count=0;
+    uint16_t temp=0;
     for(i=0; i<ABNORMALPOINT_MAXNUM; i++)
     {
-        temp=(bdt.AbnormalPoint[i]>>8);                    //获取FCAP的值
+        temp=(bdt.AbnormalPoint[i]>>8);                     // 获取FCAP的值
         if(temp !=0 )
         {
-            if(bdt.AbnormalPointNum == 1)                //只有一个异常点
+            if(bdt.AbnormalPointNum == 1)                  // 只有1个异常点
             {
                 bdt.TxRxiFCAP = temp;
                 bdt.AbPointTxiCoord = ((bdt.AbnormalPoint[i]%256)/16);    // 获取异常点坐标
                 bdt.AbPointRxiCoord = ((bdt.AbnormalPoint[i]%256)%16);
                 break;
             }
-            if(bdt.AbnormalPointNum == 2)                    //2个异常点
+            if(bdt.AbnormalPointNum == 2)                  // 2个异常点
             {
                 if(count == 0)
                 {
@@ -5092,8 +5075,6 @@ void DataProc_AdjustAbnormalPoint(void)
         }
     }
     bdt.FindOkFlag = 1;
-//     CN1100_print("FCAP=%d,Txi=%d,Rxi=%d\n",bdt.TxRxiFCAP,bdt.AbPointTxiCoord,bdt.AbPointRxiCoord);
-//     CN1100_print("FCAP=%d,Txj=%d,Rxj=%d\n",bdt.TxRxjFCAP,bdt.AbPointTxjCoord,bdt.AbPointRxjCoord);
 }
 #endif
 
@@ -7545,7 +7526,7 @@ void DataProc_FBFHStartFrameSimpleAdaptive(uint16_t *buffer)
             case FRAME_0005:
             {
                 #ifdef CHANNEL_ADAPTIVE
-            DataProc_FindSpecialValue(buffer,&max,&min,&max1,&min1);            
+                DataProc_FindSpecialValue(buffer,&max,&min,&max1,&min1);            
                 DataProc_FindAbnormalPonit(max,min,max1,min1);
                 if(bdt.AbnormalPointNum!=0)
                     DataProc_AdjustAbnormalPoint();
@@ -7615,76 +7596,76 @@ void DataProc_FBFHStartFrameFullAdaptive(uint16_t *buffer)
     uint16_t max1=0,min1=4095;
     #endif
     if(bdt.BFD.InitCount >= 3)                            // 间隔2帧之后才能对buffer进行处理
+    {
+        /********************************************************
+        * 穷举每个ref high和ref low的值
+        *********************************************************/
+        if(((bdt.BFD.InitCount%3)==0)&&(bdt.PCBA.RefHLSetCount <= CIRCLE_MAXCOUNT))
+        {
+            DataProc_CalRefHLSetAverageValue(buffer);
+            DataProc_CircleScreenAdaptive();
+        }
+    }
+    switch(bdt.BFD.InitCount)
+    {
+        case 50:
+        {
+            DataProc_SetRefHLEnd();
+            break;
+        }
+        // wait two frame
+        case 53:
         {
             /********************************************************
-            * 穷举每个ref high和ref low的值
+            * 分别调整每个Rx通道FCAP的值
             *********************************************************/
-            if(((bdt.BFD.InitCount%3)==0)&&(bdt.PCBA.RefHLSetCount <= CIRCLE_MAXCOUNT))
-            {
-                DataProc_CalRefHLSetAverageValue(buffer);
-                DataProc_CircleScreenAdaptive();
-            }
+            #ifdef CHANNEL_ADAPTIVE
+            DataProc_CalRxAverageValue(buffer);
+            DataProc_AdjustRxChannelFcap();
+            #endif
+            break;
         }
-        switch(bdt.BFD.InitCount)
+        // wait two frame
+        case 56:
         {
-            case 50:
-            {
-                DataProc_SetRefHLEnd();
-                break;
-            }
-            // wait two frame
-            case 53:
-            {
-                /********************************************************
-                * 分别调整每个Rx通道FCAP的值
-                *********************************************************/
-                #ifdef CHANNEL_ADAPTIVE
-                DataProc_CalRxAverageValue(buffer);
-                DataProc_AdjustRxChannelFcap();
-                #endif
-                break;
-            }
-            // wait two frame
-            case 56:
-            {
-                #ifdef CHANNEL_ADAPTIVE
+            #ifdef CHANNEL_ADAPTIVE
             DataProc_FindSpecialValue(buffer,&max,&min,&max1,&min1);
-                DataProc_FindAbnormalPonit(max,min,max1,min1);
-                if(bdt.AbnormalPointNum!=0)
-                    DataProc_AdjustAbnormalPoint();
-                else
-                {
-                    DataProc_CalTxAverageValue(buffer);
-                    DataProc_CalRxAverageValue(buffer);
+            DataProc_FindAbnormalPonit(max,min,max1,min1);
+            if(bdt.AbnormalPointNum!=0)
+                DataProc_AdjustAbnormalPoint();
+            else
+            {
+                DataProc_CalTxAverageValue(buffer);
+                DataProc_CalRxAverageValue(buffer);
                 DataProc_FindAbnormalChannel();
                 if((bdt.AbnormalTxChNum!=0)||(bdt.AbnormalRxChNum!=0))
                     DataProc_AdjustAbnormalChannel();
             }
-                #endif
-                break;
-            }
-            // wait two frame
-            case 59:
-            {
-                /***********************************************
-                *Initial Baseline
-                ************************************************/
-                bdt.BaseChangeFlag++;                /*  Counting 1 for baseline updating*/
-                bdt.BFD.TooLongTime4BaseUpdate = MAX_MUST_UPDATE_PERIOD - 20;    /*  Reset the Timing Count*/
-                bdt.BFD.AfterBaseUpdatedTime   = MAX_HOLDTIME_AFTERUPDATE - 20;  /*  Reset the Timing Count*/
-                bdt.BFD.bbdc.BaseUpdateCase    = BASELINE_HOLDING_CASE;
-                for (i = 0;i < XMTR_NUM;i++)
-                    for (j = 0; j < RECV_NUM;j++)
-                    {
-                        bdt.BFD.BaseDat[i][j]      = buffer[i*RECV_NUM+j];
-                        bdt.BFD.BaseDatSaved[i][j] = buffer[i*RECV_NUM+j];
-                    }
-                break;
-            }
-            // wait two frame
-            default:
-                break;
-            }
+            #endif
+            break;
+        }
+        // wait two frame
+        case 59:
+        {
+            /***********************************************
+            *Initial Baseline
+            ************************************************/
+            bdt.BaseChangeFlag++;                /*  Counting 1 for baseline updating*/
+            bdt.BFD.TooLongTime4BaseUpdate = MAX_MUST_UPDATE_PERIOD - 20;    /*  Reset the Timing Count*/
+            bdt.BFD.AfterBaseUpdatedTime   = MAX_HOLDTIME_AFTERUPDATE - 20;  /*  Reset the Timing Count*/
+            bdt.BFD.bbdc.BaseUpdateCase    = BASELINE_HOLDING_CASE;
+            for (i = 0;i < XMTR_NUM;i++)
+                for (j = 0; j < RECV_NUM;j++)
+                {
+                    bdt.BFD.BaseDat[i][j]      = buffer[i*RECV_NUM+j];
+                    bdt.BFD.BaseDatSaved[i][j] = buffer[i*RECV_NUM+j];
+                }
+            break;
+        }
+        // wait two frame
+        default:
+            break;
+    }
 #endif
 }
 

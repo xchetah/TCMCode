@@ -15,6 +15,10 @@
 #define BE30PERCENT         3         // Threshold for Valid Finger Signal
 #define BE40PERCENT         4         // Threshold for Valid Finger Signal
 
+#define TOUCH_KEY_1 0x1
+#define TOUCH_KEY_2 0x3
+#define TOUCH_KEY_3 0x7
+#define TOUCH_KEY_4 0xf
 
 /************************************************************************
 *******1111111111111111111111111111111111111111111111111111111111********
@@ -124,24 +128,24 @@
 #define RAWPOINT4FINGMATCH             // Finger Match is operated with RAW Poing Data, not from the Output of MultiFilters
 #define FOURPOINTS4STICKMOVING         // Four Ponts is needed for Stick Finger moving
 
-//#define SCREEN_NONE_ADAPTIVE               // Adaptive parameter for different screen
-#define SCREEN_SIMPLE_ADAPTIVE             // Adaptive parameter for different screen
-//#define SCREEN_FULL_ADAPTIVE             // 新的屏幕自适应算法
-//#define CHANNEL_ADAPTIVE
+//#define SCREEN_NONE_ADAPTIVE               // None Adaptive parameter for different screen
+//#define SCREEN_SIMPLE_ADAPTIVE             // Simple Adaptive parameter for different screen
+#define SCREEN_FULL_ADAPTIVE                 // Full Adaptive parameter for different screen
+#define CHANNEL_ADAPTIVE                     // Channel adaptive for adjust channel or point fcap
 
 #ifdef SCREEN_FULL_ADAPTIVE
-#define CIRCLE_MAXCOUNT         16            // 穷举的最大次数
-#define REASONABLE_VALUE        2048          // 穷举中希望接近的原始值
+#define CIRCLE_MAXCOUNT         16           // 穷举的最大次数
+#define REASONABLE_VALUE        2048         // 穷举中希望接近的原始值
 #endif
 
-#define INVALID_CHORPOINT        15            // 无效的通道或者点
+#define INVALID_CHORPOINT       15          // 无效的通道或者点
 
 #ifdef CHANNEL_ADAPTIVE
-#define RXCHANNEL_THRESHOLD     500         // RX通道与总平均值差值限度
+#define RXCHANNEL_THRESHOLD     700         // RX通道与总平均值差值限度
 #define ABCHVALUE_THRESHOLD     700         // 各个通道平均值与总的平均值差值限度
 #define ABCHANDPOINT_MAXNUM     2           // 可调节的通道、异常点最大数目
 #define ABNORMALPOINT_MAXNUM    4           // 最大值、最小值、次大值、次小值
-#define ABPOINTMAX_THRESHOLD    3000        // 异常点最大值限度
+#define ABPOINTMAX_THRESHOLD    3500        // 异常点最大值限度
 #define ABPOINTMIN_THRESHOLD    500         // 异常点最小值限度
 #define ABCHANDPOINT_MAXNUM     2           // 可调节的通道、异常点最大数目
 #define ABNORMALPOINT_MAXNUM    4           // 最大值、最小值、次大值、次小值
