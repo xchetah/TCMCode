@@ -39,6 +39,7 @@ static struct keys chm_ts_keys[]={
     {KEY_BACK,TOUCH_KEY_1},
     {KEY_HOMEPAGE,TOUCH_KEY_2},
     {KEY_MENU,TOUCH_KEY_3},
+    {KEY_SEARCH,TOUCH_KEY_4},
 };
 
 #define MAX_KEY_NUM ((sizeof(chm_ts_keys)/sizeof(chm_ts_keys[0])))
@@ -444,17 +445,17 @@ void Report_Coordinate()
     #ifdef CTP_HAVE_TOUCH_KEY
     if(bdt.PressKeyFlag1){
         report_key();    
+        bdt.PressKeyFlag1 = 0;
+        return;
     }
     if(touch_key_pressed&&(!bdt.PressKeyFlag1)){
         input_report_key(spidev->dev,key_pressed,0);
         input_sync((spidev->dev));
         key_pressed = 0;
         touch_key_pressed = 0;
+        printk("key released\n");
     }
 
-    if(touch_key_pressed){
-        return;
-    }
     #endif
 
     if(Wait4Flag)

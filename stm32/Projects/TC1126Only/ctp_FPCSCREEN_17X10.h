@@ -11,9 +11,10 @@
 #define KEY_RET_RXLOC           9
 #define KEY_MENU_RXLOC          0
 
-#define KEY_HOME_RXLOCATION     500 // Threshold Value for valid pressing
-#define KEY_RET_RXLOCATION      500
-#define KEY_MENU_RXLOCATION     500
+#define TOUCH_KEY_1_THRESHOLD     300 // Threshold Value for valid pressing
+#define TOUCH_KEY_2_THRESHOLD     300 // Threshold Value for valid pressing
+#define TOUCH_KEY_3_THRESHOLD     300 // Threshold Value for valid pressing
+#define TOUCH_KEY_4_THRESHOLD     300 // Threshold Value for valid pressing
 
 #define HIREF_SETTING        HIGH_REF_4PF
 #define LOREF_SETTING        LOW_REF_1PF

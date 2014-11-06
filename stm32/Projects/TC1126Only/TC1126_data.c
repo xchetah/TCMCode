@@ -2669,24 +2669,23 @@ void DataProc_PressKeyDetect()
 
 
     #if 1 // (KRECV_NUM == 1)
-        printk("key detect\n");
-	    printk("if conflict,then fix it\n");
-        if((bdt.DeltaDat_kp[3] > KEY_MENU_RXLOCATION)|| (bdt.DeltaDat_kp[4] > KEY_MENU_RXLOCATION))
+        printk("KEY1:(%-5d,%-5d),KEY2:(%-5d,%-5d),KEY3:(%d),KEY4:(%-5d,%-5d)\n",bdt.DeltaDat_kp[2],bdt.DeltaDat_kp[3],bdt.DeltaDat_kp[7],bdt.DeltaDat_kp[8],bdt.DeltaDat_kp[5],bdt.DeltaDat_kp[12],bdt.DeltaDat_kp[13]);
+        if((bdt.DeltaDat_kp[2] > TOUCH_KEY_1_THRESHOLD)|| (bdt.DeltaDat_kp[3] > TOUCH_KEY_1_THRESHOLD))
         {
               bdt.PressKeyFlag1 = TOUCH_KEY_1;
         }
 
-        if((bdt.DeltaDat_kp[8] > KEY_MENU_RXLOCATION)|| (bdt.DeltaDat_kp[9] > KEY_MENU_RXLOCATION))
+        if((bdt.DeltaDat_kp[7] > TOUCH_KEY_2_THRESHOLD)|| (bdt.DeltaDat_kp[8] > TOUCH_KEY_2_THRESHOLD))
         {
               bdt.PressKeyFlag1 = TOUCH_KEY_2;
         }
 
-        if((bdt.DeltaDat_kp[11] > KEY_MENU_RXLOCATION))
+        if((bdt.DeltaDat_kp[5] > TOUCH_KEY_3_THRESHOLD))
         {
               bdt.PressKeyFlag1 = TOUCH_KEY_3;
         }
 
-        if((bdt.DeltaDat_kp[13] > KEY_MENU_RXLOCATION)|| (bdt.DeltaDat_kp[14] > KEY_MENU_RXLOCATION))
+        if((bdt.DeltaDat_kp[12] > TOUCH_KEY_4_THRESHOLD)|| (bdt.DeltaDat_kp[13] > TOUCH_KEY_4_THRESHOLD))
         {
               bdt.PressKeyFlag1 = TOUCH_KEY_4;
         }
@@ -5561,6 +5560,10 @@ void DataProc_GetPoint(uint16_t index)
     //bdt.DPD[index].Finger_Y_RECV = (bdt.DPD[index].start_y << 8) + DataProc_computePosition(pY, bdt.DPD[index].len_y, yFlag);
     bdt.DPD[index].Finger_X_XMTR = DataProc_computePosition(pX, index, XMTR_AXIAL, xFlag); // 0 means X
     bdt.DPD[index].Finger_Y_RECV = DataProc_computePosition(pY, index, RECV_AXIAL, yFlag); // 1 means Y
+    if(bdt.DPD[index].Finger_Y_RECV > 2400){
+        bdt.DPD[index].Finger_X_XMTR = 0;
+        bdt.DPD[index].Finger_Y_RECV = 0;
+    }
 }
 
 /*******************************************************************************
@@ -7322,7 +7325,6 @@ void DataProc_WholeFrameProcess(uint16_t *buffer)
     if(bdt.FingerDetectNum > MIN_VALUE_POINT) 
     {
         #ifdef PRESS_KEY_DETECT
-        DataProc_PressKeyDetect();
    
           #if (KXMTR_NUM == 1)
           for(i=SXMTR_NUM;i<XMTR_NUM;i++)
@@ -7342,7 +7344,7 @@ void DataProc_WholeFrameProcess(uint16_t *buffer)
                 bdt.DeltaDat16A[i][j]=0;
               }
           #endif
-
+        DataProc_PressKeyDetect();
         #endif
 
         /***********************************************************

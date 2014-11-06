@@ -308,6 +308,8 @@ void Report_Coordinate()
     #ifdef CTP_HAVE_TOUCH_KEY
     if(bdt.PressKeyFlag1){
         report_key();    
+        bdt.PressKeyFlag1 = 0;
+        return;
     }
     if(touch_key_pressed&&(!bdt.PressKeyFlag1)){
         input_report_key(spidev->dev,key_pressed,0);
@@ -316,9 +318,6 @@ void Report_Coordinate()
         touch_key_pressed = 0;
     }
 
-    if(touch_key_pressed){
-        return;
-    }
     #endif
 
     if(Wait4Flag)
