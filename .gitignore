@@ -10,7 +10,6 @@
 *.doc
 *.htm
 *.o.d
-CN1100Only/Projects/SPI_FLASH/MDK/
 cn1100_algo.module
 libtc1126.a
 tags
@@ -31,3 +30,16 @@ tmp*
 *.tra
 *.htm
 *.a
+stm32/Projects/TC1126Only/MDK/Debug
+*.IAB
+*.IAD
+*.IMB
+*.IMD
+*.PFI
+*.PO
+*.PR
+*.PRI
+*.PS
+*.SearchResults
+*.WK3
+*.pub
