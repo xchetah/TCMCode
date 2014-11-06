@@ -2669,9 +2669,7 @@ void DataProc_PressKeyDetect()
 
 
     #if 1 // (KRECV_NUM == 1)
-
-//        printk("key1:(%d,%d),key2:(%d,%d),key3:%d,key4:(%d,%d)\n",bdt.DeltaDat_kp[3],bdt.DeltaDat_kp[4],bdt.DeltaDat_kp[8],bdt.DeltaDat_kp[9]
- //               ,bdt.DeltaDat_kp[11],bdt.DeltaDat_kp[13],bdt.DeltaDat_kp[14]);
+        printk("key detect\n");
         if((bdt.DeltaDat_kp[3] > KEY_MENU_RXLOCATION)|| (bdt.DeltaDat_kp[4] > KEY_MENU_RXLOCATION))
         {
               bdt.PressKeyFlag1 = TOUCH_KEY_1;
