@@ -2670,7 +2670,7 @@ void DataProc_PressKeyDetect()
 
     #if 1 // (KRECV_NUM == 1)
         printk("key detect\n");
-        printk("this is to test conflict\n");
+	    printk("if conflict,then fix it\n");
         if((bdt.DeltaDat_kp[3] > KEY_MENU_RXLOCATION)|| (bdt.DeltaDat_kp[4] > KEY_MENU_RXLOCATION))
         {
               bdt.PressKeyFlag1 = TOUCH_KEY_1;
