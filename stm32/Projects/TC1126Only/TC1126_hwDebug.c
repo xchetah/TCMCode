@@ -929,7 +929,7 @@ void Send_Delta_Data_To_PC(uint16_t *buf)
     dbg.debug_value[8] = bdt.Top_h;
     dbg.debug_value[9] = bdt.Bottom_h;
 #else
-    #ifdef AUTO_FACEDETECTION
+    #ifdef TPD_PROXIMITY
     dbg.debug_value[5] = bdt.FDC.WFNum;
     dbg.debug_value[6] = bdt.FDC.BigNum;
     dbg.debug_value[7] = bdt.FDC.Flag;
