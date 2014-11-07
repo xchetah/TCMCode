@@ -2615,6 +2615,96 @@ void FingProc_SuperFilter4Edge(void)
 }
 
 
+/*******************************************************************************
+* Function Name  : 
+* Description    : 
+* Input          : 
+* Output         : 
+* Return         : 
+*******************************************************************************/
+#ifdef PRESS_KEY_DETECT
+/*******************************************************************************
+* Function Name  : 
+* Description    : 
+* Input          : 
+* Output         : 
+* Return         : 
+*******************************************************************************/
+#ifdef CN1100_STM32 //CN1100_STM32
+void DataProc_PressKeyDetect()
+{
+    bdt.PressKeyFlag1          = NO_KEY_PRESSED;
+    bdt.PressKeyFlag.MenuKey   = NO_KEY_PRESSED;
+    bdt.PressKeyFlag.HomeKey   = NO_KEY_PRESSED;
+    bdt.PressKeyFlag.ReturnKey = NO_KEY_PRESSED;
+    
+    if(bdt.FingerDetectNum)
+    {
+    #if (KXMTR_NUM == 1)
+        if(bdt.DeltaDat16A[KEY_TX_LOC][KEY_MENU_RXLOC] > KEY_MENU_RXLOCATION) 
+        {
+            bdt.PressKeyFlag.MenuKey   = 1;
+        }
+        if(bdt.DeltaDat16A[KEY_TX_LOC][KEY_HOME_RXLOC] > KEY_HOME_RXLOCATION)
+        {   
+            bdt.PressKeyFlag.HomeKey   = 1;
+        }
+        if(bdt.DeltaDat16A[KEY_TX_LOC][KEY_RET_RXLOC]  > KEY_RET_RXLOCATION) 
+        {
+            bdt.PressKeyFlag.ReturnKey = 1;
+        }
+        
+        if(1 == bdt.PressKeyFlag.MenuKey)
+        { 
+            bdt.PressKeyFlag1 = MENU_KEY_PRESSED;
+        }
+        else if(1 == bdt.PressKeyFlag.HomeKey)
+        {
+            bdt.PressKeyFlag1 = HOME_KEY_PRESSED;
+        }
+        else if(1 == bdt.PressKeyFlag.ReturnKey)
+        {
+            bdt.PressKeyFlag1 = RETURN_KEY_PRESSED;
+        }
+    #endif
+
+
+    #if 0 // (KRECV_NUM == 1)
+        if(   (bdt.DeltaDat_kp[3] > KEY_MENU_RXLOCATION) 
+           || (bdt.DeltaDat_kp[4] > KEY_MENU_RXLOCATION) 
+           || (bdt.DeltaDat_kp[3]+bdt.DeltaDat_kp[4] > KEY_MENU_RXLOCATION) 
+        {
+            bdt.PressKeyFlag.MenuKey   = 1;
+        }
+        if(bdt.DeltaDat16A[KEY_TX_LOC][KEY_HOME_RXLOC] > KEY_HOME_RXLOCATION)
+        {   
+            bdt.PressKeyFlag.HomeKey   = 1;
+        }
+        if(bdt.DeltaDat16A[KEY_TX_LOC][KEY_RET_RXLOC]  > KEY_RET_RXLOCATION) 
+        {
+            bdt.PressKeyFlag.ReturnKey = 1;
+        }
+        
+        if(1 == bdt.PressKeyFlag.MenuKey)
+        { 
+            bdt.PressKeyFlag1 = MENU_KEY_PRESSED;
+        }
+        else if(1 == bdt.PressKeyFlag.HomeKey)
+        {
+            bdt.PressKeyFlag1 = HOME_KEY_PRESSED;
+        }
+        else if(1 == bdt.PressKeyFlag.ReturnKey)
+        {
+            bdt.PressKeyFlag1 = RETURN_KEY_PRESSED;
+        }
+    #endif
+
+
+    }
+}
+#endif //CN1100_STM32
+
+#endif
 
 
 /*******************************************************************************
@@ -7113,6 +7203,7 @@ void DataProc_FrequencyHopByStretch(uint16_t *buf)
     }
   #endif //FREQHOP_BYSTRETCH
 }
+
 
 /*******************************************************************************
 * Function Name  : 

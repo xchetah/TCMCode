@@ -20,7 +20,7 @@
 //#ifdef CN1100_WINNER  
 //#define DUR_INTEG            63
 //#else
-#define DUR_INTEG             63
+#define DUR_INTEG             36
 //#endif
 //#define DUR_INTEG            48
 
