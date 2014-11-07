@@ -303,7 +303,7 @@ void Report_Coordinate_Wait4_SingleTime(int id,int X, int Y)
 #endif
         input_report_abs(spidev->dev, ABS_MT_TRACKING_ID,id);
         input_report_abs(spidev->dev, ABS_MT_TOUCH_MAJOR, 5); 
-#if 1
+#if 0
         input_report_abs(spidev->dev, ABS_MT_POSITION_X, X);
 #else
         input_report_abs(spidev->dev, ABS_MT_POSITION_X, SCREEN_HIGH-X);
