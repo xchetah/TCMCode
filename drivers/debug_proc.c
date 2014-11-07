@@ -177,7 +177,6 @@ int chm_ts_read_config(cn1100_t config)
 }
 
 
-
 /*******************************************************************************
 * Function Name  : 
 * Description    : 

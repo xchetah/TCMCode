@@ -121,8 +121,6 @@
 
 #ifdef CN1100_LX //CN1100_LX
 
-#define TPD_PROXIMITY
-
 #ifdef TPD_PROXIMITY
 #include <linux/wakelock.h>
 #include <linux/miscdevice.h>
