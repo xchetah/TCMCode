@@ -21,12 +21,18 @@ typedef struct DeltaPData {
     uint16_t   Finger_X_Reported;                      // Final report finger point X, Q8
     uint16_t   Finger_Y_Reported;                      // Final report finger point Y, Q8
     EdgeCtrl   EdgeInfo;        
+
+    uint16_t   StayCount;
+    int32_t    Stay_XSum;
+    int32_t    Stay_YSum;
+
     #ifdef FROMOUT2IN_INORDER
     uint16_t   Finger_X_Erpt[3];                      // Final report finger point X, Q8
     uint16_t   Finger_Y_Erpt[3];
     uint16_t   Finger_X_Erpt1[3];                      // Final report finger point X, Q8
     uint16_t   Finger_Y_Erpt1[3];
     #endif
+
     uint16_t   Finger_X_S[SL_SAVE_FINGER_NUM];         // 2-Tap Forward Filter
     uint16_t   Finger_Y_S[SL_SAVE_FINGER_NUM];         // 2-Tap Forward Filter
     uint16_t   FF_LastDist;

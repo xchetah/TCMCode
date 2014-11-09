@@ -511,9 +511,9 @@ void Baseline_BaseBufferHandled(uint16_t *buffer)
     }
 
     #ifdef TPD_PROXIMITY
-    if(1 == tpd_proximity_flag){
-        if(FACE_DETECT_NEAR == bdt.FDC.Flag) return;
-    }
+
+    if(FACE_DETECT_NEAR == bdt.FDC.Flag) return;
+
     #endif
     
     if(bdt.BFD.bbdc.FingerExist == NO_FINGER)
@@ -744,6 +744,41 @@ void FingProc_DistanceFilter(uint16_t i, uint16_t x1, uint16_t y1, uint16_t *pX,
 * Return         : 
 *******************************************************************************/
 
+void FingProc_DF0ExceptionHandle(uint16_t i, uint16_t *pX, uint16_t *pY)
+{
+#if 0
+           *pX = bdt.DPD[i].AdjustOrigin_x; /* 步伐太小, 屹然不动*/
+           *pY = bdt.DPD[i].AdjustOrigin_y; /* 步伐太小, 屹然不动*/
+#else
+    #define INTEGR_SHFT  3
+    #define INTEGR_NUM   (1<<INTEGR_SHFT)
+
+           uint16_t td;
+           bdt.DPD[i].StayCount++;
+           bdt.DPD[i].Stay_XSum += *pX;
+           bdt.DPD[i].Stay_YSum += *pY;
+           *pX = bdt.DPD[i].AdjustOrigin_x;
+           *pY = bdt.DPD[i].AdjustOrigin_y;
+           if(bdt.DPD[i].StayCount >= INTEGR_NUM)
+           {
+               bdt.DPD[i].Stay_XSum = bdt.DPD[i].Stay_XSum>>INTEGR_SHFT;
+               bdt.DPD[i].Stay_YSum = bdt.DPD[i].Stay_YSum>>INTEGR_SHFT;
+               td = FingProc_Dist2PMeasure((int16_t)bdt.DPD[i].Stay_XSum, (int16_t)bdt.DPD[i].Stay_YSum, (int16_t)bdt.DPD[i].AdjustOrigin_x, (int16_t)bdt.DPD[i].AdjustOrigin_y);
+               if(td > (bdt.DPD[i].AdjustDistance>>2))
+               {
+                   *pX = bdt.DPD[i].Stay_XSum;
+                   *pY = bdt.DPD[i].Stay_YSum;
+                   bdt.DPD[i].AdjustOrigin_x = *pX;
+                   bdt.DPD[i].AdjustOrigin_y = *pY;
+               }
+               bdt.DPD[i].StayCount = 0;
+               bdt.DPD[i].Stay_XSum = 0;
+               bdt.DPD[i].Stay_YSum = 0;
+           }
+#endif
+}
+
+
 void FingProc_DistanceFilter0(uint16_t i, uint16_t x1, uint16_t y1, uint16_t *pX, uint16_t *pY)
 {
     #if 1
@@ -758,6 +793,9 @@ void FingProc_DistanceFilter0(uint16_t i, uint16_t x1, uint16_t y1, uint16_t *pX
     
     distance = FingProc_Dist2PMeasure((int16_t)bdt.DPD[i].AdjustOrigin_x, (int16_t)bdt.DPD[i].AdjustOrigin_y, (int16_t)(*pX), (int16_t)(*pY));
    
+        #ifdef STM32VC_LCD
+        TFT_ShowNum(3+(i<<2), 28, bdt.DPD[i].AdjustState, LCD_COLOR_BLUE, LCD_COLOR_GREEN);
+        #endif
     
     switch(bdt.DPD[i].AdjustState)
     {
@@ -771,20 +809,27 @@ void FingProc_DistanceFilter0(uint16_t i, uint16_t x1, uint16_t y1, uint16_t *pX
             bdt.DPD[i].AdjustDistance = bdt.ThrLow4DistanceFilter;
             if(distance <= bdt.DPD[i].AdjustDistance)
             {                
-                *pX = bdt.DPD[i].AdjustOrigin_x; /* 步伐太小, 屹然不动*/
-                *pY = bdt.DPD[i].AdjustOrigin_y; /* 步伐太小, 屹然不动*/
+                //*pX = bdt.DPD[i].AdjustOrigin_x; /* 步伐太小, 屹然不动*/
+                //*pY = bdt.DPD[i].AdjustOrigin_y; /* 步伐太小, 屹然不动*/
+                FingProc_DF0ExceptionHandle(i, pX, pY);
             }
-            else if(distance <= bdt.ThrHigh4DistanceFilter) 
+            else
             {
-                *pX = bdt.DPD[i].AdjustOrigin_x; /* 步伐明显, 可能要动*/
-                *pY = bdt.DPD[i].AdjustOrigin_y; /* 步伐明显, 可能要动*/
-                bdt.DPD[i].AdjustState = STATE_PREPARE_MOVE;
-            }
-            else 
-            {
-                bdt.DPD[i].AdjustOrigin_x = *pX; /* 步伐很大, 突然要动*/
-                bdt.DPD[i].AdjustOrigin_y = *pY; /* 步伐很大, 突然要动*/
-                bdt.DPD[i].AdjustState = STATE_MOVING;
+                bdt.DPD[i].StayCount         = 0;
+                bdt.DPD[i].Stay_XSum         = 0;
+                bdt.DPD[i].Stay_YSum         = 0;
+                if(distance <= bdt.ThrHigh4DistanceFilter) 
+                {
+                    *pX = bdt.DPD[i].AdjustOrigin_x; /* 步伐明显, 可能要动*/
+                    *pY = bdt.DPD[i].AdjustOrigin_y; /* 步伐明显, 可能要动*/
+                    bdt.DPD[i].AdjustState = STATE_PREPARE_MOVE;
+                }
+                else 
+                {
+                    bdt.DPD[i].AdjustOrigin_x = *pX; /* 步伐很大, 突然要动*/
+                    bdt.DPD[i].AdjustOrigin_y = *pY; /* 步伐很大, 突然要动*/
+                    bdt.DPD[i].AdjustState = STATE_MOVING;
+                }
             }
             break;
         }
@@ -820,7 +865,7 @@ void FingProc_DistanceFilter0(uint16_t i, uint16_t x1, uint16_t y1, uint16_t *pX
         }
         case STATE_MOVING:
         {
-            bdt.DPD[i].AdjustDistance = THR024;
+           bdt.DPD[i].AdjustDistance = THR024;
             if(distance <= 12)
             {
                 *pX = bdt.DPD[i].AdjustOrigin_x;  /*动中有静, 考虑不动*/
@@ -904,7 +949,7 @@ void FingProc_DistanceFilter0(uint16_t i, uint16_t x1, uint16_t y1, uint16_t *pX
 
 void FingProc_DistanceFilter1(uint16_t i, uint16_t x1, uint16_t y1, uint16_t *pX, uint16_t *pY, uint16_t SideFlag)
 {
-#if 1
+#if 0
     int16_t xv, yv;
     int16_t xThr = 3, yThr = 3;   
     //************************************************
@@ -1095,6 +1140,11 @@ void FingProc_TapFilterStateReset(uint16_t index, uint8_t FilterState)
     bdt.DPD[index].LifeNumber        = 0;
     bdt.DPD[index].FingMovingSpeed   = FINGER_FINGER_SPEED_LOW;
     bdt.DPD[index].AdjustState       = STATE_STICK_START;
+
+    bdt.DPD[index].StayCount         = 0;
+    bdt.DPD[index].Stay_XSum         = 0;
+    bdt.DPD[index].Stay_YSum         = 0;
+
 }
 
 
@@ -1145,7 +1195,7 @@ void FingProc_MultiFilterProcess(uint16_t i, uint16_t curx, uint16_t cury, uint1
     }
     else Board_Area_Flag = 0;
 
-    if(0 == Board_Area_Flag)
+    if(1) //(0 == Board_Area_Flag)
     {
         // Non_Boarder Area
         FingProc_DistanceFilter0(i, x[0], y[0], &bdt.DPD[i].Finger_X_XMTR, &bdt.DPD[i].Finger_Y_RECV);
@@ -2145,17 +2195,17 @@ uint16_t FingProc_measurestep1(uint16_t *p, uint16_t Rpt)
 * Return         : 
 *******************************************************************************/
 
-void FingProc_ImproveEdgeLinearity_L(void)
+void FingProc_ImproveEdgeLinearity_L(uint16_t i)
 {
 #ifdef SUPER_FILTER4EDGE
     uint16_t *x, *y, xRpt, yRpt;
-    uint16_t i, dx, dy;
+    uint16_t dx, dy;
 
-    for (i = 0;i < FINGER_NUM_MAX;i++)
-    {
+    //for (i = 0;i < FINGER_NUM_MAX;i++)
+    //{
         if(bdt.DPD[i].FingerStateFlag < STATE_SERIAL_FINGER)
         {
-            continue;
+            return;
         }
 
         #ifdef FROMOUT2IN_INORDER
@@ -2221,7 +2271,7 @@ void FingProc_ImproveEdgeLinearity_L(void)
         x[2]=x[1]; x[1]=x[0]; x[0]=xRpt;
         y[2]=y[1]; y[1]=y[0]; y[0]=yRpt;
         #endif
-    }
+    //}
 #endif
 }
 
@@ -2234,17 +2284,17 @@ void FingProc_ImproveEdgeLinearity_L(void)
 * Return         : 
 *******************************************************************************/
 
-void FingProc_ImproveEdgeLinearity_R(void)
+void FingProc_ImproveEdgeLinearity_R(uint16_t i)
 {
 #ifdef SUPER_FILTER4EDGE
     uint16_t *x, *y, xRpt, yRpt;
-    uint16_t i, dx, dy;
+    uint16_t dx, dy;
 
-    for (i = 0;i < FINGER_NUM_MAX;i++)
-    {
+    //for (i = 0;i < FINGER_NUM_MAX;i++)
+    //{
         if(bdt.DPD[i].FingerStateFlag < STATE_SERIAL_FINGER) 
         {
-            continue;
+            return;
         }
        
         #ifdef FROMOUT2IN_INORDER
@@ -2259,7 +2309,7 @@ void FingProc_ImproveEdgeLinearity_R(void)
     
         if( xRpt || yRpt) /* Finger Point*/
         { 
-            if((xRpt >(XMTR_NUM<<8)-SUPFIL_RANGE && x[0] >(XMTR_NUM<<8)-SUPFIL_RANGE && x[1] > (XMTR_NUM<<8)-SUPFIL_RANGE && x[2] > (XMTR_NUM<<8)-SUPFIL_RANGE)) /* Left Edg*/
+            if((xRpt >(SXMTR_NUM<<8)-SUPFIL_RANGE && x[0] >(SXMTR_NUM<<8)-SUPFIL_RANGE && x[1] > (SXMTR_NUM<<8)-SUPFIL_RANGE && x[2] > (SXMTR_NUM<<8)-SUPFIL_RANGE)) /* Left Edg*/
             {
                 dx =FingProc_Dist4Uint16Var(xRpt, x[0]);
                 dy =FingProc_Dist4Uint16Var(yRpt, y[0]);
@@ -2311,7 +2361,7 @@ void FingProc_ImproveEdgeLinearity_R(void)
         x[2]=x[1]; x[1]=x[0]; x[0]=xRpt;
         y[2]=y[1]; y[1]=y[0]; y[0]=yRpt;
         #endif
-    }
+    //}
 #endif
 }
 
@@ -2323,17 +2373,17 @@ void FingProc_ImproveEdgeLinearity_R(void)
 * Output         : 
 * Return         : 
 *******************************************************************************/
-void FingProc_ImproveEdgeLinearity_T(void)
+void FingProc_ImproveEdgeLinearity_T(uint16_t i)
 {
 #ifdef SUPER_FILTER4EDGE
     uint16_t *x, *y, xRpt, yRpt;
-    uint16_t i, dx, dy;
+    uint16_t dx, dy;
 
-    for (i = 0;i < FINGER_NUM_MAX;i++)
-    {
+    //for (i = 0;i < FINGER_NUM_MAX;i++)
+    //{
         if(bdt.DPD[i].FingerStateFlag < STATE_SERIAL_FINGER) 
         {    
-            continue;
+            return;
         }
         #ifdef FROMOUT2IN_INORDER
         x    =  bdt.DPD[i].Finger_X_Erpt;    /* Point to the saving array*/
@@ -2401,7 +2451,7 @@ void FingProc_ImproveEdgeLinearity_T(void)
          x[2]=x[1]; x[1]=x[0]; x[0]=xRpt;
          y[2]=y[1]; y[1]=y[0]; y[0]=yRpt;
         #endif
-    }
+    //}
 #endif
 }
 
@@ -2414,17 +2464,17 @@ void FingProc_ImproveEdgeLinearity_T(void)
 * Output         : 
 * Return         : 
 *******************************************************************************/
-void FingProc_ImproveEdgeLinearity_B(void)
+void FingProc_ImproveEdgeLinearity_B(uint16_t i)
 {
 #ifdef SUPER_FILTER4EDGE
     uint16_t *x, *y, xRpt, yRpt;
-    uint16_t i, dx, dy;
+    uint16_t dx, dy;
 
-    for (i = 0;i < FINGER_NUM_MAX;i++)
-    {
+    //for (i = 0;i < FINGER_NUM_MAX;i++)
+    //{
         if(bdt.DPD[i].FingerStateFlag < STATE_SERIAL_FINGER) 
         {    
-            continue;
+            return;
         }
         #ifdef FROMOUT2IN_INORDER
         x    =  bdt.DPD[i].Finger_X_Erpt1;  /* Point to the saving array*/
@@ -2438,7 +2488,7 @@ void FingProc_ImproveEdgeLinearity_B(void)
         yRpt = bdt.DPD[i].Finger_Y_RECV;    /* Just calculated from raw data */
         if( xRpt || yRpt)                   /* Finger Point */
         {
-            if((yRpt >(RECV_NUM<<8)-SUPFIL_RANGE && y[0] >(RECV_NUM<<8)-SUPFIL_RANGE && y[1] > (RECV_NUM<<8)-SUPFIL_RANGE && y[2] > (RECV_NUM<<8)-SUPFIL_RANGE)) /* Left Edg*/
+            if((yRpt >(SRECV_NUM<<8)-SUPFIL_RANGE && y[0] >(SRECV_NUM<<8)-SUPFIL_RANGE && y[1] > (SRECV_NUM<<8)-SUPFIL_RANGE && y[2] > (SRECV_NUM<<8)-SUPFIL_RANGE)) /* Left Edg*/
             {
                
                 dx =FingProc_Dist4Uint16Var(xRpt, x[0]);
@@ -2491,7 +2541,7 @@ void FingProc_ImproveEdgeLinearity_B(void)
         x[2]=x[1]; x[1]=x[0]; x[0]=xRpt;
         y[2]=y[1]; y[1]=y[0]; y[0]=yRpt;
         #endif
-    }
+    //}
 #endif
 }
 
@@ -2512,18 +2562,22 @@ void FingProc_SuperFilter4Edge(void)
     for (i=0; i<bdt.FingerDetectNum; i++)
     {
         #if 1
-        if(bdt.DPD[i].Finger_X_XMTR > 256 && bdt.DPD[i].Finger_X_XMTR < (XMTR_NUM<<8)-256 )
+        if(bdt.DPD[i].Finger_X_XMTR > 256 && bdt.DPD[i].Finger_X_XMTR < (SXMTR_NUM<<8)-256 )
         { 
             //********************************************************
             // Finger @ Out from SideArea, Num1_X Counting start
             //********************************************************
-            bdt.DPD[i].FingerRealNum1_X++;
-            if(bdt.DPD[i].FingerRealNum1_X>200)
+            if(bdt.DPD[i].FingerRealNum1_X < 200) bdt.DPD[i].FingerRealNum1_X++;
+            bdt.DPD[i].FingerRealNum2_X  = 0;
+            bdt.DPD[i].FingerRealNum2R_X = 0;
+            //************************************************************
+            // Just from Edge to AA area, (Less than 10 points)
+            //************************************************************
+            if(bdt.DPD[i].FingerRealNum1_X<10) 
             {
-                bdt.DPD[i].FingerRealNum1_X=200;
-            }
-            bdt.DPD[i].FingerRealNum2_X = 0;
-            bdt.DPD[i].FingerRealNum2R_X=0;
+                FingProc_ImproveEdgeLinearity_L(i);
+                FingProc_ImproveEdgeLinearity_R(i);
+            }  
         }
         else
         {
@@ -2533,51 +2587,40 @@ void FingProc_SuperFilter4Edge(void)
             if(bdt.DPD[i].Finger_X_XMTR != 0)
                 if(bdt.DPD[i].Finger_Y_RECV != 0)
                 { 
-                    bdt.DPD[i].FingerRealNum2_X++;
-                    bdt.DPD[i].FingerRealNum2R_X++;  
-                    if(bdt.DPD[i].FingerRealNum2_X>200)
-                    {
-                        bdt.DPD[i].FingerRealNum2_X=200;
-                    }
-                    if(bdt.DPD[i].FingerRealNum2R_X>200) 
-                    { 
-                        bdt.DPD[i].FingerRealNum2R_X=200; 
-                    }
+                    if(bdt.DPD[i].FingerRealNum2_X < 200)  bdt.DPD[i].FingerRealNum2_X++;
+                    if(bdt.DPD[i].FingerRealNum2R_X > 200) bdt.DPD[i].FingerRealNum2R_X++;  
                     bdt.DPD[i].FingerRealNum1_X = 0;
                 }
-        }
-
-        if(bdt.DPD[i].FingerRealNum1_X != 0)
-        {
-            if(bdt.DPD[i].FingerRealNum1_X<10) 
-            { 
-                FingProc_ImproveEdgeLinearity_L();
-                FingProc_ImproveEdgeLinearity_R();
-            }  
-        }
-        else 
-        {
+            //************************************************************
+            // Just from AA to Edge area, (Less than 20/35 points)
+            //************************************************************
             if(bdt.DPD[i].FingerRealNum2_X > 20)  
             { 
-                FingProc_ImproveEdgeLinearity_L();
+                FingProc_ImproveEdgeLinearity_L(i);
             }
-
             if(bdt.DPD[i].FingerRealNum2R_X > 35 )  
             {
-                FingProc_ImproveEdgeLinearity_R();
+                FingProc_ImproveEdgeLinearity_R(i);
             }
         }
         #endif
 
         #if 1
-        if(bdt.DPD[i].Finger_Y_RECV > 256 && bdt.DPD[i].Finger_Y_RECV < (RECV_NUM<<8)-256)
+        if(bdt.DPD[i].Finger_Y_RECV > 256 && bdt.DPD[i].Finger_Y_RECV < (SRECV_NUM<<8)-256)
         { 
             //********************************************************
             // Finger @ Out from SideArea, Num1_Y Counting start
             //********************************************************
-            bdt.DPD[i].FingerRealNum1_Y++;
-            if(bdt.DPD[i].FingerRealNum1_Y>200) bdt.DPD[i].FingerRealNum1_Y=200;
+            if(bdt.DPD[i].FingerRealNum1_Y < 200) bdt.DPD[i].FingerRealNum1_Y++;
             bdt.DPD[i].FingerRealNum2_Y = 0;
+            //************************************************************
+            // Just from Edge to AA area, (Less than 10 points)
+            //************************************************************
+            if(bdt.DPD[i].FingerRealNum1_Y<10) 
+            { 
+                FingProc_ImproveEdgeLinearity_T(i);
+                FingProc_ImproveEdgeLinearity_B(i);
+            }
         }
         else
         {
@@ -2587,27 +2630,14 @@ void FingProc_SuperFilter4Edge(void)
             if(bdt.DPD[i].Finger_X_XMTR != 0)
                 if(bdt.DPD[i].Finger_Y_RECV != 0)
                 {
-                    bdt.DPD[i].FingerRealNum2_Y++;
-                    if(bdt.DPD[i].FingerRealNum2_Y>200)
-                    {
-                        bdt.DPD[i].FingerRealNum2_Y=200;
-                    }
+                    if(bdt.DPD[i].FingerRealNum2_Y < 200) bdt.DPD[i].FingerRealNum2_Y++;
                     bdt.DPD[i].FingerRealNum1_Y = 0;
                 }
-        }
-
-        if(bdt.DPD[i].FingerRealNum1_Y != 0)   
-        {
-            if(bdt.DPD[i].FingerRealNum1_Y<10) 
-            { 
-                FingProc_ImproveEdgeLinearity_T();
-                FingProc_ImproveEdgeLinearity_B();
-            }
-        }
-        else if(bdt.DPD[i].FingerRealNum2_Y>20) 
-        { 
-            FingProc_ImproveEdgeLinearity_T();
-            FingProc_ImproveEdgeLinearity_B();
+            //************************************************************
+            // Just from AA to Edge area, (Less than 20 points)
+            //************************************************************
+            FingProc_ImproveEdgeLinearity_T(i);
+            FingProc_ImproveEdgeLinearity_B(i);
         }
         #endif
     }
@@ -2630,6 +2660,7 @@ void FingProc_SuperFilter4Edge(void)
 * Output         : 
 * Return         : 
 *******************************************************************************/
+#ifdef CN1100_STM32 //CN1100_STM32
 void DataProc_PressKeyDetect()
 {
     bdt.PressKeyFlag1          = NO_KEY_PRESSED;
@@ -2639,7 +2670,7 @@ void DataProc_PressKeyDetect()
     
     if(bdt.FingerDetectNum)
     {
-    #if 0
+    #if (KXMTR_NUM == 1)
         if(bdt.DeltaDat16A[KEY_TX_LOC][KEY_MENU_RXLOC] > KEY_MENU_RXLOCATION) 
         {
             bdt.PressKeyFlag.MenuKey   = 1;
@@ -2668,33 +2699,40 @@ void DataProc_PressKeyDetect()
     #endif
 
 
-    #if 1 // (KRECV_NUM == 1)
-        printk("KEY1:(%-5d,%-5d),KEY2:(%-5d,%-5d),KEY3:(%d),KEY4:(%-5d,%-5d)\n",bdt.DeltaDat_kp[2],bdt.DeltaDat_kp[3],bdt.DeltaDat_kp[7],bdt.DeltaDat_kp[8],bdt.DeltaDat_kp[5],bdt.DeltaDat_kp[12],bdt.DeltaDat_kp[13]);
-        if((bdt.DeltaDat_kp[2] > TOUCH_KEY_1_THRESHOLD)|| (bdt.DeltaDat_kp[3] > TOUCH_KEY_1_THRESHOLD))
+    #if 0 // (KRECV_NUM == 1)
+        if(   (bdt.DeltaDat_kp[3] > KEY_MENU_RXLOCATION) 
+           || (bdt.DeltaDat_kp[4] > KEY_MENU_RXLOCATION) 
+           || (bdt.DeltaDat_kp[3]+bdt.DeltaDat_kp[4] > KEY_MENU_RXLOCATION) 
         {
-              bdt.PressKeyFlag1 = TOUCH_KEY_1;
+            bdt.PressKeyFlag.MenuKey   = 1;
         }
-
-        if((bdt.DeltaDat_kp[7] > TOUCH_KEY_2_THRESHOLD)|| (bdt.DeltaDat_kp[8] > TOUCH_KEY_2_THRESHOLD))
-        {
-              bdt.PressKeyFlag1 = TOUCH_KEY_2;
+        if(bdt.DeltaDat16A[KEY_TX_LOC][KEY_HOME_RXLOC] > KEY_HOME_RXLOCATION)
+        {   
+            bdt.PressKeyFlag.HomeKey   = 1;
         }
-
-        if((bdt.DeltaDat_kp[5] > TOUCH_KEY_3_THRESHOLD))
+        if(bdt.DeltaDat16A[KEY_TX_LOC][KEY_RET_RXLOC]  > KEY_RET_RXLOCATION) 
         {
-              bdt.PressKeyFlag1 = TOUCH_KEY_3;
+            bdt.PressKeyFlag.ReturnKey = 1;
         }
-
-        if((bdt.DeltaDat_kp[12] > TOUCH_KEY_4_THRESHOLD)|| (bdt.DeltaDat_kp[13] > TOUCH_KEY_4_THRESHOLD))
+        
+        if(1 == bdt.PressKeyFlag.MenuKey)
+        { 
+            bdt.PressKeyFlag1 = MENU_KEY_PRESSED;
+        }
+        else if(1 == bdt.PressKeyFlag.HomeKey)
         {
-              bdt.PressKeyFlag1 = TOUCH_KEY_4;
+            bdt.PressKeyFlag1 = HOME_KEY_PRESSED;
+        }
+        else if(1 == bdt.PressKeyFlag.ReturnKey)
+        {
+            bdt.PressKeyFlag1 = RETURN_KEY_PRESSED;
         }
     #endif
 
 
     }
 }
-
+#endif //CN1100_STM32
 
 #endif
 
@@ -4367,10 +4405,10 @@ uint32_t DataProc_CircleScreenAdaptive(void)
     {
         if((bdt.PCBA.HighRefGainSet == 3)&&(bdt.PCBA.LowRefGainSet == 3))    // 标记穷举结束
         {
-            bdt.PCBA.HighRefGainSet = 0;                                      // 恢复到初始化值
+            bdt.PCBA.HighRefGainSet = 0;                        // 恢复到初始化值
             bdt.PCBA.LowRefGainSet = 0;
-            bdt.PCBA.RefHLSetCount = CIRCLE_MAXCOUNT+1;                       // 置为无效的数据
-            return 2;                                                        // 穷举结束
+            bdt.PCBA.RefHLSetCount = CIRCLE_MAXCOUNT+1;            // 置为无效的数据
+            return 2;                                            // 穷举结束
         }
         else
         {
@@ -4378,15 +4416,15 @@ uint32_t DataProc_CircleScreenAdaptive(void)
             {
                 if(bdt.PCBA.LowRefGainSet == 3)
                 {
-                    bdt.PCBA.HighRefGainSet++;                   // 一轮内层循环结束，外层计数加一
-                    bdt.PCBA.LowRefGainSet = -1;                // 保证下一次计数LowRefGainSet从0开始
+                    bdt.PCBA.HighRefGainSet++;        // 一轮内层循环结束，外层计数加一
+                    bdt.PCBA.LowRefGainSet = -1;    // 保证下一次计数LowRefGainSet从0开始
                     break;
                 }
                 else
                 {
                     bdt.PCBA.LowRefGainSet++;
-                    bdt.PCBA.RefHLSetCount++;                  // 计数加一
-                    return 1;                                 // 一次结束
+                    bdt.PCBA.RefHLSetCount++;        // 计数加一
+                    return 1;                        // 一次结束
                 }
             }
         }
@@ -4562,7 +4600,7 @@ void DataProc_DepressRecvLineNoise0(uint16_t TXi)
     /********************************************************************************
     *Compute MAX value and SUM if the sample is belower than threshold
     ********************************************************************************/
-    for (j = 0;j < RECV_NUM;j++)
+    for (j = 0;j < SRECV_NUM;j++)
     {
         if(abs16(bdt.DeltaDat16A[TXi][j]) < bdt.ThresholdInFrame)
         {
@@ -4593,7 +4631,7 @@ void DataProc_DepressRecvLineNoise0(uint16_t TXi)
     {
         tempcount = 0;
         sum       = 0;
-        for (j = 0; j < RECV_NUM; j++)
+        for (j = 0; j < SRECV_NUM; j++)
         {   
             if((abs16(bdt.DeltaDat16A[TXi][j]) < aveval) && (abs16(bdt.DeltaDat16A[TXi][j]) < bdt.ThresholdInFrame))
             {
@@ -4620,7 +4658,7 @@ void DataProc_DepressRecvLineNoise0(uint16_t TXi)
     {
         tempcount = 0;
         sum       = 0;
-        for (j = 0; j < RECV_NUM; j++)
+        for (j = 0; j < SRECV_NUM; j++)
         { 
             if((abs16(bdt.DeltaDat16A[TXi][j]) > aveval)&&(abs16(bdt.DeltaDat16A[TXi][j]) < bdt.ThresholdInFrame))
             {
@@ -4653,7 +4691,7 @@ void DataProc_DepressRecvLineNoise0(uint16_t TXi)
         {
             tempnum = abs16(maxval);
         }
-        for (j = 0; j < RECV_NUM; j++)
+        for (j = 0; j < SRECV_NUM; j++)
         {
             if(abs16(bdt.DeltaDat16A[TXi][j]) < (tempnum>>1))
             {
@@ -4673,7 +4711,7 @@ void DataProc_DepressRecvLineNoise0(uint16_t TXi)
       /********************************************************************************
       * Adjust delta data by average value
       ********************************************************************************/
-    for (j = 0; j < RECV_NUM; j++) 
+    for (j = 0; j < SRECV_NUM; j++) 
     {
         bdt.DeltaDat16A[TXi][j] -= aveval;
     }
@@ -4696,7 +4734,7 @@ void DataProc_DepressNoise(void)
 {
     int16_t  i;
     
-    for (i = 0;i < XMTR_NUM;i++)
+    for (i = 0;i < SXMTR_NUM;i++)
     {
         DataProc_DepressRecvLineNoise0(i);
 
@@ -4883,7 +4921,7 @@ void DataProc_AdjustRxChannelFcap(void)
     for(j=0; j<SRECV_NUM; j++)
     {
         temp = bdt.RxAveValue[j] - bdt.AllAveValue;
-        if((temp>0) && ((temp)>RXCHANNEL_THRESHOLD))           // 原始值过大，FCAP加1
+        if((temp>0) && ((temp)>RXCHANNEL_THRESHOLD))        // 原始值过大，FCAP加1
         {
             bdt.RxFcapValue[j] = bdt.PCBA.RcvmRcvrFcapSet+1;
             bdt.AdjustRxChFlag = 1;                             // 可以调整Rx通道
@@ -4914,21 +4952,21 @@ void DataProc_FindAbnormalChannel(void)
     uint16_t i,j;
     for(i=0; i<SXMTR_NUM; i++)
     {
-        if(bdt.TxAveValue[i] != 0)                                                   // 排除由于接线不稳定导致通道为0的状况
+        if(bdt.TxAveValue[i] != 0)                                //排除由于接线不稳定导致通道为0的状况
         {
             if(abs16(bdt.AllAveValue-bdt.TxAveValue[i]) > ABCHVALUE_THRESHOLD)
             {
                 if(bdt.AllAveValue > bdt.TxAveValue[i])
-                    bdt.TxAbnormalCh[i] = bdt.PCBA.RcvmRcvrFcapSet-1;                // 标记i通道原始值偏小
+                    bdt.TxAbnormalCh[i] = bdt.PCBA.RcvmRcvrFcapSet-1;                            //标记i通道原始值偏小
                 else
-                    bdt.TxAbnormalCh[i] = bdt.PCBA.RcvmRcvrFcapSet+1;                // 标记i通道原始值偏大
+                    bdt.TxAbnormalCh[i] = bdt.PCBA.RcvmRcvrFcapSet+1;                            //标记i通道原始值偏大
                 bdt.AbnormalTxChNum++;
-                if(bdt.AbnormalTxChNum >= ABCHANDPOINT_MAXNUM)                       // 最多只处理其中的两个通道，其他的通道暂时无法支持
+                if(bdt.AbnormalTxChNum >= ABCHANDPOINT_MAXNUM)            //最多只处理其中的两个通道，其他的通道暂时无法支持
                     break;
             }
         }
     }   
-    if(bdt.AbnormalTxChNum >= ABCHANDPOINT_MAXNUM)                                   // 当Tx异常通道数目>2之后不再进行Rx的相关计算
+    if(bdt.AbnormalTxChNum >= ABCHANDPOINT_MAXNUM)                    //当Tx异常通道数目>2之后不再进行Rx的相关计算
     {
         //do nothing
     }
@@ -4941,9 +4979,9 @@ void DataProc_FindAbnormalChannel(void)
                 if(abs16(bdt.AllAveValue-bdt.RxAveValue[j]) > ABCHVALUE_THRESHOLD)
                 {
                     if(bdt.AllAveValue > bdt.RxAveValue[j])
-                        bdt.RxAbnormalCh[j] = bdt.RxFcapValue[j]-1;                  // 标记j通道原始值偏小
+                        bdt.RxAbnormalCh[j] = bdt.RxFcapValue[j]-1;                        //标记j通道原始值偏小
                     else
-                        bdt.RxAbnormalCh[j] = bdt.RxFcapValue[j]+1;                  //标记j通道原始值偏大
+                        bdt.RxAbnormalCh[j] = bdt.RxFcapValue[j]+1;                        //标记j通道原始值偏大
                     bdt.AbnormalRxChNum++;
                     if((bdt.AbnormalTxChNum+bdt.AbnormalRxChNum) >= ABCHANDPOINT_MAXNUM)
                         break;
@@ -4995,14 +5033,14 @@ void DataProc_FindAbnormalPonit(uint16_t max,uint16_t min,uint16_t max1,uint16_t
 {
     uint16_t fcap;
     uint16_t rxloc;
-    if(max > ABPOINTMAX_THRESHOLD)                      // max过大，需把该点调小，FCAP增加
+    if(max > ABPOINTMAX_THRESHOLD)                     // max过大，需把该点调小，FCAP增加
     {
         rxloc = (bdt.AbnormalPoint[0]%256)%16;         // 定位到max所在的Rx通道
-        fcap = bdt.RxFcapValue[rxloc]+1;                // 获取该Rx通道的fcap值，增加FCAP
+        fcap = bdt.RxFcapValue[rxloc]+1;               // 获取该Rx通道的fcap值，增加FCAP
         bdt.AbnormalPointNum++;
         bdt.AbnormalPoint[0] = (fcap<<8)|bdt.AbnormalPoint[0];
     }
-    if(max1 > ABPOINTMAX_THRESHOLD)                     // max1过大，需把该点调小
+    if(max1 > ABPOINTMAX_THRESHOLD)                    //max1过大，需把该点调小
     {
         rxloc = (bdt.AbnormalPoint[2]%256)%16;         // 定位到max1所在的Rx通道
         fcap = bdt.RxFcapValue[rxloc]+1;
@@ -5010,9 +5048,9 @@ void DataProc_FindAbnormalPonit(uint16_t max,uint16_t min,uint16_t max1,uint16_t
         bdt.AbnormalPoint[2] = (fcap<<8)|bdt.AbnormalPoint[2];
     }
     
-    if(bdt.AbnormalPointNum < ABCHANDPOINT_MAXNUM)      // 最多只能调节2个异常点
+    if(bdt.AbnormalPointNum < ABCHANDPOINT_MAXNUM)     //最多只能调节2个异常点
     {
-        if(min < ABPOINTMIN_THRESHOLD)                  // min过小，需把该点调大，FCAP减小
+        if(min < ABPOINTMIN_THRESHOLD)                 //min过小，需把该点调大，FCAP减小
         {
             bdt.AbnormalPointNum++;
             rxloc = (bdt.AbnormalPoint[1]%256)%16;
@@ -5021,7 +5059,7 @@ void DataProc_FindAbnormalPonit(uint16_t max,uint16_t min,uint16_t max1,uint16_t
         }
         if(bdt.AbnormalPointNum < ABCHANDPOINT_MAXNUM)
         {
-            if(min1 < ABPOINTMIN_THRESHOLD)             // min过小，需把该点调大，FCAP=1
+            if(min1 < ABPOINTMIN_THRESHOLD)    //min过小，需把该点调大，FCAP=1
             {
                 bdt.AbnormalPointNum++;
                 rxloc = (bdt.AbnormalPoint[3]%256)%16;
@@ -5045,7 +5083,7 @@ void DataProc_AdjustAbnormalPoint(void)
     uint16_t temp=0;
     for(i=0; i<ABNORMALPOINT_MAXNUM; i++)
     {
-        temp=(bdt.AbnormalPoint[i]>>8);                     // 获取FCAP的值
+        temp=(bdt.AbnormalPoint[i]>>8);                    //获取FCAP的值
         if(temp !=0 )
         {
             if(bdt.AbnormalPointNum == 1)                  // 只有1个异常点
@@ -5055,7 +5093,7 @@ void DataProc_AdjustAbnormalPoint(void)
                 bdt.AbPointRxiCoord = ((bdt.AbnormalPoint[i]%256)%16);
                 break;
             }
-            if(bdt.AbnormalPointNum == 2)                  // 2个异常点
+            if(bdt.AbnormalPointNum == 2)                    //2个异常点
             {
                 if(count == 0)
                 {
@@ -5560,10 +5598,6 @@ void DataProc_GetPoint(uint16_t index)
     //bdt.DPD[index].Finger_Y_RECV = (bdt.DPD[index].start_y << 8) + DataProc_computePosition(pY, bdt.DPD[index].len_y, yFlag);
     bdt.DPD[index].Finger_X_XMTR = DataProc_computePosition(pX, index, XMTR_AXIAL, xFlag); // 0 means X
     bdt.DPD[index].Finger_Y_RECV = DataProc_computePosition(pY, index, RECV_AXIAL, yFlag); // 1 means Y
-    if(bdt.DPD[index].Finger_Y_RECV > 2400){
-        bdt.DPD[index].Finger_X_XMTR = 0;
-        bdt.DPD[index].Finger_Y_RECV = 0;
-    }
 }
 
 /*******************************************************************************
@@ -7200,6 +7234,7 @@ void DataProc_FrequencyHopByStretch(uint16_t *buf)
   #endif //FREQHOP_BYSTRETCH
 }
 
+
 /*******************************************************************************
 * Function Name  : 
 * Description    : 
@@ -7230,6 +7265,26 @@ void DataProc_WholeFrameProcess(uint16_t *buffer)
     }
     
     DataProc_CalculateDeltaData(buffer); /* Extract Delta Data*//* Delta data == Origin data - Baseline data */
+
+    #ifdef PRESS_KEY_DETECT
+          #if (KXMTR_NUM == 1)
+          for(i=SXMTR_NUM;i<XMTR_NUM;i++)
+              for(j=0; j<RECV_NUM; j++)
+              {
+                bdt.DeltaDat_kp[j]    = bdt.DeltaDat16A[i][j];
+                bdt.DeltaDat16A[i][j]=0;
+              }
+          #endif
+
+          #if (KRECV_NUM == 1)
+          for(j=SRECV_NUM; j<RECV_NUM; j++)
+              for(i=0;i<XMTR_NUM;i++)
+              {
+                bdt.DeltaDat_kp[i]    = bdt.DeltaDat16A[i][j];
+                bdt.DeltaDat16A[i][j]=0;
+              }
+          #endif
+    #endif
     
     DataProc_FindMaxAndMinValue();       /* Find Max Value and its Location, also Min Value*/
     bdt.ThresholdInFrame  = DataProc_Ratio2Threshold(bdt.MaxValueInFrame, BE_PERCENT_RATIO);
@@ -7250,10 +7305,8 @@ void DataProc_WholeFrameProcess(uint16_t *buffer)
     * than the value, we will not handle the finger PROC
     *******************************************************/
     #ifdef TPD_PROXIMITY
-    if(1 == tpd_proximity_flag){
-        DataProc_FaceDetectProcess();
-    }
-    if(bdt.MaxValueInFrame < bdt.PCBA.MaxValueNoFinger ||((1==tpd_proximity_flag)&&(FACE_DETECT_NEAR == bdt.FDC.Flag)))
+    DataProc_FaceDetectProcess();
+    if((bdt.MaxValueInFrame < bdt.PCBA.MaxValueNoFinger) || (FACE_DETECT_NEAR == bdt.FDC.Flag))
     #else    
     if(bdt.MaxValueInFrame < bdt.PCBA.MaxValueNoFinger)
     #endif
@@ -7271,25 +7324,6 @@ void DataProc_WholeFrameProcess(uint16_t *buffer)
     if(bdt.FingerDetectNum > MIN_VALUE_POINT) 
     {
         #ifdef PRESS_KEY_DETECT
-   
-          #if (KXMTR_NUM == 1)
-          for(i=SXMTR_NUM;i<XMTR_NUM;i++)
-              for(j=0; j<RECV_NUM; j++)
-              {
-                bdt.DeltaDat_kp[j]    = bdt.DeltaDat16A[i][j];
-                bdt.DeltaDat16A[i][j]=0;
-              }
-          #endif
-
-
-          #if (KRECV_NUM == 1)
-          for(j=SRECV_NUM; j<RECV_NUM; j++)
-              for(i=0;i<XMTR_NUM;i++)
-              {
-                bdt.DeltaDat_kp[i]    = bdt.DeltaDat16A[i][j];
-                bdt.DeltaDat16A[i][j]=0;
-              }
-          #endif
         DataProc_PressKeyDetect();
         #endif
 
@@ -7474,7 +7508,7 @@ void DataProc_FBFHStartFrameSimpleAdaptive(uint16_t *buffer)
             case FRAME_0005:
             {
                 #ifdef CHANNEL_ADAPTIVE
-                DataProc_FindSpecialValue(buffer,&max,&min,&max1,&min1);            
+            DataProc_FindSpecialValue(buffer,&max,&min,&max1,&min1);            
                 DataProc_FindAbnormalPonit(max,min,max1,min1);
                 if(bdt.AbnormalPointNum!=0)
                     DataProc_AdjustAbnormalPoint();
@@ -7544,76 +7578,76 @@ void DataProc_FBFHStartFrameFullAdaptive(uint16_t *buffer)
     uint16_t max1=0,min1=4095;
     #endif
     if(bdt.BFD.InitCount >= 3)                            // 间隔2帧之后才能对buffer进行处理
-    {
-        /********************************************************
-        * 穷举每个ref high和ref low的值
-        *********************************************************/
-        if(((bdt.BFD.InitCount%3)==0)&&(bdt.PCBA.RefHLSetCount <= CIRCLE_MAXCOUNT))
-        {
-            DataProc_CalRefHLSetAverageValue(buffer);
-            DataProc_CircleScreenAdaptive();
-        }
-    }
-    switch(bdt.BFD.InitCount)
-    {
-        case 50:
-        {
-            DataProc_SetRefHLEnd();
-            break;
-        }
-        // wait two frame
-        case 53:
         {
             /********************************************************
-            * 分别调整每个Rx通道FCAP的值
+            * 穷举每个ref high和ref low的值
             *********************************************************/
-            #ifdef CHANNEL_ADAPTIVE
-            DataProc_CalRxAverageValue(buffer);
-            DataProc_AdjustRxChannelFcap();
-            #endif
-            break;
-        }
-        // wait two frame
-        case 56:
-        {
-            #ifdef CHANNEL_ADAPTIVE
-            DataProc_FindSpecialValue(buffer,&max,&min,&max1,&min1);
-            DataProc_FindAbnormalPonit(max,min,max1,min1);
-            if(bdt.AbnormalPointNum!=0)
-                DataProc_AdjustAbnormalPoint();
-            else
+            if(((bdt.BFD.InitCount%3)==0)&&(bdt.PCBA.RefHLSetCount <= CIRCLE_MAXCOUNT))
             {
-                DataProc_CalTxAverageValue(buffer);
+                DataProc_CalRefHLSetAverageValue(buffer);
+                DataProc_CircleScreenAdaptive();
+            }
+        }
+        switch(bdt.BFD.InitCount)
+        {
+            case 50:
+            {
+                DataProc_SetRefHLEnd();
+                break;
+            }
+            // wait two frame
+            case 53:
+            {
+                /********************************************************
+                * 分别调整每个Rx通道FCAP的值
+                *********************************************************/
+                #ifdef CHANNEL_ADAPTIVE
                 DataProc_CalRxAverageValue(buffer);
+                DataProc_AdjustRxChannelFcap();
+                #endif
+                break;
+            }
+            // wait two frame
+            case 56:
+            {
+                #ifdef CHANNEL_ADAPTIVE
+            DataProc_FindSpecialValue(buffer,&max,&min,&max1,&min1);
+                DataProc_FindAbnormalPonit(max,min,max1,min1);
+                if(bdt.AbnormalPointNum!=0)
+                    DataProc_AdjustAbnormalPoint();
+                else
+                {
+                    DataProc_CalTxAverageValue(buffer);
+                    DataProc_CalRxAverageValue(buffer);
                 DataProc_FindAbnormalChannel();
                 if((bdt.AbnormalTxChNum!=0)||(bdt.AbnormalRxChNum!=0))
                     DataProc_AdjustAbnormalChannel();
             }
-            #endif
-            break;
-        }
-        // wait two frame
-        case 59:
-        {
-            /***********************************************
-            *Initial Baseline
-            ************************************************/
-            bdt.BaseChangeFlag++;                /*  Counting 1 for baseline updating*/
-            bdt.BFD.TooLongTime4BaseUpdate = MAX_MUST_UPDATE_PERIOD - 20;    /*  Reset the Timing Count*/
-            bdt.BFD.AfterBaseUpdatedTime   = MAX_HOLDTIME_AFTERUPDATE - 20;  /*  Reset the Timing Count*/
-            bdt.BFD.bbdc.BaseUpdateCase    = BASELINE_HOLDING_CASE;
-            for (i = 0;i < XMTR_NUM;i++)
-                for (j = 0; j < RECV_NUM;j++)
-                {
-                    bdt.BFD.BaseDat[i][j]      = buffer[i*RECV_NUM+j];
-                    bdt.BFD.BaseDatSaved[i][j] = buffer[i*RECV_NUM+j];
-                }
-            break;
-        }
-        // wait two frame
-        default:
-            break;
-    }
+                #endif
+                break;
+            }
+            // wait two frame
+            case 59:
+            {
+                /***********************************************
+                *Initial Baseline
+                ************************************************/
+                bdt.BaseChangeFlag++;                /*  Counting 1 for baseline updating*/
+                bdt.BFD.TooLongTime4BaseUpdate = MAX_MUST_UPDATE_PERIOD - 20;    /*  Reset the Timing Count*/
+                bdt.BFD.AfterBaseUpdatedTime   = MAX_HOLDTIME_AFTERUPDATE - 20;  /*  Reset the Timing Count*/
+                bdt.BFD.bbdc.BaseUpdateCase    = BASELINE_HOLDING_CASE;
+                for (i = 0;i < XMTR_NUM;i++)
+                    for (j = 0; j < RECV_NUM;j++)
+                    {
+                        bdt.BFD.BaseDat[i][j]      = buffer[i*RECV_NUM+j];
+                        bdt.BFD.BaseDatSaved[i][j] = buffer[i*RECV_NUM+j];
+                    }
+                break;
+            }
+            // wait two frame
+            default:
+                break;
+            }
 #endif
 }
 

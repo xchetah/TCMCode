@@ -19,6 +19,7 @@
 #define TOUCH_KEY_2 0x3
 #define TOUCH_KEY_3 0x7
 #define TOUCH_KEY_4 0xf
+//#define TPD_PROXIMITY
 
 /************************************************************************
 *******1111111111111111111111111111111111111111111111111111111111********
@@ -126,12 +127,12 @@
 /**********************************************************************/
 //#define ONE_MORE_LINE_SCAN           // Scan 2 times just for the first TX in screen
 #define RAWPOINT4FINGMATCH             // Finger Match is operated with RAW Poing Data, not from the Output of MultiFilters
-#define FOURPOINTS4STICKMOVING         // Four Ponts is needed for Stick Finger moving
+//#define FOURPOINTS4STICKMOVING         // Four Ponts is needed for Stick Finger moving
 
 //#define SCREEN_NONE_ADAPTIVE               // None Adaptive parameter for different screen
-//#define SCREEN_SIMPLE_ADAPTIVE             // Simple Adaptive parameter for different screen
-#define SCREEN_FULL_ADAPTIVE                 // Full Adaptive parameter for different screen
-#define CHANNEL_ADAPTIVE                     // Channel adaptive for adjust channel or point fcap
+#define SCREEN_SIMPLE_ADAPTIVE             // Simple Adaptive parameter for different screen
+//#define SCREEN_FULL_ADAPTIVE                 // Full Adaptive parameter for different screen
+//#define CHANNEL_ADAPTIVE                     // Channel adaptive for adjust channel or point fcap
 
 #ifdef SCREEN_FULL_ADAPTIVE
 #define CIRCLE_MAXCOUNT         16           // 穷举的最大次数
@@ -152,8 +153,8 @@
 #endif
 
 
-//#define SUPER_FILTER4EDGE
-//#define FROMOUT2IN_INORDER
+#define SUPER_FILTER4EDGE
+#define FROMOUT2IN_INORDER
 #define SUPFIL_RANGE          256
 
 #define DISBALE_HOLDONEDGE         // Disbale Hold Point on the area of Edge

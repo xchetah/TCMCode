@@ -894,6 +894,10 @@ void TC1126_Init_GlobalVariables(void)
         bdt.DPD[i].AdjustOrigin_x       = 0;
         bdt.DPD[i].AdjustOrigin_y       = 0;
         
+        bdt.DPD[i].StayCount            = 0;
+        bdt.DPD[i].Stay_XSum            = 0;
+        bdt.DPD[i].Stay_YSum            = 0;
+
 #ifdef SUPER_FILTER4EDGE
         bdt.DPD[i].EdgeShift_L          = 3;
         bdt.DPD[i].EdgeOffset_L         = 8;
