@@ -778,13 +778,25 @@ void FingProc_DF0ExceptionHandle(uint16_t i, uint16_t *pX, uint16_t *pY)
 #endif
 }
 
+void FingProc_DF0GotoMovingState(uint16_t i, uint16_t *pX, uint16_t *pY)
+{
+#if 1
+    bdt.DPD[i].StayCount      = 0;
+    bdt.DPD[i].Stay_XSum      = 0;
+    bdt.DPD[i].Stay_YSum      = 0;
+    bdt.DPD[i].AdjustOrigin_x = *pX;
+    bdt.DPD[i].AdjustOrigin_y = *pY;
+    bdt.DPD[i].AdjustState    = STATE_MOVING;
+ #endif
+}
+
 
 void FingProc_DistanceFilter0(uint16_t i, uint16_t x1, uint16_t y1, uint16_t *pX, uint16_t *pY)
 {
     #if 1
     uint16_t distance;
 
-    #define EDGE_NUMR 8
+    //#define EDGE_NUMR 8
     if((0 == bdt.DPD[i].AdjustOrigin_x) && (0 == bdt.DPD[i].AdjustOrigin_y))
     {
         bdt.DPD[i].AdjustOrigin_x = x1;
@@ -793,42 +805,34 @@ void FingProc_DistanceFilter0(uint16_t i, uint16_t x1, uint16_t y1, uint16_t *pX
     
     distance = FingProc_Dist2PMeasure((int16_t)bdt.DPD[i].AdjustOrigin_x, (int16_t)bdt.DPD[i].AdjustOrigin_y, (int16_t)(*pX), (int16_t)(*pY));
    
-        #ifdef STM32VC_LCD
-        TFT_ShowNum(3+(i<<2), 28, bdt.DPD[i].AdjustState, LCD_COLOR_BLUE, LCD_COLOR_GREEN);
-        #endif
+    #ifdef STM32VC_LCD
+    TFT_ShowNum(3+(i<<2), 28, bdt.DPD[i].AdjustState, LCD_COLOR_BLUE, LCD_COLOR_GREEN);
+    #endif
     
     switch(bdt.DPD[i].AdjustState)
     {
-     /*************************************************************
-     * 分成两种CASE, 是为了 在中途case "STATE_STICK_HERE" 可以更好
-     * 地安排 手指报告点 接近 手指触摸物理点的 真实位置。这还没做!
-     **************************************************************/
+        /*************************************************************
+        * 分成两种CASE, 是为了 在中途case "STATE_STICK_HERE" 可以更好
+        * 地安排 手指报告点 接近 手指触摸物理点的 真实位置。这还没做!
+        **************************************************************/
         case STATE_STICK_START:
         case STATE_STICK_HERE:
         {
             bdt.DPD[i].AdjustDistance = bdt.ThrLow4DistanceFilter;
             if(distance <= bdt.DPD[i].AdjustDistance)
             {                
-                //*pX = bdt.DPD[i].AdjustOrigin_x; /* 步伐太小, 屹然不动*/
-                //*pY = bdt.DPD[i].AdjustOrigin_y; /* 步伐太小, 屹然不动*/
                 FingProc_DF0ExceptionHandle(i, pX, pY);
             }
             else
             {
                 if(distance <= bdt.ThrHigh4DistanceFilter) 
                 {
-                    *pX = bdt.DPD[i].AdjustOrigin_x; /* 步伐明显, 可能要动*/
-                    *pY = bdt.DPD[i].AdjustOrigin_y; /* 步伐明显, 可能要动*/
+                    FingProc_DF0ExceptionHandle(i, pX, pY);
                     bdt.DPD[i].AdjustState = STATE_PREPARE_MOVE;
                 }
                 else 
                 {
-                    bdt.DPD[i].StayCount         = 0;
-                    bdt.DPD[i].Stay_XSum         = 0;
-                    bdt.DPD[i].Stay_YSum         = 0;
-                    bdt.DPD[i].AdjustOrigin_x = *pX; /* 步伐很大, 突然要动*/
-                    bdt.DPD[i].AdjustOrigin_y = *pY; /* 步伐很大, 突然要动*/
-                    bdt.DPD[i].AdjustState = STATE_MOVING;
+                    FingProc_DF0GotoMovingState(i, pX, pY);
                 }
             }
             break;
@@ -837,8 +841,6 @@ void FingProc_DistanceFilter0(uint16_t i, uint16_t x1, uint16_t y1, uint16_t *pX
         {
             if(distance <= bdt.DPD[i].AdjustDistance)
             {
-                //*pX = bdt.DPD[i].AdjustOrigin_x; /* 貌似阻断, 恍然不动*/
-                //*pY = bdt.DPD[i].AdjustOrigin_y; /* 貌似阻断, 恍然不动*/ 
                 FingProc_DF0ExceptionHandle(i, pX, pY);
                 bdt.DPD[i].AdjustState = STATE_STICK_HERE;
             }
@@ -846,134 +848,61 @@ void FingProc_DistanceFilter0(uint16_t i, uint16_t x1, uint16_t y1, uint16_t *pX
             {
                 if((FingProc_Dist4Uint16Var(*pX,x1) > bdt.DPD[i].AdjustDistance) && (FingProc_Dist4Uint16Var(*pY,y1) < THR024))
                 {
-                    //*pX = bdt.DPD[i].AdjustOrigin_x; /* 有点蹊跷, 暂时不动*/
-                    //*pY = bdt.DPD[i].AdjustOrigin_y; /* 有点蹊跷, 暂时不动*/
                     FingProc_DF0ExceptionHandle(i, pX, pY);
                 }
                 else 
                 {
-                    #if 0
-                    *pX = bdt.DPD[i].AdjustOrigin_x; /* 名副其实, 确实要动*/
-                    *pY = bdt.DPD[i].AdjustOrigin_y; /* 名副其实, 确实要动*/
-                    #else
-                    bdt.DPD[i].AdjustOrigin_x = *pX; /* 名副其实, 确实要动*/
-                    bdt.DPD[i].AdjustOrigin_y = *pY; /* 名副其实, 确实要动*/
-                    #endif
-                    bdt.DPD[i].AdjustState = STATE_MOVING;
-                    bdt.DPD[i].StayCount         = 0;
-                    bdt.DPD[i].Stay_XSum         = 0;
-                    bdt.DPD[i].Stay_YSum         = 0;
+                    FingProc_DF0GotoMovingState(i, pX, pY);
                 }
             }
             else
             {
-                bdt.DPD[i].AdjustState = STATE_MOVING;
-                bdt.DPD[i].AdjustOrigin_x = *pX; /* 快马加鞭, 立即行动*/
-                bdt.DPD[i].AdjustOrigin_y = *pY; /* 快马加鞭, 立即行动*/
-                bdt.DPD[i].StayCount         = 0;
-                bdt.DPD[i].Stay_XSum         = 0;
-                bdt.DPD[i].Stay_YSum         = 0;
+                FingProc_DF0GotoMovingState(i, pX, pY);
             }
             break;
         }
         case STATE_MOVING:
         {
             bdt.DPD[i].AdjustDistance = THR024;
-            if(distance <= 12)
+            bdt.DPD[i].AdjustOrigin_x = *pX;
+            bdt.DPD[i].AdjustOrigin_y = *pY;
+            if(distance <= bdt.DPD[i].AdjustDistance)
             {
-                #if 0
-                *pX = bdt.DPD[i].AdjustOrigin_x; /* 名副其实, 确实要动*/
-                *pY = bdt.DPD[i].AdjustOrigin_y; /* 名副其实, 确实要动*/
-                #else
-                bdt.DPD[i].AdjustOrigin_x = *pX; /* 名副其实, 确实要动*/
-                bdt.DPD[i].AdjustOrigin_y = *pY; /* 名副其实, 确实要动*/
-                #endif
-                //*pX = bdt.DPD[i].AdjustOrigin_x;  /*动中有静, 考虑不动*/
-                //*pY = bdt.DPD[i].AdjustOrigin_y;  /* 动中有静, 考虑不动*/
-                bdt.DPD[i].AdjStickCounter = 2;   
-                bdt.DPD[i].AdjustState = STATE_PREPARE_STICK;
-                
-            }
-            else if(distance <= bdt.DPD[i].AdjustDistance)
-            {
-                #if 0
-                *pX = bdt.DPD[i].AdjustOrigin_x; /* 名副其实, 确实要动*/
-                *pY = bdt.DPD[i].AdjustOrigin_y; /* 名副其实, 确实要动*/
-                #else
-                bdt.DPD[i].AdjustOrigin_x = *pX; /* 名副其实, 确实要动*/
-                bdt.DPD[i].AdjustOrigin_y = *pY; /* 名副其实, 确实要动*/
-                #endif
-                //*pX = bdt.DPD[i].AdjustOrigin_x; /* 动中有静, 考虑不动*/
-                //*pY = bdt.DPD[i].AdjustOrigin_y; /* 动中有静, 考虑不动*/
                 bdt.DPD[i].AdjStickCounter = 0;  
                 bdt.DPD[i].AdjustState = STATE_PREPARE_STICK;
-               
-            }
-            else 
-            {
-                bdt.DPD[i].AdjustOrigin_x = *pX; /* 持续行动, 记录轨迹*/
-                bdt.DPD[i].AdjustOrigin_y = *pY; /* 持续行动, 记录轨迹*/
+                if(distance <= 12)
+                    bdt.DPD[i].AdjStickCounter = 2;   
             }
             break ;
         }
         case STATE_PREPARE_STICK:
         {
             bdt.DPD[i].AdjustDistance = bdt.ThrLow4DistanceFilter;
+            bdt.DPD[i].AdjustOrigin_x = *pX;
+            bdt.DPD[i].AdjustOrigin_y = *pY;
             if(distance <= bdt.DPD[i].AdjustDistance)
             {
-                #if 0
-                *pX = bdt.DPD[i].AdjustOrigin_x; /* 名副其实, 确实要动*/
-                *pY = bdt.DPD[i].AdjustOrigin_y; /* 名副其实, 确实要动*/
-                #else
-                bdt.DPD[i].AdjustOrigin_x = *pX; /* 名副其实, 确实要动*/
-                bdt.DPD[i].AdjustOrigin_y = *pY; /* 名副其实, 确实要动*/
-                #endif
-                //*pX = bdt.DPD[i].AdjustOrigin_x; /* 先行静谧, 再看趋势*/
-                //*pY = bdt.DPD[i].AdjustOrigin_y; /* 先行静谧, 再看趋势*/
-                if(bdt.DPD[i].AdjStickCounter >= 3)
+                bdt.DPD[i].AdjStickCounter++;
+                if(bdt.DPD[i].AdjStickCounter > 3)
                 {
                     bdt.DPD[i].AdjStickCounter = 0;          /* 静止有时, 可以换挡*/
                     bdt.DPD[i].AdjustState = STATE_STICK_HERE;
-                }
-                else
-                {
-                    bdt.DPD[i].AdjStickCounter++;            /* 静止进行, 持续加码*/
                 }
             }
             else if(distance <= THR144)
             {
                 if((FingProc_Dist4Uint16Var(*pX,x1) > THR048) && (FingProc_Dist4Uint16Var(*pY,y1) < THR024))
                 {
-                    #if 0
-                    *pX = bdt.DPD[i].AdjustOrigin_x; /* 名副其实, 确实要动*/
-                    *pY = bdt.DPD[i].AdjustOrigin_y; /* 名副其实, 确实要动*/
-                    #else
-                    bdt.DPD[i].AdjustOrigin_x = *pX; /* 名副其实, 确实要动*/
-                    bdt.DPD[i].AdjustOrigin_y = *pY; /* 名副其实, 确实要动*/
-                    #endif
-                    //*pX = bdt.DPD[i].AdjustOrigin_x; /*静中假动, 认真考量*/
-                    //*pY = bdt.DPD[i].AdjustOrigin_y; /* 静中假动, 认真考量*/
                 }
                 else 
                 {
                     bdt.DPD[i].AdjStickCounter = 0;
-                    #if 0
-                    *pX = bdt.DPD[i].AdjustOrigin_x; /* 名副其实, 确实要动*/
-                    *pY = bdt.DPD[i].AdjustOrigin_y; /* 名副其实, 确实要动*/
-                    #else
-                    bdt.DPD[i].AdjustOrigin_x = *pX; /* 名副其实, 确实要动*/
-                    bdt.DPD[i].AdjustOrigin_y = *pY; /* 名副其实, 确实要动*/
-                    #endif
-                    //*pX = bdt.DPD[i].AdjustOrigin_x; /* 静中有动, 还得行动*/
-                    //*pY = bdt.DPD[i].AdjustOrigin_y; /* 静中有动, 还得行动*/
                     bdt.DPD[i].AdjustState = STATE_MOVING;
                 }
             }
             else
             {
                 bdt.DPD[i].AdjStickCounter = 0;
-                bdt.DPD[i].AdjustOrigin_x = *pX;    /* 静是假静, 动是真动*/
-                bdt.DPD[i].AdjustOrigin_y = *pY;    /* 静是假静, 动是真动*/
                 bdt.DPD[i].AdjustState = STATE_MOVING;
             }
             break;
