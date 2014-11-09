@@ -154,7 +154,7 @@
 
 
 #define SUPER_FILTER4EDGE
-#define FROMOUT2IN_INORDER
+//#define FROMOUT2IN_INORDER
 #define SUPFIL_RANGE          256
 
 #define DISBALE_HOLDONEDGE         // Disbale Hold Point on the area of Edge

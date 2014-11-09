@@ -2567,14 +2567,15 @@ void FingProc_SuperFilter4Edge(void)
             //********************************************************
             // Finger @ Out from SideArea, Num1_X Counting start
             //********************************************************
-            if(bdt.DPD[i].FingerRealNum1_X < 200) bdt.DPD[i].FingerRealNum1_X++;
+            //if(bdt.DPD[i].FingerRealNum1_X < 200) bdt.DPD[i].FingerRealNum1_X++;
             bdt.DPD[i].FingerRealNum2_X  = 0;
             bdt.DPD[i].FingerRealNum2R_X = 0;
             //************************************************************
             // Just from Edge to AA area, (Less than 10 points)
             //************************************************************
-            if(bdt.DPD[i].FingerRealNum1_X<10) 
+            if(bdt.DPD[i].FingerRealNum1_X < 10) 
             {
+                bdt.DPD[i].FingerRealNum1_X++;
                 FingProc_ImproveEdgeLinearity_L(i);
                 FingProc_ImproveEdgeLinearity_R(i);
             }  
@@ -2587,21 +2588,23 @@ void FingProc_SuperFilter4Edge(void)
             if(bdt.DPD[i].Finger_X_XMTR != 0)
                 if(bdt.DPD[i].Finger_Y_RECV != 0)
                 { 
-                    if(bdt.DPD[i].FingerRealNum2_X < 200)  bdt.DPD[i].FingerRealNum2_X++;
-                    if(bdt.DPD[i].FingerRealNum2R_X > 200) bdt.DPD[i].FingerRealNum2R_X++;  
+                    //if(bdt.DPD[i].FingerRealNum2_X < 200)  bdt.DPD[i].FingerRealNum2_X++;
+                    //if(bdt.DPD[i].FingerRealNum2R_X > 200) bdt.DPD[i].FingerRealNum2R_X++;  
                     bdt.DPD[i].FingerRealNum1_X = 0;
+                    //************************************************************
+                    // Just from AA to Edge area, (Less than 20/35 points)
+                    //************************************************************
+                    if(bdt.DPD[i].FingerRealNum2_X > 20)  
+                    { 
+                        FingProc_ImproveEdgeLinearity_L(i);
+                    }
+                    else bdt.DPD[i].FingerRealNum2_X++;
+                    if(bdt.DPD[i].FingerRealNum2R_X > 35 )  
+                    {
+                        FingProc_ImproveEdgeLinearity_R(i);
+                    }
+                    else bdt.DPD[i].FingerRealNum2R_X++;
                 }
-            //************************************************************
-            // Just from AA to Edge area, (Less than 20/35 points)
-            //************************************************************
-            if(bdt.DPD[i].FingerRealNum2_X > 20)  
-            { 
-                FingProc_ImproveEdgeLinearity_L(i);
-            }
-            if(bdt.DPD[i].FingerRealNum2R_X > 35 )  
-            {
-                FingProc_ImproveEdgeLinearity_R(i);
-            }
         }
         #endif
 
@@ -2611,13 +2614,14 @@ void FingProc_SuperFilter4Edge(void)
             //********************************************************
             // Finger @ Out from SideArea, Num1_Y Counting start
             //********************************************************
-            if(bdt.DPD[i].FingerRealNum1_Y < 200) bdt.DPD[i].FingerRealNum1_Y++;
+            //if(bdt.DPD[i].FingerRealNum1_Y < 200) bdt.DPD[i].FingerRealNum1_Y++;
             bdt.DPD[i].FingerRealNum2_Y = 0;
             //************************************************************
             // Just from Edge to AA area, (Less than 10 points)
             //************************************************************
-            if(bdt.DPD[i].FingerRealNum1_Y<10) 
+            if(bdt.DPD[i].FingerRealNum1_Y < 10) 
             { 
+                bdt.DPD[i].FingerRealNum1_Y++;
                 FingProc_ImproveEdgeLinearity_T(i);
                 FingProc_ImproveEdgeLinearity_B(i);
             }
@@ -2630,14 +2634,18 @@ void FingProc_SuperFilter4Edge(void)
             if(bdt.DPD[i].Finger_X_XMTR != 0)
                 if(bdt.DPD[i].Finger_Y_RECV != 0)
                 {
-                    if(bdt.DPD[i].FingerRealNum2_Y < 200) bdt.DPD[i].FingerRealNum2_Y++;
+                    //if(bdt.DPD[i].FingerRealNum2_Y < 200) bdt.DPD[i].FingerRealNum2_Y++;
                     bdt.DPD[i].FingerRealNum1_Y = 0;
+                    //************************************************************
+                    // Just from AA to Edge area, (Less than 20 points)
+                    //************************************************************
+                    if(bdt.DPD[i].FingerRealNum2_Y > 20)
+                    {
+                        FingProc_ImproveEdgeLinearity_T(i);
+                        FingProc_ImproveEdgeLinearity_B(i);
+                    }
+                    else bdt.DPD[i].FingerRealNum2_Y++;
                 }
-            //************************************************************
-            // Just from AA to Edge area, (Less than 20 points)
-            //************************************************************
-            FingProc_ImproveEdgeLinearity_T(i);
-            FingProc_ImproveEdgeLinearity_B(i);
         }
         #endif
     }
