@@ -151,7 +151,6 @@
 #define ABNORMALPOINT_MAXNUM    4           // 最大值、最小值、次大值、次小值
 #endif
 
-//#define AUTO_FACEDETECTION           // For CELLPHONE Talking
 
 //#define SUPER_FILTER4EDGE
 //#define FROMOUT2IN_INORDER

@@ -262,7 +262,7 @@ typedef struct BasData {
 
     uint16_t        FingerInvalidPNum;     // Used for Baseline Updating
 
-#ifdef AUTO_FACEDETECTION
+#ifdef TPD_PROXIMITY
     FaceDetCtrl     FDC;                   // 
     uint16_t        FaceDetectDelay;       // 
 #endif

@@ -874,7 +874,7 @@ void TC1126_Init_GlobalVariables(void)
     #endif
     #endif
     
-    #ifdef AUTO_FACEDETECTION
+    #ifdef TPD_PROXIMITY
     bdt.FDC.Flag             = 0;       // 
     bdt.FDC.WFNum            = 0;       // 
     bdt.FDC.BigNum           = 0;       // 

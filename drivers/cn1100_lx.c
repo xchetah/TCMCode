@@ -23,7 +23,6 @@ static void chm_ts_late_resume(struct early_suspend *h);
 static int retries = 1;
 
 #ifdef TPD_PROXIMITY
-static int prox_work = 0; 
 u8 tpd_proximity_flag = 0; 
 u8 tpd_proximity_detect = 1; 
 int last_tpd_proximity_state = 1; 

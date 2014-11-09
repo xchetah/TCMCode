@@ -510,10 +510,10 @@ void Baseline_BaseBufferHandled(uint16_t *buffer)
         bdt.BFD.AfterBaseUpdatedTime++;
     }
 
-    #ifdef AUTO_FACEDETECTION
-
-    if(FACE_DETECT_NEAR == bdt.FDC.Flag) return;
-
+    #ifdef TPD_PROXIMITY
+    if(1 == tpd_proximity_flag){
+        if(FACE_DETECT_NEAR == bdt.FDC.Flag) return;
+    }
     #endif
     
     if(bdt.BFD.bbdc.FingerExist == NO_FINGER)
@@ -7200,62 +7200,6 @@ void DataProc_FrequencyHopByStretch(uint16_t *buf)
   #endif //FREQHOP_BYSTRETCH
 }
 
-uint16_t DataProc_FDGetValidSampNumber(uint32_t *buf)
-{
-    uint16_t num = 0;
-#ifdef AUTO_FACEDETECTION
-    uint16_t i, j;
-
-    for (i=0; i<XMTR_NUM; i++)
-        for (j=0; j<RECV_NUM; j++)
-        {
-            if(buf[i] & (1<<j)) num++;        
-        }
-#endif
-    return num;
-}
-
-void DataProc_FaceDetectProcess(void)
-{
-    #ifdef AUTO_FACEDETECTION
-    uint16_t i, temp;
-    temp = ((bdt.ThresholdInFrame)>>1);
-    DataProc_DeltaMatrix2Array(bdt.DeltaBitDat, temp); /* mark finger point */
-
-    bdt.FDC.WFNum  = bdt.FingerDetectNum;  // Get the all Number of Valid samples
-    bdt.FDC.Flag   = FACE_DETECT_FAR;      // Reset it as no FACE Detect
-    bdt.FDC.BigNum = 0;
-
-    if(bdt.FDC.WFNum > MIN_VALIDDATA4FACEDET)
-    {
-        //************************************************************
-        // Face may be appeared, we can find "FingerDetectNum" area
-        //************************************************************
-        DataProc_PullBitmapApart(bdt.DeltaBitDat);
-        for(i = 0;i < bdt.FingerDetectNum; i++)
-        {
-            temp = DataProc_FDGetValidSampNumber(bdt.DPD[i].BitMapDat);
-            if(bdt.FDC.BigNum < temp) 
-            {
-                bdt.FDC.BigNum = temp;
-            }
-            if(temp > MIN_CONNECTNUM4FACEDET)
-            {
-                bdt.FDC.Flag          = FACE_DETECT_NEAR;
-                bdt.FaceDetectDelay   = MIN_FACEDET_LOSSPERD;
-                break; 
-            }
-        }
-    }
-
-    if(bdt.FaceDetectDelay)
-    {
-        bdt.FaceDetectDelay--;
-        bdt.FDC.Flag = FACE_DETECT_NEAR;
-    }
-    #endif
-}
-
 /*******************************************************************************
 * Function Name  : 
 * Description    : 
@@ -7305,9 +7249,11 @@ void DataProc_WholeFrameProcess(uint16_t *buffer)
     * Normally it should be 200, if MAX value is smaller
     * than the value, we will not handle the finger PROC
     *******************************************************/
-    #ifdef AUTO_FACEDETECTION
-    DataProc_FaceDetectProcess();
-    if((bdt.MaxValueInFrame < bdt.PCBA.MaxValueNoFinger) || (FACE_DETECT_NEAR == bdt.FDC.Flag))
+    #ifdef TPD_PROXIMITY
+    if(1 == tpd_proximity_flag){
+        DataProc_FaceDetectProcess();
+    }
+    if(bdt.MaxValueInFrame < bdt.PCBA.MaxValueNoFinger ||((1==tpd_proximity_flag)&&(FACE_DETECT_NEAR == bdt.FDC.Flag)))
     #else    
     if(bdt.MaxValueInFrame < bdt.PCBA.MaxValueNoFinger)
     #endif
