@@ -71,7 +71,8 @@ zImage:
 tar:
 	./mkpkg.sh
 clean:
-	@rm -rf  rm *.o *.mod.o *~ core .depend *.cmd *.ko *.mod.c .tmp_versions *.order *.symvers .*.cmd $(SOURCE_PREFIX)/*.o $(SOURCE_PREFIX)/.*.cmd *.bin 
+	@rm -rf  rm *.o *.mod.o *~ core .depend *.cmd *.ko *.mod.c .tmp_versions *.order *.symvers .*.cmd $(SOURCE_PREFIX)/*.o $(SOURCE_PREFIX)/.*.cmd *.bin\
+		drivers/*.o drivers/*.cmd drivers/.*.cmd stm32/Projects/TC1126Only/*.o stm32/Projects/TC1126Only/*.cmd stm32/Projects/TC1126Only/.*.cmd
 
 .PHONY: modules modules_install clean
 
