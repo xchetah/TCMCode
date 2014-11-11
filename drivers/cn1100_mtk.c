@@ -281,8 +281,8 @@ void Report_Coordinate_Wait4_SingleTime(int id,int X, int Y)
 	X  = (uint16_t)(( ((uint32_t)X) * XMTR_SCALE )>>16);
 
 	if(X > 0 || Y > 0){ 
-	//	tpd_down(id,SCREEN_HIGH-X,SCREEN_WIDTH-Y);
-		tpd_down(id,X,Y);
+		tpd_down(id,SCREEN_HIGH-X,SCREEN_WIDTH-Y);
+	//	tpd_down(id,X,Y);
 	}
 }
 uint16_t FingProc_Dist2PMeasure(int16_t x1, int16_t y1, int16_t x2, int16_t y2);
