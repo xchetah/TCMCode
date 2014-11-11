@@ -157,7 +157,6 @@
 #define FROMOUT2IN_INORDER
 #define SUPFIL_RANGE          256
 
-#define DISBALE_HOLDONEDGE         // Disbale Hold Point on the area of Edge
 #define BORDER_SIMPLE_ADJUSTABLE   // One Adjust Coef.
 #define ONLY2PNT4BORDERCONPUTE     // At Border Area, only 2 points are applied in the computing of position
 //#define SHOW_H_DATA                // Test and show h value when we set the mapping array of h2H
@@ -284,7 +283,7 @@
 #define PROTECT_TIME                    50    // 200
 
 #define ABNORMAL_MAX_DIFF               15
-#define ABNORMAL_NUM_DIFF               20    // ((XMTR_NUM*RECV_NUM)>>2)
+#define ABNORMAL_NUM_DIFF               37    // ((XMTR_NUM*RECV_NUM)>>2)
 #define ABNORMAL_HOLD_TIME              5
 
 #ifdef CN1100_WINNER
@@ -375,7 +374,7 @@
 #endif
 
 #else // CN1100_STM32
-  #define ISCANMODE_PERD_REG_VALUE             0x1c0   //12.5ms      
+  #define ISCANMODE_PERD_REG_VALUE             0x140   //12.5ms      
 
   #define RAW_DATA_DIFF_THR                    1100
 

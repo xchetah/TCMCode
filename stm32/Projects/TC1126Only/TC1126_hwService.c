@@ -882,13 +882,10 @@ void TC1126_Init_GlobalVariables(void)
     #endif
     bdt.PrevFingerDetectNum  = 0;
     bdt.PrevFingerDetectNum2 = 0;
-
     bdt.MaxNoise_Sum = 0;
     bdt.MaxNoise_SumCount = 0;
     bdt.Noise_Sum = 0;
     bdt.updatecount =350;
-
-
     for (i = 0; i < FINGER_NUM_MAX;i++)
     {
         bdt.DPD[i].FingerStateFlag      = 0;    /*  No Finger */

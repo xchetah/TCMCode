@@ -174,16 +174,17 @@ void clearArray(uint16_t* p, uint16_t size)
 void Baseline_FingerupdateTX(void)
 {
     uint16_t Max_num,i,j,average;
-    int16_t Min_sum,Max_sum;
+    int16_t Max_sum;
     uint16_t Max_cnt, Max_maxcnt, IvdCnt,IvdCnt1 ;
     for(j=0; j<RECV_NUM; j++)
     {
         Max_sum = 0;
         average = 0;      // averagesum
-       //Min_sum = 32767; // mini
         Max_num = 0;
         Max_cnt    = 0;
         Max_maxcnt = 0;
+	IvdCnt1 = 0;
+	IvdCnt = 0;
         for(i=0; i<XMTR_NUM; i++)
         {
            // if(bdt.DeltaDat16A[i][j] < Min_sum) Min_sum = bdt.DeltaDat16A[i][j];
@@ -1361,37 +1362,13 @@ void FingProc_ShowXYResultOnLine(uint16_t line)
 *******************************************************************************/
 void FingProc_MultiFilterProcess(uint16_t i, uint16_t curx, uint16_t cury, uint16_t *x, uint16_t *y)
 {
-    uint16_t Board_Area_Flag = 0; // 0: Center Area; 1: XMTR Side; 2: RECV Side
     FingProc_ForwardSmoothLine(i,x,y);
 
     curx = bdt.DPD[i].Finger_X_XMTR;
     cury = bdt.DPD[i].Finger_Y_RECV;
     FingProc_TapFilterProcess(i, curx,cury,x,y);
 
-#ifdef DISBALE_HOLDONEDGE
-    if((bdt.DPD[i].Finger_X_XMTR < MAX_MAP_VALUE) || (bdt.DPD[i].Finger_X_XMTR > ((SXMTR_NUM<<8) - MAX_MAP_VALUE)))
-    {
-        Board_Area_Flag = 1; // XMTR Side
-    }
-    else if((bdt.DPD[i].Finger_Y_RECV < MAX_MAP_VALUE) || (bdt.DPD[i].Finger_Y_RECV > ((SRECV_NUM<<8)  - MAX_MAP_VALUE))) 
-    {
-        Board_Area_Flag = 2; // RECV Side
-    }
-    else Board_Area_Flag = 0;
-
-    if(1) //(0 == Board_Area_Flag)
-    {
-        // Non_Boarder Area
-        FingProc_DistanceFilter0(i, x[0], y[0], &bdt.DPD[i].Finger_X_XMTR, &bdt.DPD[i].Finger_Y_RECV);
-    }
-    else
-    {
-        // Boarder Area
-        FingProc_DistanceFilter1(i, x[0], y[0], &bdt.DPD[i].Finger_X_XMTR, &bdt.DPD[i].Finger_Y_RECV, Board_Area_Flag);
-    }
-#else
     FingProc_DistanceFilter0(i, x[0], y[0], &bdt.DPD[i].Finger_X_XMTR, &bdt.DPD[i].Finger_Y_RECV);
-#endif
     
     FingProc_TapFilterStateUpdate(i);
     
@@ -3429,11 +3406,17 @@ void FingProc_PostSortFingers(void)
         bdt.DPD[i].EdgeInfo.PrevEdgeNum = bdt.DPD[i].EdgeInfo.EdgeNum;
         if(bdt.DPD[i].Finger_X_XMTR || bdt.DPD[i].Finger_Y_RECV)
         {
+            //***************************************************************
+            // The code is used for Data Validation in data.c
+            //***************************************************************
             bdt.LFrame_X_XMTR[bdt.LFrame_NUM] = (bdt.DPD[i].Finger_X_XMTR)>>8;
             bdt.LFrame_Y_RECV[bdt.LFrame_NUM] = (bdt.DPD[i].Finger_Y_RECV)>>8;
             bdt.LFrame_NUM++;
             bdt.FingerRealNum++;
 
+            //***************************************************************
+            // The code is used for record edge flag somehow
+            //***************************************************************
             bdt.DPD[i].EdgeInfo.EdgeNum = FINGER_SHOW;
             if(bdt.DPD[i].Finger_X_XMTR < MAX_MAP_VALUE)
             {   // Left Side
@@ -4553,7 +4536,7 @@ void DataProc_HandleFingerInfo(void)
     FingProc_MergeClosingPoints();  
     FingProc_ImproveEdgePoint();  /* optimize edge finger XY value */
     FingProc_SortFingers();
-    FingProc_CheckCrossedLines();
+    FingProc_CheckCrossedLines(); /* Useless now, empty now*/
     FingProc_AvoidLongLine();
     
     FingProc_PostSortFingers();
@@ -6957,7 +6940,8 @@ void DataProc_PowerNoiseLevelJudge(void)
                 break;
             }
         }
-        if(bdt.NDD.Noise_Sum >bdt.MaxNoise_Sum) bdt.MaxNoise_Sum = bdt.NDD.Noise_Sum;
+        if(bdt.NDD.Noise_Sum >bdt.MaxNoise_Sum) 
+            bdt.MaxNoise_Sum = bdt.NDD.Noise_Sum;
         bdt.Noise_Sum = bdt.NDD.Noise_Sum;
         #ifdef STM32VC_LCD
         TFT_ShowNum(0, 29, bdt.NDD.Battery_Level, 0xf800, LCD_COLOR_GREEN);
