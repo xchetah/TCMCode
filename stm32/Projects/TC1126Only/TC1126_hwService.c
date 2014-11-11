@@ -2387,7 +2387,7 @@ void CN1100_SysTick_ISR(void)
 * Return         : 
 *******************************************************************************/
 
-#ifdef CN1100_LINUX
+#if defined(CN1100_LINUX)&&!defined(CN1100_MTK)
 void CN1100_FrameScanDoneInt_ISR(struct work_struct *work)
 #else
 void CN1100_FrameScanDoneInt_ISR()
@@ -2398,7 +2398,9 @@ void CN1100_FrameScanDoneInt_ISR()
     #if defined(CN1100_LINUX) && !defined(SLEEP_EVENT_SIM)
         if(spidev->mode & CN1100_IS_SUSPENDED)
         {
+	    #ifndef CN1100_MTK
             enable_irq(spidev->irq);
+	    #endif
             return;
         }
     #elif !defined(CN1100_LINUX)
@@ -2464,7 +2466,9 @@ void CN1100_FrameScanDoneInt_ISR()
                 Tiny_Delay(2000);
                 #endif
                 #ifdef CN1100_LINUX
+		#ifndef CN1100_MTK
                 enable_irq(spidev->irq);
+		#endif
                 #endif
             }
             break;
@@ -2480,7 +2484,9 @@ void CN1100_FrameScanDoneInt_ISR()
                 spidev->irq_count = 0;
                 TC1126_GotoDozeMode();
                 msleep(10);
+		#ifndef CN1100_MTK
                 enable_irq(spidev->irq);
+		#endif
                 break;
             }
             #endif
@@ -2570,7 +2576,9 @@ void CN1100_FrameScanDoneInt_ISR()
                     BufferBHandle();
                     /*Clear the interrupt Bit4(Buffer B Just Filled)*/
                 }
+		#ifndef CN1100_MTK
                 enable_irq(spidev->irq);
+		#endif
                 #endif
             }
             break;

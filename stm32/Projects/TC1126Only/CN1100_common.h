@@ -284,7 +284,7 @@
 #define PROTECT_TIME                    50    // 200
 
 #define ABNORMAL_MAX_DIFF               15
-#define ABNORMAL_NUM_DIFF               37    // ((XMTR_NUM*RECV_NUM)>>2)
+#define ABNORMAL_NUM_DIFF               20    // ((XMTR_NUM*RECV_NUM)>>2)
 #define ABNORMAL_HOLD_TIME              5
 
 #define FRAME_MAX_SAMPLE                100

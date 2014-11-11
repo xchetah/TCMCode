@@ -7209,7 +7209,8 @@ void DataProc_WholeFrameProcess(uint16_t *buffer)
     *  Extract Delta Data for the current Buffer;
     *  Get the Maximum Value and its Location;
     *******************************************************/
-    if(1 == bdt.NDD.Frame_Count)
+    //if(1 == bdt.NDD.Frame_Count)
+    if(1 == bdt.PowerOnWithFinger) 
     {
         bdt.PowerOnWithFinger  = 0;
         bdt.MEM_MIN_XY_Count = 0;
