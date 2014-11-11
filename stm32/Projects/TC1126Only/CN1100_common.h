@@ -21,6 +21,7 @@
 #define TOUCH_KEY_2 0x3
 #define TOUCH_KEY_3 0x7
 #define TOUCH_KEY_4 0xf
+//#define TPD_PROXIMITY
 
 /************************************************************************
 *******1111111111111111111111111111111111111111111111111111111111********
@@ -128,12 +129,12 @@
 /**********************************************************************/
 //#define ONE_MORE_LINE_SCAN           // Scan 2 times just for the first TX in screen
 #define RAWPOINT4FINGMATCH             // Finger Match is operated with RAW Poing Data, not from the Output of MultiFilters
-#define FOURPOINTS4STICKMOVING         // Four Ponts is needed for Stick Finger moving
+//#define FOURPOINTS4STICKMOVING         // Four Ponts is needed for Stick Finger moving
 
 //#define SCREEN_NONE_ADAPTIVE               // None Adaptive parameter for different screen
-//#define SCREEN_SIMPLE_ADAPTIVE             // Simple Adaptive parameter for different screen
-#define SCREEN_FULL_ADAPTIVE                 // Full Adaptive parameter for different screen
-#define CHANNEL_ADAPTIVE                     // Channel adaptive for adjust channel or point fcap
+#define SCREEN_SIMPLE_ADAPTIVE             // Simple Adaptive parameter for different screen
+//#define SCREEN_FULL_ADAPTIVE                 // Full Adaptive parameter for different screen
+//#define CHANNEL_ADAPTIVE                     // Channel adaptive for adjust channel or point fcap
 
 #ifdef SCREEN_FULL_ADAPTIVE
 #define CIRCLE_MAXCOUNT         16           // 穷举的最大次数
@@ -143,19 +144,19 @@
 #define INVALID_CHORPOINT       15          // 无效的通道或者点
 
 #ifdef CHANNEL_ADAPTIVE
-#define RXCHANNEL_THRESHOLD     700         // RX通道与总平均值差值限度
-#define ABCHVALUE_THRESHOLD     700         // 各个通道平均值与总的平均值差值限度
+#define RXCHANNEL_THRESHOLD     800         // RX通道与总平均值差值限度
+#define ABCHVALUE_THRESHOLD     800         // 各个通道平均值与总的平均值差值限度
 #define ABCHANDPOINT_MAXNUM     2           // 可调节的通道、异常点最大数目
 #define ABNORMALPOINT_MAXNUM    4           // 最大值、最小值、次大值、次小值
-#define ABPOINTMAX_THRESHOLD    3500        // 异常点最大值限度
-#define ABPOINTMIN_THRESHOLD    500         // 异常点最小值限度
+#define ABPOINTMAX_THRESHOLD    3200        // 异常点最大值限度
+#define ABPOINTMIN_THRESHOLD    300         // 异常点最小值限度
 #define ABCHANDPOINT_MAXNUM     2           // 可调节的通道、异常点最大数目
 #define ABNORMALPOINT_MAXNUM    4           // 最大值、最小值、次大值、次小值
 #endif
 
 
-//#define SUPER_FILTER4EDGE
-//#define FROMOUT2IN_INORDER
+#define SUPER_FILTER4EDGE
+#define FROMOUT2IN_INORDER
 #define SUPFIL_RANGE          256
 
 #define DISBALE_HOLDONEDGE         // Disbale Hold Point on the area of Edge
@@ -188,18 +189,15 @@
 /**** 1.8    *********  关于 触摸屏 类型  *****************************/
 /**********************************************************************/
 
-//#define WHITESCREEN_15X10               // White or Black screen DITO, 15X10
+#define WHITESCREEN_15X10               // White or Black screen DITO, 15X10
 //#define SITO_SCREEN_10X15             // Black Screen SITO, 15X10
 //#define ITO_BORDERLINE_15X10          // ITO走线 DITO 屏
 
 //#define PHONESCREEN_13X10               // 手机屏(单层ITO), GT960
 //#define SH_FEATUREPHONE_13X9            // 手机屏(单层ITO), GT1688 ( //// FREQY_HOP_ONLY has to be disabled ////)
 
-#if defined(CN1100_A31)||defined(CN1100_S5PV210)
-#define FPCSCREEN_17X10                   // FPC屏(DITO), GT960
-#else
-#define WHITESCREEN_15X10
-#endif
+//#define FPCSCREEN_17X10                   // FPC屏(DITO), GT960
+
 //#define PCB_DITO_SCREEN_15X10         // PCB 标准 DITO 图案
 //#define PCB_RHOMBUS_15X10             // PCB - 菱形图案
 
@@ -288,8 +286,18 @@
 #define PROTECT_TIME                    50    // 200
 
 #define ABNORMAL_MAX_DIFF               15
-#define ABNORMAL_NUM_DIFF               37    // ((XMTR_NUM*RECV_NUM)>>2)
+#define ABNORMAL_NUM_DIFF               20    // ((XMTR_NUM*RECV_NUM)>>2)
 #define ABNORMAL_HOLD_TIME              5
+
+#ifdef CN1100_WINNER
+#define BIGNOISE                       200
+#else  
+#ifdef CN1100_ATM 
+#define BIGNOISE                       400
+#else
+#define BIGNOISE                       50
+#endif
+#endif
 
 #define FRAME_MAX_SAMPLE                100
 

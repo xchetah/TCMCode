@@ -393,6 +393,26 @@ void tpd_eint_interrupt_handler(void)
 		wake_up_interruptible(&spidev->syncq);
 	}
 }
+#ifdef DEBUG_PROC_USED
+static int chm_proc_open(struct inode *inode, struct file *file)
+{
+    return 0;
+}
+
+int chm_proc_release(struct inode *inode, struct file *file)
+{
+    return 0;
+}
+
+static const struct file_operations chm_proc_fops = {
+    .owner      = THIS_MODULE,
+    .open       = chm_proc_open,
+    .read       = chm_proc_read,
+    .write      = chm_proc_write,
+    .release    = chm_proc_release,
+};
+#endif
+
 
 static int tpd_i2c_probe(struct i2c_client *client, const struct i2c_device_id *id)
 {
@@ -440,14 +460,12 @@ static int tpd_i2c_probe(struct i2c_client *client, const struct i2c_device_id *
 	}
 	/*Related to specified hardware*/
 
-	spidev->chm_ts_proc = create_proc_entry("chm_ts",0666,NULL);
-	if(spidev->chm_ts_proc){
-		spidev->chm_ts_proc->read_proc = chm_ts_read_proc;
-		spidev->chm_ts_proc->write_proc = chm_ts_write_proc;
-	}else{
-		printk("failed to create proc directory\n");
+#ifdef DEBUG_PROC_USED
+	spidev->chm_ts_proc = proc_create("chm_ts",0666,NULL,&chm_proc_fops);
+	if(!spidev->chm_ts_proc){
+	    printk("failed to create proc directory\n");
 	}
-
+#endif
 	hrtimer_start(&spidev->systic, ktime_set(0, SCAN_SYSTIC_INTERVAL), HRTIMER_MODE_REL);
 	return 0;
 fail:

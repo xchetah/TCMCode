@@ -751,13 +751,22 @@ void Send_Buffer_DeltaData_To_Host(uint8_t *CRCT, uint16_t *buffer)
             CRCT[0] ^= CRCT[1];
             SendOutOneByte(CRCT[1]);
         }
-
+#if 1 
+        buffer[tempi+j] = (uint16_t)(bdt.DeltaDat_kp[i]);
+            CRCT[1] = (uint8_t)(buffer[tempi+j]>>8);
+            CRCT[0] ^= CRCT[1];
+            SendOutOneByte(CRCT[1]);
+            CRCT[1] = (uint8_t)(buffer[tempi+j]&0xff);
+            CRCT[0] ^= CRCT[1];
+            SendOutOneByte(CRCT[1]);
+#else
         CRCT[1] = (uint8_t)(bdt.DeltaDat_kp[i]>>8);
         CRCT[0] ^= CRCT[1];
         SendOutOneByte(CRCT[1]);
         CRCT[1] = (uint8_t)(bdt.DeltaDat_kp[j]&0xff);
         CRCT[0] ^= CRCT[1];
         SendOutOneByte(CRCT[1]);
+#endif
     }
     #endif
 
@@ -929,7 +938,7 @@ void Send_Delta_Data_To_PC(uint16_t *buf)
     dbg.debug_value[8] = bdt.Top_h;
     dbg.debug_value[9] = bdt.Bottom_h;
 #else
-    #ifdef TPD_PROXIMITY
+    #ifdef AUTO_FACEDETECTION
     dbg.debug_value[5] = bdt.FDC.WFNum;
     dbg.debug_value[6] = bdt.FDC.BigNum;
     dbg.debug_value[7] = bdt.FDC.Flag;

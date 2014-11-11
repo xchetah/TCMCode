@@ -883,6 +883,12 @@ void TC1126_Init_GlobalVariables(void)
     bdt.PrevFingerDetectNum  = 0;
     bdt.PrevFingerDetectNum2 = 0;
 
+    bdt.MaxNoise_Sum = 0;
+    bdt.MaxNoise_SumCount = 0;
+    bdt.Noise_Sum = 0;
+    bdt.updatecount =350;
+
+
     for (i = 0; i < FINGER_NUM_MAX;i++)
     {
         bdt.DPD[i].FingerStateFlag      = 0;    /*  No Finger */
@@ -894,6 +900,10 @@ void TC1126_Init_GlobalVariables(void)
         bdt.DPD[i].AdjustOrigin_x       = 0;
         bdt.DPD[i].AdjustOrigin_y       = 0;
         
+        bdt.DPD[i].StayCount            = 0;
+        bdt.DPD[i].Stay_XSum            = 0;
+        bdt.DPD[i].Stay_YSum            = 0;
+
 #ifdef SUPER_FILTER4EDGE
         bdt.DPD[i].EdgeShift_L          = 3;
         bdt.DPD[i].EdgeOffset_L         = 8;
@@ -2383,7 +2393,7 @@ void CN1100_SysTick_ISR(void)
 * Return         : 
 *******************************************************************************/
 
-#ifdef CN1100_LINUX
+#if defined(CN1100_LINUX)&&!defined(CN1100_MTK)
 void CN1100_FrameScanDoneInt_ISR(struct work_struct *work)
 #else
 void CN1100_FrameScanDoneInt_ISR()
@@ -2394,7 +2404,9 @@ void CN1100_FrameScanDoneInt_ISR()
     #if defined(CN1100_LINUX) && !defined(SLEEP_EVENT_SIM)
         if(spidev->mode & CN1100_IS_SUSPENDED)
         {
+	    #ifndef CN1100_MTK
             enable_irq(spidev->irq);
+	    #endif
             return;
         }
     #elif !defined(CN1100_LINUX)
@@ -2460,7 +2472,9 @@ void CN1100_FrameScanDoneInt_ISR()
                 Tiny_Delay(2000);
                 #endif
                 #ifdef CN1100_LINUX
+		#ifndef CN1100_MTK
                 enable_irq(spidev->irq);
+		#endif
                 #endif
             }
             break;
@@ -2476,7 +2490,9 @@ void CN1100_FrameScanDoneInt_ISR()
                 spidev->irq_count = 0;
                 TC1126_GotoDozeMode();
                 msleep(10);
+		#ifndef CN1100_MTK
                 enable_irq(spidev->irq);
+		#endif
                 break;
             }
             #endif
@@ -2566,7 +2582,9 @@ void CN1100_FrameScanDoneInt_ISR()
                     BufferBHandle();
                     /*Clear the interrupt Bit4(Buffer B Just Filled)*/
                 }
+		#ifndef CN1100_MTK
                 enable_irq(spidev->irq);
+		#endif
                 #endif
             }
             break;
