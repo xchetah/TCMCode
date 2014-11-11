@@ -287,6 +287,16 @@
 #define ABNORMAL_NUM_DIFF               20    // ((XMTR_NUM*RECV_NUM)>>2)
 #define ABNORMAL_HOLD_TIME              5
 
+#ifdef CN1100_WINNER
+#define BIGNOISE                       200
+#else  
+#ifdef CN1100_ATM 
+#define BIGNOISE                       400
+#else
+#define BIGNOISE                       50
+#endif
+#endif
+
 #define FRAME_MAX_SAMPLE                100
 
 #define MAX_MUST_UPDATE_PERIOD          4000  // 10000

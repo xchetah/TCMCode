@@ -165,6 +165,175 @@ void clearArray(uint16_t* p, uint16_t size)
 
 
 /*******************************************************************************
+* Function Name  : Baseline_FingerupdateTX
+* Description    : 
+* Input          : 
+* Output         : 
+* Return         : 
+*******************************************************************************/
+void Baseline_FingerupdateTX(void)
+{
+    uint16_t Max_num,i,j,average;
+    int16_t Min_sum,Max_sum;
+    uint16_t Max_cnt, Max_maxcnt, IvdCnt,IvdCnt1 ;
+    for(j=0; j<RECV_NUM; j++)
+    {
+        Max_sum = 0;
+        average = 0;      // averagesum
+       //Min_sum = 32767; // mini
+        Max_num = 0;
+        Max_cnt    = 0;
+        Max_maxcnt = 0;
+        for(i=0; i<XMTR_NUM; i++)
+        {
+           // if(bdt.DeltaDat16A[i][j] < Min_sum) Min_sum = bdt.DeltaDat16A[i][j];
+            if(bdt.DeltaDat16A[i][j]>50)
+            {
+                Max_sum += bdt.DeltaDat16A[i][j];
+                Max_num++;
+                Max_cnt++;
+            }
+            else
+            {
+               if(Max_cnt > Max_maxcnt)
+               {
+                   Max_maxcnt = Max_cnt;
+                   average    = Max_sum/Max_cnt;
+               }
+               Max_cnt = 0;
+               Max_sum = 0;
+            }
+        }
+        if(average > 60)
+        { 
+            if(Max_maxcnt == 15)
+            {
+                bdt.PowerOnWithFinger  = 1;
+                return ;
+            }
+           else if(Max_maxcnt >= 7)
+            {   
+                IvdCnt++;
+                if(IvdCnt>=2)
+                {
+                    bdt.PowerOnWithFinger  = 1;
+                    return ;
+                }
+            }
+            else if(Max_maxcnt >=5 ) IvdCnt1++;
+
+            if(IvdCnt1 >=4 )
+            {
+                bdt.PowerOnWithFinger = 1;
+                return;
+            }
+        }
+    }
+}
+
+
+/*******************************************************************************
+* Function Name  : Baseline_FingerupdateRX
+* Description    : 
+* Input          : 
+* Output         : 
+* Return         : 
+*******************************************************************************/
+void Baseline_FingerupdateRX(void)
+{
+    uint16_t Max_num,i,j,average;
+    int16_t Min_sum,Max_sum;
+    uint16_t Max_cnt, Max_maxcnt, IvdCnt;
+    Min_sum = 0;
+    Max_num = 0;
+    Max_sum = 0;
+    Max_cnt    = 0;
+    Max_maxcnt = 0;
+    IvdCnt     = 0;
+    for(i=0; i<XMTR_NUM; i++)
+    {
+        Max_sum = 0;
+        average = 0;      // averagesum
+        Min_sum = 32767; // mini
+        Max_num = 0;
+        Max_cnt    = 0;
+        Max_maxcnt = 0;
+        for(j=0; j<RECV_NUM; j++)
+        {
+            if(bdt.DeltaDat16A[i][j] < Min_sum)
+                Min_sum = bdt.DeltaDat16A[i][j];
+            if(bdt.DeltaDat16A[i][j] > 50)
+            {
+                Max_sum += bdt.DeltaDat16A[i][j];
+                Max_num++;
+                Max_cnt++;
+            }
+            else
+            {
+               if(Max_cnt > Max_maxcnt)
+               {
+                   Max_maxcnt = Max_cnt;
+                   average    = Max_sum/Max_cnt;
+               }
+               Max_cnt = 0;
+               Max_sum = 0;
+            }
+        }
+        if(average > 60)
+        {
+            if(Max_maxcnt == 10)
+            {
+                bdt.PowerOnWithFinger  = 1;
+                return ;
+            }
+           else if(Max_maxcnt >= 7)
+            {
+                IvdCnt++;
+                if(IvdCnt>=2)
+                {
+                    bdt.PowerOnWithFinger  = 1;
+                    return ;
+                }
+            }
+            else if(Max_maxcnt >=5 )
+                IvdCnt++;
+            if(IvdCnt >= 3)
+            {
+                bdt.PowerOnWithFinger = 1;
+                return;
+            }
+        }
+    }
+}
+
+
+/*******************************************************************************
+* Function Name  : Baseline_Fingerupdatenoise
+* Description    : 
+* Input          : 
+* Output         : 
+* Return         : 
+*******************************************************************************/
+void Baseline_Fingerupdatenoise(void)
+{
+    if(bdt.MaxNoise_Sum > BIGNOISE )
+    {
+        bdt.MaxNoise_SumCount++;
+        bdt.PowerOnWithFinger  = 0;
+    }
+
+    if(bdt.MaxNoise_SumCount>80)
+    {
+        bdt.MaxNoise_SumCount = 0;
+        bdt.MaxNoise_Sum = 0;
+        bdt.updatecount =100;
+        bdt.PowerOnWithFinger  = 1;
+        return;
+    }
+}
+
+
+/*******************************************************************************
 * Function Name  : 
 * Description    : 
 * Input          : 
@@ -179,6 +348,12 @@ void Baseline_FingerExistedHandled(uint16_t *buffer)
     Min_sum = 0;
     Max_num = 0;
     Max_sum = 0;
+
+    Baseline_Fingerupdatenoise();
+    Baseline_FingerupdateTX();
+    Baseline_FingerupdateRX();
+    if(bdt.PowerOnWithFinger)
+        return;
     if(bdt.MinValueInFrame < (0-(bdt.PCBA.FrameMaxSample<<1)))
     {
         if(bdt.MEM_MIN_XY_Count > ABNORMAL_HOLD_TIME)
@@ -343,11 +518,11 @@ uint8_t Baseline_ManyBigInvalidSampleinDeltaFrame(void)
     uint32_t temp_count = 0;
     
   /***********************************************************************
-       * 如果一个差分帧内:
-       *    数值超过"bdt.PCBA.AbnormalMaxDiff = ABNORMAL_MAX_DIFF(15)"
-       *    个数超过"bdt.PCBA.AbnormalNumDiff = ABNORMAL_NUM_DIFF(1/4帧)"
-       *    次数超过 ABNORMAL_HOLD_TIME(5)
-       ***********************************************************************/
+  * 如果一个差分帧内:
+  *    数值超过"bdt.PCBA.AbnormalMaxDiff = ABNORMAL_MAX_DIFF(15)"
+  *    个数超过"bdt.PCBA.AbnormalNumDiff = ABNORMAL_NUM_DIFF(1/4帧)"
+  *    次数超过 ABNORMAL_HOLD_TIME(5)
+  ***********************************************************************/
     for (i=0;i<XMTR_NUM;i++)
     for (j=0;j<RECV_NUM;j++)
     {
@@ -355,7 +530,6 @@ uint8_t Baseline_ManyBigInvalidSampleinDeltaFrame(void)
         if(abs16(bdt.DeltaDat16A[i][j]) >= bdt.PCBA.AbnormalMaxDiff)
             temp_count++;
     }
-    
     if(temp_count > bdt.PCBA.AbnormalNumDiff)
     {
         bdt.BFD.AbnormalUpdateDelay++;
@@ -386,8 +560,8 @@ uint8_t Baseline_IsNeedUpdateBaseBuffer(void)
     uint8_t  result = BASE_FRAME_HOLD;
     
    /*********************************************************************************
-        * Step 1: Compute the sum of delta data
-        *********************************************************************************/
+   * Step 1: Compute the sum of delta data
+   *********************************************************************************/
     bdt.BFD.DeltaSum = 0;
     for (i=0;i<XMTR_NUM;i++)
     for (j=0;j<RECV_NUM;j++)
@@ -487,7 +661,6 @@ uint8_t Baseline_IsNeedUpdateBaseBuffer(void)
 void Baseline_BaseBufferHandled(uint16_t *buffer)
 {
     int i, j;
-    
    /************************************************************************
    * After finger is just left, Hold for Protection Time
    ************************************************************************/
@@ -515,9 +688,12 @@ void Baseline_BaseBufferHandled(uint16_t *buffer)
     if(FACE_DETECT_NEAR == bdt.FDC.Flag) return;
 
     #endif
-    
     if(bdt.BFD.bbdc.FingerExist == NO_FINGER)
     {
+        #if defined(CN1100_WINNER) || defined(CN1100_ATM)
+        if(bdt.updatecount)
+            bdt.updatecount--;
+        #endif
         #ifdef DOZE_ALLOWED
        /***********************************************************
        *        This will be useless actually (QFU)
@@ -746,10 +922,6 @@ void FingProc_DistanceFilter(uint16_t i, uint16_t x1, uint16_t y1, uint16_t *pX,
 
 void FingProc_DF0ExceptionHandle(uint16_t i, uint16_t *pX, uint16_t *pY)
 {
-#if 0
-           *pX = bdt.DPD[i].AdjustOrigin_x; /* 步伐太小, 屹然不动*/
-           *pY = bdt.DPD[i].AdjustOrigin_y; /* 步伐太小, 屹然不动*/
-#else
     #define INTEGR_SHFT  3
     #define INTEGR_NUM   (1<<INTEGR_SHFT)
 
@@ -775,7 +947,6 @@ void FingProc_DF0ExceptionHandle(uint16_t i, uint16_t *pX, uint16_t *pY)
                bdt.DPD[i].Stay_XSum = 0;
                bdt.DPD[i].Stay_YSum = 0;
            }
-#endif
 }
 
 void FingProc_DF0GotoMovingState(uint16_t i, uint16_t *pX, uint16_t *pY)
@@ -796,7 +967,6 @@ void FingProc_DistanceFilter0(uint16_t i, uint16_t x1, uint16_t y1, uint16_t *pX
     #if 1
     uint16_t distance;
 
-    //#define EDGE_NUMR 8
     if((0 == bdt.DPD[i].AdjustOrigin_x) && (0 == bdt.DPD[i].AdjustOrigin_y))
     {
         bdt.DPD[i].AdjustOrigin_x = x1;
@@ -882,6 +1052,9 @@ void FingProc_DistanceFilter0(uint16_t i, uint16_t x1, uint16_t y1, uint16_t *pX
             bdt.DPD[i].AdjustOrigin_y = *pY;
             if(distance <= bdt.DPD[i].AdjustDistance)
             {
+                //*****************************************************************
+                // Moving --- Small Moving --- Stick
+                //*****************************************************************
                 bdt.DPD[i].AdjStickCounter++;
                 if(bdt.DPD[i].AdjStickCounter > 3)
                 {
@@ -891,6 +1064,9 @@ void FingProc_DistanceFilter0(uint16_t i, uint16_t x1, uint16_t y1, uint16_t *pX
             }
             else if(distance <= THR144)
             {
+                //*****************************************************************
+                // Moving --- Small Moving --- Bigger Moving --- Moving
+                //*****************************************************************
                 if((FingProc_Dist4Uint16Var(*pX,x1) > THR048) && (FingProc_Dist4Uint16Var(*pY,y1) < THR024))
                 {
                 }
@@ -902,6 +1078,9 @@ void FingProc_DistanceFilter0(uint16_t i, uint16_t x1, uint16_t y1, uint16_t *pX
             }
             else
             {
+                //*****************************************************************
+                // Moving --- Small Moving --- Biggest Moving --- Moving
+                //*****************************************************************
                 bdt.DPD[i].AdjStickCounter = 0;
                 bdt.DPD[i].AdjustState = STATE_MOVING;
             }
@@ -1087,8 +1266,10 @@ void FingProc_TapFilterEdgeProcess(uint16_t i, uint16_t curx, uint16_t cury, uin
 void FingProc_TapFilterProcess(uint16_t i, uint16_t curx, uint16_t cury, uint16_t *x, uint16_t *y)
 {
 #if 1
-    bdt.DPD[i].Finger_X_XMTR = (x[2]>>3) + (x[1]>>3) + (x[0]>>2) + (curx>>1);  // 3阶 IIR 滤波
-    bdt.DPD[i].Finger_Y_RECV = (y[2]>>3) + (y[1]>>3) + (y[0]>>2) + (cury>>1);  // 3阶 IIR 滤波
+    //bdt.DPD[i].Finger_X_XMTR = (x[2]>>3) + (x[1]>>3) + (x[0]>>2) + (curx>>1);  // 3阶 IIR 滤波
+    //bdt.DPD[i].Finger_Y_RECV = (y[2]>>3) + (y[1]>>3) + (y[0]>>2) + (cury>>1);  // 3阶 IIR 滤波
+    bdt.DPD[i].Finger_X_XMTR = (x[2] + x[1] + (x[0]<<1) + (curx<<2))>>3;  // 3?× IIR ??2¨
+    bdt.DPD[i].Finger_Y_RECV = (y[2] + y[1] + (y[0]<<1) + (cury<<2))>>3;  // 3?× IIR ??2¨
 #else
     bdt.DPD[i].Finger_X_XMTR = (curx>>3) + (x[1]>>3) + (x[0]>>2) + (curx>>1);  // 2阶 IIR 滤波
     bdt.DPD[i].Finger_Y_RECV = (cury>>3) + (y[1]>>3) + (y[0]>>2) + (cury>>1);  // 2阶 IIR 滤波
@@ -2127,7 +2308,7 @@ void FingProc_ImproveByMultiFilters(void)
 * Output         : 
 * Return         : 
 *******************************************************************************/
-uint16_t FingProc_measurestep(uint16_t *p, uint16_t Rpt)
+uint16_t FingProc_measurestepLT(uint16_t *p, uint16_t Rpt)
 {
     int16_t i, dx;
 
@@ -2162,7 +2343,7 @@ uint16_t FingProc_measurestep(uint16_t *p, uint16_t Rpt)
 * Output         : 
 * Return         : 
 *******************************************************************************/
-uint16_t FingProc_measurestep1(uint16_t *p, uint16_t Rpt)
+uint16_t FingProc_measurestepRB(uint16_t *p, uint16_t Rpt)
 {
     int16_t i, dx;
     dx = (int16_t)Rpt - (int16_t)p[0];
@@ -2209,16 +2390,24 @@ void FingProc_ImproveEdgeLinearity_L(uint16_t i,uint16_t *x, uint16_t *y)
 
         if( xRpt || yRpt)                   /* Finger Point                  */
         {
-            if(xRpt < SUPFIL_RANGE && x[0] < SUPFIL_RANGE && x[1] <SUPFIL_RANGE && x[2] < SUPFIL_RANGE) /* Left Edg*/
+            if(xRpt < SUPFIL_RANGE && x[0] < SUPFIL_RANGE && x[1] < SUPFIL_RANGE && x[2] < SUPFIL_RANGE)
             {
                  dx = FingProc_Dist4Uint16Var(xRpt, x[0]);
                  dy = FingProc_Dist4Uint16Var(yRpt, y[0]);
 
                  if((dx > (dy>>2)) && (dy < 256))
                  {
-                      if(0 == FingProc_measurestep(x,xRpt)) 
+                      if(0 == FingProc_measurestepLT(x,xRpt)) 
                       {
-                          if(bdt.DPD[i].EdgeShift_L < 3)
+                      	if(x[0] == x[1] && x[1]== x[2] && ((x[0]-xRpt)>16))
+                          {
+                              if(bdt.DPD[i].EdgeShift_L > 0)
+                              {  
+                                  bdt.DPD[i].EdgeShift_L -= 1;
+                                  bdt.DPD[i].EdgeOffset_L <<= 1;
+                              }
+                          }
+                      else if(bdt.DPD[i].EdgeShift_L < 3)
                           {  
                               bdt.DPD[i].EdgeShift_L += 1;
                               bdt.DPD[i].EdgeOffset_L >>= 1;
@@ -2278,7 +2467,8 @@ void FingProc_ImproveEdgeLinearity_R(uint16_t i,uint16_t *x, uint16_t *y)
     
         if( xRpt || yRpt) /* Finger Point*/
         { 
-            if((xRpt >(SXMTR_NUM<<8)-SUPFIL_RANGE && x[0] >(SXMTR_NUM<<8)-SUPFIL_RANGE && x[1] > (SXMTR_NUM<<8)-SUPFIL_RANGE && x[2] > (SXMTR_NUM<<8)-SUPFIL_RANGE)) /* Left Edg*/
+            #define RIEL_VAL  ((SXMTR_NUM<<8) - SUPFIL_RANGE)
+            if(xRpt > RIEL_VAL && x[0] > RIEL_VAL && x[1] > RIEL_VAL && x[2] > RIEL_VAL)
             {
                 dx =FingProc_Dist4Uint16Var(xRpt, x[0]);
                 dy =FingProc_Dist4Uint16Var(yRpt, y[0]);
@@ -2286,9 +2476,17 @@ void FingProc_ImproveEdgeLinearity_R(uint16_t i,uint16_t *x, uint16_t *y)
                 if((dx > (dy>>2)) && (dy < 256))
                 { 
                 
-                    if(0 == FingProc_measurestep1(x,xRpt)) 
+                    if(0 == FingProc_measurestepRB(x,xRpt)) 
                     {
-                        if(bdt.DPD[i].EdgeShift_R < 3)
+                    	if(x[0] == x[1] && x[1]== x[2] && ((xRpt-x[0])>16))
+                          {
+                              if(bdt.DPD[i].EdgeShift_R> 0)
+                              {  
+                                  bdt.DPD[i].EdgeShift_R-= 1;
+                                  bdt.DPD[i].EdgeOffset_R<<= 1;
+                              }
+                          }
+                      else  if(bdt.DPD[i].EdgeShift_R < 3)
                         {  
                             bdt.DPD[i].EdgeShift_R += 1;
                          
@@ -2346,7 +2544,7 @@ void FingProc_ImproveEdgeLinearity_T(uint16_t i,uint16_t *x, uint16_t *y)
         yRpt = bdt.DPD[i].Finger_Y_RECV;    /* Just calculated from raw data */
         if(xRpt || yRpt) /* Finger Point*/
         {
-            if((yRpt < SUPFIL_RANGE && y[0] < SUPFIL_RANGE && y[1] <SUPFIL_RANGE && y[2] < SUPFIL_RANGE)) /* Left Edg*/
+            if(yRpt < SUPFIL_RANGE && y[0] < SUPFIL_RANGE && y[1] <SUPFIL_RANGE && y[2] < SUPFIL_RANGE)
             {
            
             
@@ -2354,9 +2552,17 @@ void FingProc_ImproveEdgeLinearity_T(uint16_t i,uint16_t *x, uint16_t *y)
                   dy =FingProc_Dist4Uint16Var(yRpt, y[0]);
                   if((dy > (dx>>2)) && (dx < 256))
                   {
-                       if(0 == FingProc_measurestep(y,yRpt)) 
+                       if(0 == FingProc_measurestepLT(y,yRpt)) 
                        {
-                           if(bdt.DPD[i].EdgeShift_T < 3)
+                       		if(y[0] == y[1] && y[1]== y[2] && ((y[0]-yRpt)>16))
+                          {
+                              if(bdt.DPD[i].EdgeShift_T> 0)
+                              {  
+                                  bdt.DPD[i].EdgeShift_T-= 1;
+                                  bdt.DPD[i].EdgeOffset_T<<= 1;
+                              }
+                          }
+                         else  if(bdt.DPD[i].EdgeShift_T < 3)
                            {  
                                bdt.DPD[i].EdgeShift_T += 1;
                                bdt.DPD[i].EdgeOffset_T >>= 1;
@@ -2418,7 +2624,8 @@ void FingProc_ImproveEdgeLinearity_B(uint16_t i,uint16_t *x, uint16_t *y)
         yRpt = bdt.DPD[i].Finger_Y_RECV;    /* Just calculated from raw data */
         if( xRpt || yRpt)                   /* Finger Point */
         {
-            if((yRpt >(SRECV_NUM<<8)-SUPFIL_RANGE && y[0] >(SRECV_NUM<<8)-SUPFIL_RANGE && y[1] > (SRECV_NUM<<8)-SUPFIL_RANGE && y[2] > (SRECV_NUM<<8)-SUPFIL_RANGE)) /* Left Edg*/
+            #define BIEL_VAL  ((SRECV_NUM<<8)-SUPFIL_RANGE)
+            if( yRpt > BIEL_VAL && y[0] > BIEL_VAL && y[1] > BIEL_VAL && y[2] > BIEL_VAL ) 
             {
                
                 dx =FingProc_Dist4Uint16Var(xRpt, x[0]);
@@ -2427,9 +2634,17 @@ void FingProc_ImproveEdgeLinearity_B(uint16_t i,uint16_t *x, uint16_t *y)
                 if((dy > (dx>>2)) && (dx < 256))
                 {
 
-                    if(0 == FingProc_measurestep1(y,yRpt)) 
+                    if(0 == FingProc_measurestepRB(y,yRpt)) 
                     {
-                        if(bdt.DPD[i].EdgeShift_B < 3)
+                    	if(y[0] == y[1] && y[1]== y[2] && ((yRpt-y[0])>16))
+                          {
+                              if(bdt.DPD[i].EdgeShift_B> 0)
+                              {  
+                                  bdt.DPD[i].EdgeShift_B-= 1;
+                                  bdt.DPD[i].EdgeOffset_B<<= 1;
+                              }
+                          }
+                      else  if(bdt.DPD[i].EdgeShift_B < 3)
                         {  
                             bdt.DPD[i].EdgeShift_B += 1;
                             bdt.DPD[i].EdgeOffset_B >>= 1;
@@ -2496,14 +2711,14 @@ void FingProc_SuperFilter4Edge(void)
         }
 
         #ifdef FROMOUT2IN_INORDER
-        x    =  bdt.DPD[i].Finger_X_Erpt;   /* Point to the saving array     */
-        y    =  bdt.DPD[i].Finger_Y_Erpt;
+        x = bdt.DPD[i].Finger_X_Erpt;   /* Point to the saving array     */
+        y = bdt.DPD[i].Finger_Y_Erpt;
         #else 
-        x    = bdt.DPD[i].Prev_Finger_X;    /* Point to the saving array     */
-        y    = bdt.DPD[i].Prev_Finger_Y;
+        x = bdt.DPD[i].Prev_Finger_X;    /* Point to the saving array     */
+        y = bdt.DPD[i].Prev_Finger_Y;
         #endif
 
-        if( (bdt.DPD[i].Finger_X_XMTR > 256) && (bdt.DPD[i].Finger_X_XMTR < ((SXMTR_NUM<<8)-256)) )
+        if( (bdt.DPD[i].Finger_X_XMTR > SUPFIL_RANGE) && (bdt.DPD[i].Finger_X_XMTR < ((SXMTR_NUM<<8)-SUPFIL_RANGE)) )
         { 
             #if 1
             //********************************************************
@@ -2551,7 +2766,7 @@ void FingProc_SuperFilter4Edge(void)
                 }
         }
 
-        if( (bdt.DPD[i].Finger_Y_RECV > 256) && (bdt.DPD[i].Finger_Y_RECV < ((SRECV_NUM<<8)-256)) )
+        if( (bdt.DPD[i].Finger_Y_RECV > SUPFIL_RANGE) && (bdt.DPD[i].Finger_Y_RECV < ((SRECV_NUM<<8)-SUPFIL_RANGE)) )
         { 
             #if 1
             //********************************************************
@@ -6742,6 +6957,8 @@ void DataProc_PowerNoiseLevelJudge(void)
                 break;
             }
         }
+        if(bdt.NDD.Noise_Sum >bdt.MaxNoise_Sum) bdt.MaxNoise_Sum = bdt.NDD.Noise_Sum;
+        bdt.Noise_Sum = bdt.NDD.Noise_Sum;
         #ifdef STM32VC_LCD
         TFT_ShowNum(0, 29, bdt.NDD.Battery_Level, 0xf800, LCD_COLOR_GREEN);
         TFT_ShowNum(3, 29, bdt.NDD.Noise_Sum, 0xf800, LCD_COLOR_GREEN);
@@ -7210,7 +7427,7 @@ void DataProc_WholeFrameProcess(uint16_t *buffer)
     *  Get the Maximum Value and its Location;
     *******************************************************/
     //if(1 == bdt.NDD.Frame_Count)
-    if(1 == bdt.PowerOnWithFinger) 
+    if(1 == bdt.PowerOnWithFinger)
     {
         bdt.PowerOnWithFinger  = 0;
         bdt.MEM_MIN_XY_Count = 0;

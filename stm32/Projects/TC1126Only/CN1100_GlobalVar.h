@@ -276,6 +276,11 @@ typedef struct BasData {
     uint16_t        PrevFingerDetectNum;   // used for sortfingers
     uint16_t        PrevFingerDetectNum2;  // used for sortfingers
 
+    uint16_t        MaxNoise_Sum;
+    uint16_t        MaxNoise_SumCount;
+    uint16_t        Noise_Sum;
+    uint16_t        updatecount;
+
     uint16_t        FingerDetectBitFlag;   // 
     uint8_t         PressKeyFlag1;
     PressKeyStruct  PressKeyFlag;
