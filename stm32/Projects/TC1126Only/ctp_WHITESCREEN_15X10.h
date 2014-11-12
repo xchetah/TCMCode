@@ -26,7 +26,7 @@
 
 #define DUR_STRETCH          1      // TX Freq: 150K
 
-#define BURST_CNT            0x81C //0x81C
+#define BURST_CNT            0x81F //0x81C
 //#define BURST_CNT            0x81F
 
 

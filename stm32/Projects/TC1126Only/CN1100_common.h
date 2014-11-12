@@ -15,8 +15,6 @@
 #define BE30PERCENT         3         // Threshold for Valid Finger Signal
 #define BE40PERCENT         4         // Threshold for Valid Finger Signal
 
-//#define TPD_PROXIMITY
-
 #define TOUCH_KEY_1 0x1
 #define TOUCH_KEY_2 0x3
 #define TOUCH_KEY_3 0x7
@@ -132,8 +130,8 @@
 //#define FOURPOINTS4STICKMOVING         // Four Ponts is needed for Stick Finger moving
 
 //#define SCREEN_NONE_ADAPTIVE               // None Adaptive parameter for different screen
-#define SCREEN_SIMPLE_ADAPTIVE             // Simple Adaptive parameter for different screen
-//#define SCREEN_FULL_ADAPTIVE                 // Full Adaptive parameter for different screen
+//#define SCREEN_SIMPLE_ADAPTIVE             // Simple Adaptive parameter for different screen
+#define SCREEN_FULL_ADAPTIVE                 // Full Adaptive parameter for different screen
 //#define CHANNEL_ADAPTIVE                     // Channel adaptive for adjust channel or point fcap
 
 #ifdef SCREEN_FULL_ADAPTIVE
@@ -376,7 +374,7 @@
 #endif
 
 #else // CN1100_STM32
-  #define ISCANMODE_PERD_REG_VALUE             0x140   //12.5ms      
+  #define ISCANMODE_PERD_REG_VALUE             0x1C0   //12.5ms      
 
   #define RAW_DATA_DIFF_THR                    1100
 
