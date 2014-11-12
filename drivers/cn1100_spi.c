@@ -382,6 +382,17 @@ out:
 
 #ifdef PRESS_KEY_DETECT
 
+
+void set_finger_num(int num)
+{
+    if(bdt.FingerReqNum != num){
+        bdt.FingerReqNum = num;
+    }else{
+        bdt.FingerReqNum = 1;
+    }
+    printk("bdt.FingerReqNum:%d\n",bdt.FingerReqNum);
+}
+
 #define KEY1_THRESH 300
 #define KEY2_THRESH 300
 #define KEY3_THRESH 200
@@ -402,7 +413,6 @@ void DataProc_PressKeyDetect()
 
     if((bdt.DeltaDat_kp[5] > KEY3_THRESH))
     {
-		  bdt.FingerReqNum = 1;
           bdt.PressKeyFlag1 = TOUCH_KEY_3;
     }
 
@@ -480,6 +490,9 @@ void Report_Coordinate()
     if(touch_key_pressed&&(!bdt.PressKeyFlag1)){
         input_report_key(spidev->dev,key_pressed,0);
         input_sync((spidev->dev));
+		if(key_pressed == KEY_MENU){
+			set_finger_num(5);
+		}
         key_pressed = 0;
         touch_key_pressed = 0;
         printk("key released\n");

@@ -804,7 +804,7 @@ void Baseline_BaseBufferHandled(uint16_t *buffer)
         bdt.BFD.bbdc.NoFingerCnt4Base = 0;
         bdt.BFD.FingerLeftProtectTime = 0;
         
-       // Baseline_FingerExistedHandled(buffer);
+       //Baseline_FingerExistedHandled(buffer);
         
         if(0 == bdt.PrevFingerDetectNum2)
         {
