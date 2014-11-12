@@ -22,8 +22,7 @@ int CN1100_RESET_PIN=S5PV210_GPD0(3);
 struct cn1100_spi_dev *spidev = NULL;
 uint16_t chip_addr = 0x5d;
 
-#define CTP_HAVE_TOUCH_KEY
-#ifdef CTP_HAVE_TOUCH_KEY
+#ifdef PRESS_KEY_DETECT
 
 uint16_t key_pressed = 0;
 //static int touch_keys[] = {
@@ -381,7 +380,35 @@ out:
 	return status;
 }
 
-#ifdef CTP_HAVE_TOUCH_KEY
+#ifdef PRESS_KEY_DETECT
+#define KEY1_THRESH 300
+#define KEY2_THRESH 300
+#define KEY3_THRESH 200
+#define KEY4_THRESH 300
+void DataProc_PressKeyDetect()
+{
+    bdt.PressKeyFlag1          = NO_KEY_PRESSED;
+    printk("KEY1:(%-5d,%-5d),KEY2:(%-5d,%-5d),KEY3:(%-5d),KEY4:(%-5d,%-5d)\n",bdt.DeltaDat_kp[2],bdt.DeltaDat_kp[3],bdt.DeltaDat_kp[7],bdt.DeltaDat_kp[8],bdt.DeltaDat_kp[5],bdt.DeltaDat_kp[12],bdt.DeltaDat_kp[13]);
+    if((bdt.DeltaDat_kp[2] > KEY1_THRESH)|| (bdt.DeltaDat_kp[3] > KEY1_THRESH))
+    {
+          bdt.PressKeyFlag1 = TOUCH_KEY_1;
+    }
+
+    if((bdt.DeltaDat_kp[7] > KEY2_THRESH)|| (bdt.DeltaDat_kp[8] > KEY2_THRESH))
+    {
+          bdt.PressKeyFlag1 = TOUCH_KEY_2;
+    }
+
+    if((bdt.DeltaDat_kp[5] > KEY3_THRESH))
+    {
+          bdt.PressKeyFlag1 = TOUCH_KEY_3;
+    }
+
+    if((bdt.DeltaDat_kp[12] > KEY4_THRESH)|| (bdt.DeltaDat_kp[13] > KEY4_THRESH))
+    {
+          bdt.PressKeyFlag1 = TOUCH_KEY_4;
+    }
+}
 void report_key(void)
 {
     int i = 0;
@@ -442,7 +469,7 @@ void Report_Coordinate()
     for(i=0; i<fnum; i++) {
         if(bdt.DPD[i].JustPassStateFlag4) Wait4Flag = 1;
     }
-    #ifdef CTP_HAVE_TOUCH_KEY
+    #ifdef PRESS_KEY_DETECT
     if(bdt.PressKeyFlag1){
         report_key();    
         bdt.PressKeyFlag1 = 0;
@@ -618,7 +645,7 @@ static int chm_ts_probe(struct i2c_client *client, const struct i2c_device_id *i
     set_bit(ABS_MT_POSITION_Y, spidev->dev->absbit);              
     set_bit(ABS_MT_WIDTH_MAJOR, spidev->dev->absbit);                     
     set_bit(ABS_MT_TRACKING_ID,spidev->dev->absbit);
-#ifdef CTP_HAVE_TOUCH_KEY
+#ifdef PRESS_KEY_DETECT
     for (index = 0; index < MAX_KEY_NUM; index++)
     {    
         input_set_capability(spidev->dev,EV_KEY,chm_ts_keys[index].key);  
@@ -924,6 +951,7 @@ static struct i2c_driver chm_ts_driver = {
 static int __init cn1100_spi_init(void)
 {
     int status = 0;
+    struct timespec tv;
 
     bd = kmalloc(sizeof(bd_t),GFP_KERNEL);
     if(!bd){

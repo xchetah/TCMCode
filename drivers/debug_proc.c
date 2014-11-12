@@ -177,7 +177,6 @@ int chm_ts_read_config(cn1100_t config)
 }
 
 
-
 /*******************************************************************************
 * Function Name  : 
 * Description    : 
@@ -358,15 +357,12 @@ ssize_t chm_proc_read(struct file *file, char __user *buf, size_t size, loff_t *
         case INFO_READ_MODE:
         {
             len = sizeof(tmp);
-            #ifndef CN1100_MTK
-            tmp[0] = BUILD_DATE;
+            #ifdef TC1126 
+            tmp[0] = 1;
             #else
-            tmp[0] = 0;
             #endif
-            tmp[1] = 0;tmp[2] = 0;
-            tmp[3] = SCREEN_HIGH;tmp[4] = SCREEN_WIDTH;tmp[5] = XMTR_NUM;tmp[6] = RECV_NUM;
-            tmp[7] = 1024;
-            printk("BUILD_DATE:%u\n",tmp[0]);
+            tmp[1] = XMTR_NUM;tmp[2] = RECV_NUM;
+            tmp[3] = 1024;
             if(copy_to_user(buf,tmp,len)){
                 printk("copy failed\n");
             }

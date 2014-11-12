@@ -7,6 +7,7 @@ import time
 
 global user
 prefix="/opt/CN1100/Kernels/"
+excludes = ["Libraries","Utilities","tags","vssver2.scc","LcdModule","MDK","TC1126","TC1540Only"]
 msg='''
 plats:save platforms and correspond directory
 	Platform	Macro	Driver	Lib	   Kernel	Toolchain
@@ -135,10 +136,42 @@ def cmpdrv(p,action):
 				os.system(cmd)
 
 
+def copyFiles(path):
+	for f in os.listdir(path):
+		nextdir = path+"/"+f
+		if nextdir.split("/")[-1].startswith("."):
+			continue
+		if os.path.isdir(nextdir):
+			if f.split("/")[-1] in excludes:
+				continue
+			targetPath = "TC1126/%s" %nextdir.split(".")[1:][0]
+			print targetPath
+			if not os.path.exists(targetPath):
+				os.mkdir(targetPath)
+			copyFiles(nextdir)
+			cmd = "tar cvf "
+		elif os.path.isfile(nextdir):
+			cmd = "cp %s TC1126/%s" %(nextdir,nextdir[1:])
+			os.system(cmd)
+
 def mkpkg(p,action):
-	if len(p) == 0:
-		action = 2;
-	cmpdrv(p,action)
+	if action == 2:
+		if not os.path.exists("TC1126"):
+			os.mkdir("TC1126")
+		ymdhm=getFormatTime("%y%m%d%H%M")
+		filename="TC1126-%s.tar.gz" %(ymdhm)
+		copyFiles(".")
+		cmd = "tar cvf %s -R TC1126" %filename 
+		os.system(cmd)
+		cmd = "mv %s /opt/CN1100/out/%s" %(filename,user)
+		os.system(cmd)
+
+		cmd = "rm -rf TC1126"
+		os.system(cmd)
+	else:
+		if len(p) == 0:
+			action = 3;
+		cmpdrv(p,action)
 
 def mksymbolink(p):
 	pass
@@ -154,7 +187,6 @@ def help():
 if __name__ == "__main__":
 	user = os.getlogin()
 	p=[]
-
 	ditinit()
 
 	if len(sys.argv) < 2:
@@ -168,6 +200,9 @@ if __name__ == "__main__":
 		elif sys.argv[1] == "s":
 			p = sys.argv[2:]
 			mkpkg(p,1)
+		elif sys.argv[1] == "p":
+			p = sys.argv[2:]
+			mkpkg(p,2);
 		elif sys.argv[1] in platforms.keys():
 			p=sys.argv[1:]
 			cmpdrv(p,-1)
