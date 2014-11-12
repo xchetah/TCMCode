@@ -2,7 +2,7 @@
  * 版权所有(C) TRUECOREING
  * DEPARTMENT:
  * MANUAL_PERCENT:
- * 文件名称: CN1100_init.c 
+ * 文件名称: CN1000_data.c 
  * 文件标识:    
  * 内容摘要: 
  * 其它说明:
@@ -15,6 +15,12 @@
  * 修改日期: 2014-09-15
  * 版 本 号:
  * 修 改 人: Wangpc
+ * 修改内容: 
+ *
+ * 修改记录2: Add one feature that acquire 10 fingers then parse 5 fingers 
+ * 修改日期: 2014-11-12
+ * 版 本 号:
+ * 修 改 人: Wangpc(R01)
  * 修改内容: 
  *****************************************************************************/
 
@@ -899,7 +905,7 @@ void TC1126_Init_GlobalVariables(void)
         bdt.DPD[i].AdjStickCounter      = 0;
         bdt.DPD[i].AdjustOrigin_x       = 0;
         bdt.DPD[i].AdjustOrigin_y       = 0;
-        
+
         bdt.DPD[i].StayCount            = 0;
         bdt.DPD[i].Stay_XSum            = 0;
         bdt.DPD[i].Stay_YSum            = 0;
@@ -1105,6 +1111,7 @@ void TC1126_Init_GlobalVariables(void)
         bdt.AbnormalPoint[i] = 0;
     }
     #endif
+	bdt.FingerReqNum = FINGER_REQUIREMENT_NUM;   //R01 -a
 }
 
 /******************************************************************************
@@ -1540,13 +1547,13 @@ void TC1126_RxChAdaptive_TransModeSetting(void)
     SPI_write_singleData(TFC1_REG, TFC1_T0R4_FCAP_COEF((bdt.RxFcapValue[4]<<2)) | TFC1_T0R5_FCAP_COEF((bdt.RxFcapValue[5]<<2))
                          | TFC1_T0R6_FCAP_COEF((bdt.RxFcapValue[6]<<2)) | TFC1_T0R7_FCAP_COEF((bdt.RxFcapValue[7]<<2)));  
     SPI_write_singleData(TFC2_REG, TFC2_T0R8_FCAP_COEF((bdt.RxFcapValue[8]<<2)) | TFC2_T0R9_FCAP_COEF((bdt.RxFcapValue[9]<<2))
-                         | TFC2_TNR0_FCAP_COEF((bdt.RxFcapValue[0]<<2)) | TFC2_SPECIAL_RXI_COORD(INVALID_CHORPOINT));
+                         | TFC2_TNR0_FCAP_COEF((bdt.RxFcapValue[0]<<2)) | TFC2_SPECIAL_RXI_COORD(INVALID_CHORPOINT)); 
 }
 
 /*******************************************************************************
 * Function Name  : TC1126_ChAdaptive_TransModeSetting
 * Description    : 往寄存器写入需要调节的异常通道或者异常点的FCAP值
-* Input          : TxorRxFlag：标记SCALE_MODE类型；
+* Input          :     TxorRxFlag：标记SCALE_MODE类型；
 * Output         : 
 * Return         : 
 *******************************************************************************/
@@ -2340,13 +2347,13 @@ void CN1100_SysTick_ISR(void)
         if(!(spidev->mode & CN1100_IS_SUSPENDED))
             spidev->ticks++;
     }    
-    #if defined(CN1100_RESET_ENABLE)
+        #if defined(CN1100_RESET_ENABLE)
         if((spidev->ticks>5000)){
                 printk("%d\n",spidev->ticks);
                 spidev->ticks = 0; 
                 queue_work(spidev->workqueue,&spidev->reset_work);
-        }    
-    #endif
+            }
+        #endif
     hrtimer_start(&spidev->systic, ktime_set(0, 1000000), HRTIMER_MODE_REL);
     #endif
     
@@ -2474,7 +2481,7 @@ void CN1100_FrameScanDoneInt_ISR()
                 #ifdef CN1100_LINUX
 		#ifndef CN1100_MTK
                 enable_irq(spidev->irq);
-		#endif
+                #endif
                 #endif
             }
             break;
@@ -2584,7 +2591,7 @@ void CN1100_FrameScanDoneInt_ISR()
                 }
 		#ifndef CN1100_MTK
                 enable_irq(spidev->irq);
-		#endif
+                #endif
                 #endif
             }
             break;

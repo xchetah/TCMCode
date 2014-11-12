@@ -1,3 +1,29 @@
+/******************************************************************************
+ * 版权所有(C) TRUECOREING
+ * DEPARTMENT:
+ * MANUAL_PERCENT:
+ * 文件名称: CN1000_data.c 
+ * 文件标识:    
+ * 内容摘要: 
+ * 其它说明:
+ * 当前版本: 
+ * 作    者: 
+ * 完成日期:
+ * 当前责任人: 
+ *
+ * 修改记录1: 代码合规
+ * 修改日期: 2014-09-15
+ * 版 本 号:
+ * 修 改 人: Wangpc
+ * 修改内容: 
+ *
+ * 修改记录2: Add one feature that acquire 10 fingers then parse 5 fingers 
+ * 修改日期: 2014-11-12
+ * 版 本 号:
+ * 修 改 人: Wangpc(R01)
+ * 修改内容: 
+ *****************************************************************************/
+
 #ifndef GLOBSLVAR_H
 #define  GLOBSLVAR_H
 
@@ -20,7 +46,7 @@ typedef struct DeltaPData {
     uint8_t    LifeNumber;
     uint16_t   Finger_X_Reported;                      // Final report finger point X, Q8
     uint16_t   Finger_Y_Reported;                      // Final report finger point Y, Q8
-    EdgeCtrl   EdgeInfo;        
+    EdgeCtrl   EdgeInfo; 
 
     uint16_t   StayCount;
     int32_t    Stay_XSum;
@@ -363,7 +389,9 @@ typedef struct BasData {
     uint32_t  TxRxiFCAP;                            // 调节后该点的FCAP值
     uint32_t  TxRxjFCAP;
 #endif
-  
+
+    uint16_t FingerReqNum;   //R01 -a
+
 } BasData_t;
 
 #define VarSL(x,v,m)  do {                                 \

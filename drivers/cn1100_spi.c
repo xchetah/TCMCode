@@ -381,6 +381,7 @@ out:
 }
 
 #ifdef PRESS_KEY_DETECT
+
 #define KEY1_THRESH 300
 #define KEY2_THRESH 300
 #define KEY3_THRESH 200
@@ -388,7 +389,7 @@ out:
 void DataProc_PressKeyDetect()
 {
     bdt.PressKeyFlag1          = NO_KEY_PRESSED;
-    printk("KEY1:(%-5d,%-5d),KEY2:(%-5d,%-5d),KEY3:(%-5d),KEY4:(%-5d,%-5d)\n",bdt.DeltaDat_kp[2],bdt.DeltaDat_kp[3],bdt.DeltaDat_kp[7],bdt.DeltaDat_kp[8],bdt.DeltaDat_kp[5],bdt.DeltaDat_kp[12],bdt.DeltaDat_kp[13]);
+    //printk("KEY1:(%-5d,%-5d),KEY2:(%-5d,%-5d),KEY3:(%-5d),KEY4:(%-5d,%-5d)\n",bdt.DeltaDat_kp[2],bdt.DeltaDat_kp[3],bdt.DeltaDat_kp[7],bdt.DeltaDat_kp[8],bdt.DeltaDat_kp[5],bdt.DeltaDat_kp[12],bdt.DeltaDat_kp[13]);
     if((bdt.DeltaDat_kp[2] > KEY1_THRESH)|| (bdt.DeltaDat_kp[3] > KEY1_THRESH))
     {
           bdt.PressKeyFlag1 = TOUCH_KEY_1;
@@ -401,6 +402,7 @@ void DataProc_PressKeyDetect()
 
     if((bdt.DeltaDat_kp[5] > KEY3_THRESH))
     {
+		  bdt.FingerReqNum = 1;
           bdt.PressKeyFlag1 = TOUCH_KEY_3;
     }
 
