@@ -3893,7 +3893,8 @@ uint16_t FingProc_XMTR_NolinearMapping_Left(uint16_t h)
     #endif
     
 #ifdef BORDER_SIMPLE_ADJUSTABLE
-    result = h<<1;
+    h = h<<1;
+	result = (((h>>5)+1)<<5)-16;
     if(result > 230) result = 230;
 #else
     #ifdef CN1100_WINNER                    
@@ -4064,7 +4065,8 @@ uint16_t FingProc_XMTR_NolinearMapping_Right(uint16_t h)
     #endif
 
 #ifdef BORDER_SIMPLE_ADJUSTABLE
-    result = h<<1;
+    h = h<<1;
+	result = (((h>>5)+1)<<5)-16;
     if(result > 230) result = 230;
 #else
     #ifdef CN1100_WINNER                    
@@ -4251,7 +4253,8 @@ uint16_t FingProc_RECV_NolinearMapping_Top(uint16_t h)
     #endif
 
 #ifdef BORDER_SIMPLE_ADJUSTABLE
-    result = h<<1;
+    h = h<<1;
+	result = (((h>>5)+1)<<5)-16;
     if(result > 230) result = 230;
 #else
     #ifdef CN1100_WINNER                    
@@ -4430,7 +4433,8 @@ uint16_t FingProc_RECV_NolinearMapping_Bottom(uint16_t h)
     #endif
 
 #ifdef BORDER_SIMPLE_ADJUSTABLE
-    result = (h<<1) + (h>>3) + (h>>4); 
+    h = h<<1;
+	result = (((h>>5)+1)<<5)-16;
     if(result > 230) result = 230;
 #else
     #ifdef CN1100_WINNER                     

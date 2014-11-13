@@ -156,8 +156,8 @@
 //#define FOURPOINTS4STICKMOVING         // Four Ponts is needed for Stick Finger moving
 
 //#define SCREEN_NONE_ADAPTIVE               // None Adaptive parameter for different screen
-//#define SCREEN_SIMPLE_ADAPTIVE             // Simple Adaptive parameter for different screen
-#define SCREEN_FULL_ADAPTIVE                 // Full Adaptive parameter for different screen
+#define SCREEN_SIMPLE_ADAPTIVE             // Simple Adaptive parameter for different screen
+//#define SCREEN_FULL_ADAPTIVE                 // Full Adaptive parameter for different screen
 #define CHANNEL_ADAPTIVE                     // Channel adaptive for adjust channel or point fcap
 
 #ifdef SCREEN_FULL_ADAPTIVE
