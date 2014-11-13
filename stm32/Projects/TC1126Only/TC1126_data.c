@@ -182,7 +182,7 @@ void Baseline_FingerupdateTX(void)
 {
     uint16_t Max_num,i,j,average;
     int16_t Max_sum;
-    uint16_t Max_cnt, Max_maxcnt, IvdCnt,IvdCnt1 ;
+    uint16_t Max_cnt, Max_maxcnt, IvdCnt = 0,IvdCnt1  = 0;
     for(j=0; j<RECV_NUM; j++)
     {
         Max_sum = 0;
@@ -804,7 +804,7 @@ void Baseline_BaseBufferHandled(uint16_t *buffer)
         bdt.BFD.bbdc.NoFingerCnt4Base = 0;
         bdt.BFD.FingerLeftProtectTime = 0;
         
-       //Baseline_FingerExistedHandled(buffer);
+       Baseline_FingerExistedHandled(buffer);
         
         if(0 == bdt.PrevFingerDetectNum2)
         {
