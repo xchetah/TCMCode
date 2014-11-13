@@ -329,7 +329,7 @@ void Baseline_Fingerupdatenoise(void)
     if(bdt.MaxNoise_Sum > BIGNOISE )
     {
         bdt.MaxNoise_SumCount++;
-        bdt.PowerOnWithFinger  = 1;
+        bdt.PowerOnWithFinger  = 0;
     }
 
     if(bdt.MaxNoise_SumCount > 80)
@@ -337,7 +337,7 @@ void Baseline_Fingerupdatenoise(void)
         bdt.MaxNoise_SumCount = 0;
         bdt.MaxNoise_Sum = 0;
         bdt.updatecount = 100;
-        bdt.PowerOnWithFinger = 0;
+        bdt.PowerOnWithFinger = 1;
         return;
     }
 }
