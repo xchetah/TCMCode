@@ -2,7 +2,7 @@
  * 版权所有(C) TRUECOREING
  * DEPARTMENT:
  * MANUAL_PERCENT:
- * 文件名称: CN1100_init.c 
+ * 文件名称: TC1126_hwService.c
  * 文件标识:    
  * 内容摘要: 
  * 其它说明:
@@ -15,6 +15,12 @@
  * 修改日期: 2014-09-15
  * 版 本 号:
  * 修 改 人: Wangpc
+ * 修改内容: 
+ *
+ * 修改记录2: Add one feature that acquire 10 fingers then parse 5 fingers 
+ * 修改日期: 2014-11-12
+ * 版 本 号:
+ * 修 改 人: Wangpc(R01)
  * 修改内容: 
  *****************************************************************************/
 
@@ -882,10 +888,13 @@ void TC1126_Init_GlobalVariables(void)
     #endif
     bdt.PrevFingerDetectNum  = 0;
     bdt.PrevFingerDetectNum2 = 0;
+
     bdt.MaxNoise_Sum = 0;
     bdt.MaxNoise_SumCount = 0;
     bdt.Noise_Sum = 0;
     bdt.updatecount =350;
+
+
     for (i = 0; i < FINGER_NUM_MAX;i++)
     {
         bdt.DPD[i].FingerStateFlag      = 0;    /*  No Finger */
@@ -1102,6 +1111,7 @@ void TC1126_Init_GlobalVariables(void)
         bdt.AbnormalPoint[i] = 0;
     }
     #endif
+    bdt.FingerReqNum = FINGER_REQUIREMENT_NUM;   //R01 -a
 }
 
 /******************************************************************************

@@ -1,3 +1,29 @@
+/******************************************************************************
+ * 版权所有(C) TRUECOREING
+ * DEPARTMENT:
+ * MANUAL_PERCENT:
+ * 文件名称: CN1000_GlobalVal.h 
+ * 文件标识:    
+ * 内容摘要: 
+ * 其它说明:
+ * 当前版本: 
+ * 作    者: 
+ * 完成日期:
+ * 当前责任人: 
+ *
+ * 修改记录1: 代码合规
+ * 修改日期: 2014-09-15
+ * 版 本 号:
+ * 修 改 人: Wangpc
+ * 修改内容: 
+ *
+ * 修改记录2: Add one feature that acquire 10 fingers then parse 5 fingers 
+ * 修改日期: 2014-11-12
+ * 版 本 号:
+ * 修 改 人: Wangpc(R01)
+ * 修改内容: 
+ *****************************************************************************/
+
 #ifndef GLOBSLVAR_H
 #define  GLOBSLVAR_H
 
@@ -108,14 +134,14 @@ typedef struct
 {
     uint16_t Doze_FirstIn      : 2; // Bit1:0   Useful
     uint16_t Doze_OddNum       : 1; // Bit2     Useless now
-} MTDCtrl;	
+} MTDCtrl;
 
 typedef struct
 {
     uint16_t Flag       : 1; // Bit0     
     uint16_t WFNum      : 7; // Bit7:1   
     uint16_t BigNum     : 7; // Bit14:8  
-} FaceDetCtrl;	
+} FaceDetCtrl;
 
 typedef struct
 {
@@ -153,7 +179,7 @@ typedef struct
     uint8_t        AdjustCount;
     uint8_t        AbnormalUpdateDelay;
     int16_t        DeltaSumMaxThreshold;
-    int32_t        DeltaSum;	
+    int32_t        DeltaSum;
 } BaseBufferDef;
 
 //typedef struct
@@ -364,6 +390,8 @@ typedef struct BasData {
     uint32_t  TxRxjFCAP;
 #endif
   
+    uint16_t FingerReqNum;   //R01 -a
+
 } BasData_t;
 
 #define VarSL(x,v,m)  do {                                 \

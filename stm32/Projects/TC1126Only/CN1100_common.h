@@ -1,3 +1,29 @@
+/******************************************************************************
+ * 版权所有(C) TRUECOREING
+ * DEPARTMENT:
+ * MANUAL_PERCENT:
+ * 文件名称: CN1000_common.h 
+ * 文件标识:    
+ * 内容摘要: 
+ * 其它说明:
+ * 当前版本: 
+ * 作    者: 
+ * 完成日期:
+ * 当前责任人: 
+ *
+ * 修改记录1: 代码合规
+ * 修改日期: 2014-09-15
+ * 版 本 号:
+ * 修 改 人: Wangpc
+ * 修改内容: 
+ *
+ * 修改记录2: Add one feature that acquire 10 fingers then parse 5 fingers 
+ * 修改日期: 2014-11-12
+ * 版 本 号:
+ * 修 改 人: Wangpc(R01)
+ * 修改内容: 
+ *****************************************************************************/
+
 #ifndef CN1000_COMMON_H
 #define  CN1000_COMMON_H
 
@@ -132,7 +158,7 @@
 //#define SCREEN_NONE_ADAPTIVE               // None Adaptive parameter for different screen
 //#define SCREEN_SIMPLE_ADAPTIVE             // Simple Adaptive parameter for different screen
 #define SCREEN_FULL_ADAPTIVE                 // Full Adaptive parameter for different screen
-//#define CHANNEL_ADAPTIVE                     // Channel adaptive for adjust channel or point fcap
+#define CHANNEL_ADAPTIVE                     // Channel adaptive for adjust channel or point fcap
 
 #ifdef SCREEN_FULL_ADAPTIVE
 #define CIRCLE_MAXCOUNT         16           // 穷举的最大次数
@@ -146,14 +172,16 @@
 #define ABCHVALUE_THRESHOLD     800         // 各个通道平均值与总的平均值差值限度
 #define ABCHANDPOINT_MAXNUM     2           // 可调节的通道、异常点最大数目
 #define ABNORMALPOINT_MAXNUM    4           // 最大值、最小值、次大值、次小值
-#define ABPOINTMAX_THRESHOLD    3200        // 异常点最大值限度
-#define ABPOINTMIN_THRESHOLD    300         // 异常点最小值限度
+#define ABPOINTMAX_THRESHOLD    3500        // 异常点最大值限度
+#define ABPOINTMIN_THRESHOLD    500         // 异常点最小值限度
 #define ABCHANDPOINT_MAXNUM     2           // 可调节的通道、异常点最大数目
 #define ABNORMALPOINT_MAXNUM    4           // 最大值、最小值、次大值、次小值
 #endif
 
 
 #define SUPER_FILTER4EDGE
+//#define SUPER_FILTER4EDGE_DEBUGSHOW
+#define DUALDIR_SUPER_FILTER
 #define FROMOUT2IN_INORDER
 #define SUPFIL_RANGE          256
 
@@ -263,7 +291,9 @@
 #define ADC_SPEED_SET          ADCM_ADC_SPEED_DIV4
 #define ACS_SPEED_SET          ADCM_ACS_DIV01
 
-#define FINGER_NUM_MAX         5
+#define FINGER_NUM_MAX         6  //R01 -m
+#define FINGER_REQUIREMENT_NUM 5   //R01 -a(5,4,3,2,1 has tested)
+
 #define DEBUG_VALUE_NUM_MAX    10
 
 #define CALINUM_EVERYSTEP      5  // FrequencyHopByStretch
@@ -292,7 +322,7 @@
 #ifdef CN1100_ATM 
 #define BIGNOISE                       400
 #else
-#define BIGNOISE                       50
+#define BIGNOISE                       200
 #endif
 #endif
 

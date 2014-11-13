@@ -1640,7 +1640,12 @@ void LCD_Show_Line(void)
 {
     uint16_t i,X[FINGER_NUM_MAX],Y[FINGER_NUM_MAX];
     uint16_t cnt = 0;
-    unsigned int LineColor[FINGER_NUM_MAX] = {LCD_COLOR_RED, LCD_COLOR_BLUE, LCD_COLOR_BLACK, LCD_COLOR_YELLOW, LCD_COLOR_GREY};
+
+    unsigned int LineColor5[5] = {LCD_COLOR_RED, LCD_COLOR_BLUE, LCD_COLOR_BLACK, LCD_COLOR_YELLOW, LCD_COLOR_GREY};
+    unsigned int cnum, LineColor[FINGER_NUM_MAX];
+    cnum = FINGER_NUM_MAX;
+    if(cnum>5) cnum = 5;
+    for(i=0; i<cnum; i++) LineColor[i]= LineColor5[i];
 
     if(0 == bdt.LcdIsrFlag)
     for (i=0; i<FINGER_NUM_MAX; i++)
