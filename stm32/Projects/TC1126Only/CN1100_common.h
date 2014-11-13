@@ -2,7 +2,7 @@
  * 版权所有(C) TRUECOREING
  * DEPARTMENT:
  * MANUAL_PERCENT:
- * 文件名称: CN1000_data.c 
+ * 文件名称: CN1000_common.h 
  * 文件标识:    
  * 内容摘要: 
  * 其它说明:
@@ -156,8 +156,8 @@
 //#define FOURPOINTS4STICKMOVING         // Four Ponts is needed for Stick Finger moving
 
 //#define SCREEN_NONE_ADAPTIVE               // None Adaptive parameter for different screen
-#define SCREEN_SIMPLE_ADAPTIVE             // Simple Adaptive parameter for different screen
-//#define SCREEN_FULL_ADAPTIVE                 // Full Adaptive parameter for different screen
+//#define SCREEN_SIMPLE_ADAPTIVE             // Simple Adaptive parameter for different screen
+#define SCREEN_FULL_ADAPTIVE                 // Full Adaptive parameter for different screen
 //#define CHANNEL_ADAPTIVE                     // Channel adaptive for adjust channel or point fcap
 
 #ifdef SCREEN_FULL_ADAPTIVE
@@ -180,6 +180,8 @@
 
 
 #define SUPER_FILTER4EDGE
+//#define SUPER_FILTER4EDGE_DEBUGSHOW
+#define DUALDIR_SUPER_FILTER
 #define FROMOUT2IN_INORDER
 #define SUPFIL_RANGE          256
 

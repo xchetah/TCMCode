@@ -2,7 +2,7 @@
  * 版权所有(C) TRUECOREING
  * DEPARTMENT:
  * MANUAL_PERCENT:
- * 文件名称: CN1000_data.c 
+ * 文件名称: TC1126_hwService.c
  * 文件标识:    
  * 内容摘要: 
  * 其它说明:
@@ -1111,7 +1111,7 @@ void TC1126_Init_GlobalVariables(void)
         bdt.AbnormalPoint[i] = 0;
     }
     #endif
-	bdt.FingerReqNum = FINGER_REQUIREMENT_NUM;   //R01 -a
+    bdt.FingerReqNum = FINGER_REQUIREMENT_NUM;   //R01 -a
 }
 
 /******************************************************************************

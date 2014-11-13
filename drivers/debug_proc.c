@@ -234,10 +234,10 @@ ssize_t chm_proc_read(struct file *file, char __user *buf, size_t size, loff_t *
             wait_event_interruptible(spidev->waitq,(spidev->mode & CN1100_DATA_PREPARED));
             
             #ifdef SHOW_H_DATA
-            bdt.DeltaDat16A[0][1] = bdt.Left_h;
-            bdt.DeltaDat16A[0][2] = bdt.Right_h; 
-            bdt.DeltaDat16A[0][3] = bdt.Top_h;
-            bdt.DeltaDat16A[0][4] = bdt.Bottom_h;
+            bdt.DeltaDat16A[0][0] = bdt.Left_h;
+            bdt.DeltaDat16A[0][1] = bdt.Right_h; 
+            bdt.DeltaDat16A[0][2] = bdt.Top_h;
+            bdt.DeltaDat16A[0][3] = bdt.Bottom_h;
             #endif
             if(copy_to_user(buf,&bdt.DeltaDat16A[0][0],len)){
                 printk("copy failed\n");
