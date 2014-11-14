@@ -393,7 +393,7 @@ typedef struct BasData {
 	#ifdef OUTSCREEN4EDGE
 	uint16_t   Debug_X;
 	uint16_t   Debug_Y;
-	uint16_t   Debug_Z;
+	int16_t   Debug[12];
 	uint16_t   EdgeDirFlag;
 	#endif
 

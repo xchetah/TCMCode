@@ -1116,7 +1116,8 @@ void TC1126_Init_GlobalVariables(void)
 	#ifdef OUTSCREEN4EDGE
 	bdt.Debug_X = 0;
 	bdt.Debug_Y = 0;
-	bdt.Debug_Z = 0;
+	for(i=0; i<12; i++)
+		bdt.Debug[i] = 0;
 	bdt.EdgeDirFlag = 0;
 	#endif
 	

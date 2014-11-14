@@ -240,9 +240,15 @@ ssize_t chm_proc_read(struct file *file, char __user *buf, size_t size, loff_t *
             bdt.DeltaDat16A[0][3] = bdt.Bottom_h;
             #endif
 			#ifdef OUTSCREEN4EDGE
-			bdt.DeltaDat16A[0][1] = bdt.Debug_X;
-			bdt.DeltaDat16A[0][2] = bdt.Debug_Y;
-			bdt.DeltaDat16A[0][3] = bdt.Debug_Z;
+			for(j=0; j<7; j++)
+			{
+				bdt.DeltaDat16A[0][j+1] = bdt.Debug[j];
+			}
+			bdt.DeltaDat16A[0][8] = bdt.Debug_X;
+			bdt.DeltaDat16A[0][9] = bdt.Debug_Y;
+			bdt.DeltaDat16A[1][0] = bdt.Debug[7];
+			bdt.DeltaDat16A[1][1] = bdt.Debug[8];
+			bdt.DeltaDat16A[1][2] = bdt.Debug[9];
 			#endif
             if(copy_to_user(buf,&bdt.DeltaDat16A[0][0],len)){
                 printk("copy failed\n");
