@@ -1395,6 +1395,53 @@ void FingProc_ShowXYResultOnLine(uint16_t line)
 #endif
 }
 
+
+#ifdef OUTSCREEN4EDGE
+/*******************************************************************************
+* Function Name  : FingProc_OutScreen4Edge
+* Description    : 
+* Input          : 
+* Output         : 
+* Return         : 
+*******************************************************************************/
+void FingProc_OutScreen4Edge(uint16_t idx, uint16_t curx, uint16_t cury, uint16_t *x, uint16_t *y)
+{
+	uint16_t i = 0;
+	uint16_t dx[STOREPOSNUM];
+	uint16_t dy[STOREPOSNUM];
+
+	for(i=0; i<STOREPOSNUM; i++)
+	{
+		if(i == 0)
+			dx[0] = curx - x[0];
+		else
+			dx[i] = x[i-1] - x[i];
+	}
+
+	for(i=0; i<STOREPOSNUM; i++)
+	{
+		if(i == 0)
+			dy[0] = cury - y[0];
+		else
+			dy[i] = y[i-1] - y[i];
+	}
+	bdt.Debug_X = dx[0];
+	bdt.Debug_Y = dx[1];
+	bdt.Debug_Z = dx[2];
+	for(i=0; i<STOREPOSNUM; i++)
+	{
+		if((abs16(dx[i]) > 0)&&(abs16(dx[i]) < 10))				// 不沿X方向
+		{
+			if((abs16(dy[i]) > 0)&&(abs16(dy[i]) < 10))			// 不沿Y方向
+			{
+				bdt.EdgeDirFlag = 1;
+			}
+		}
+	}
+}
+#endif
+
+
 /*******************************************************************************
 * Function Name  : FingProc_MultiFilterProcess
 * Description    : 
@@ -1416,6 +1463,29 @@ void FingProc_MultiFilterProcess(uint16_t i, uint16_t curx, uint16_t cury, uint1
     
     bdt.DPD[i].Finger_X_Reported = bdt.DPD[i].Finger_X_XMTR;
     bdt.DPD[i].Finger_Y_Reported = bdt.DPD[i].Finger_Y_RECV;
+
+	#ifdef OUTSCREEN4EDGE
+	curx = bdt.DPD[i].Finger_X_Reported;
+	cury = bdt.DPD[i].Finger_Y_Reported;
+	
+	FingProc_OutScreen4Edge(i, curx, cury, x, y);
+	
+	//bdt.Debug_X = bdt.DPD[i].Finger_X_Reported;
+	//bdt.Debug_Y = bdt.DPD[i].Finger_Y_Reported;
+	if(bdt.DPD[i].Finger_X_Reported > ((SXMTR_NUM<<8)-MAX_MAP_VALUE))
+	{
+		if(bdt.EdgeDirFlag)
+		{
+			if(bdt.DPD[i].Finger_X_Reported > ((SXMTR_NUM<<8)-38))
+			{
+				bdt.EdgeDirFlag = 0;
+				bdt.DPD[i].Finger_X_Reported = 0;
+				bdt.DPD[i].Finger_Y_Reported = 0;
+			}
+		}
+	}	
+	#endif
+	
     #if 0
     {
         uint16_t max=0, mini=0xffff, cury;
@@ -1897,19 +1967,19 @@ void FingProc_FromStickCaseProcess(uint16_t i, uint16_t FF, uint16_t curx, uint1
             bdt.DPD[i].LifeNumber++;
         }
         /*****************************************************************
-                  * 正常计算 手指点滤波过程
-                  ******************************************************************/
+        * 正常计算 手指点滤波过程
+        ******************************************************************/
         FingProc_MultiFilterProcess(i, curx, cury, x, y);
         
         /*****************************************************************
-                  * 但是不报告 到HOST系统 目前的手指点，报告到HOST的依旧是以前的点
-                  ******************************************************************/
+        * 但是不报告 到HOST系统 目前的手指点，报告到HOST的依旧是以前的点
+        ******************************************************************/
         bdt.DPD[i].Finger_X_Reported = x[bdt.DPD[i].FingerStateFlag - STATE_S_OUT1_FINGER+2]; 
         bdt.DPD[i].Finger_Y_Reported = y[bdt.DPD[i].FingerStateFlag - STATE_S_OUT1_FINGER+2]; 
         
         /*****************************************************************
-                  * 首先判断 最新手指点 到 基地手指点之间的距离 是否太近了?
-                  ******************************************************************/ 
+        * 首先判断 最新手指点 到 基地手指点之间的距离 是否太近了?
+        ******************************************************************/ 
         if(FingProc_Dist2PMeasure(curx, cury, bdt.DPD[i].Finger_X_Reported, bdt.DPD[i].Finger_Y_Reported) < bdt.ThrLow4DistanceFilter)
         {
             /********************************************
@@ -1925,9 +1995,9 @@ void FingProc_FromStickCaseProcess(uint16_t i, uint16_t FF, uint16_t curx, uint1
         }
         else
         {
-         /********************************************
-         * 手指点依旧离基地有距离
-         **********************************************/
+            /********************************************
+            * 手指点依旧离基地有距离
+            **********************************************/
             bdt.DPD[i].FingerStateFlag  = NextFingerState;
             FingProc_SmallAngleTringleProcess(i, x, y, STATE_STAYAT_FINGER);
             FingProc_unreasonblespeedProcess(i, x, y, STATE_STAYAT_FINGER);
@@ -1957,7 +2027,7 @@ void FingProc_ImproveByMultiFilters(void)
         cury = bdt.DPD[i].Finger_Y_RECV;    /* Just calculated from raw data */
         if(curx || cury)
         {
-            FINGER_FLAG = 1;   /* Make sure there is finger @ i (index)*/
+            FINGER_FLAG = 1;                /* Make sure there is finger @ i (index)*/
         }
         else
         {    
@@ -3893,9 +3963,25 @@ uint16_t FingProc_XMTR_NolinearMapping_Left(uint16_t h)
     #endif
     
 #ifdef BORDER_SIMPLE_ADJUSTABLE
-    h = h<<1;
-	result = (((h>>5)+1)<<5)-16;
-    if(result > 230) result = 230;
+	#ifdef OUTSCREEN4EDGE
+	//result = h<<1;
+	result = h;
+    if(h > 64)
+    {
+        h = h - 64;
+        result += (h>>1);
+        if(h >= 16)
+        {
+            do 
+            {
+                h -= 16;
+                result += h;
+            } while(h >= 16);
+            result += h;
+        }
+    }
+    if(result > 240) result = 240;
+	#endif
 #else
     #ifdef CN1100_WINNER                    
     if(h < 16)    
@@ -4065,9 +4151,25 @@ uint16_t FingProc_XMTR_NolinearMapping_Right(uint16_t h)
     #endif
 
 #ifdef BORDER_SIMPLE_ADJUSTABLE
-    h = h<<1;
-	result = (((h>>5)+1)<<5)-16;
-    if(result > 230) result = 230;
+    #ifdef OUTSCREEN4EDGE
+	//result = h<<1;
+	result = h;
+    if(h > 64)
+    {
+        h = h - 64;
+        result += (h>>1);
+        if(h >= 16)
+        {
+            do 
+            {
+                h -= 16;
+                result += h;
+            } while(h >= 16);
+            result += h;
+        }
+    }
+    if(result > 240) result = 240;
+	#endif
 #else
     #ifdef CN1100_WINNER                    
     if(h < 16)
@@ -4253,9 +4355,25 @@ uint16_t FingProc_RECV_NolinearMapping_Top(uint16_t h)
     #endif
 
 #ifdef BORDER_SIMPLE_ADJUSTABLE
-    h = h<<1;
-	result = (((h>>5)+1)<<5)-16;
-    if(result > 230) result = 230;
+    #ifdef OUTSCREEN4EDGE
+	//result = h<<1;
+	result = h;
+    if(h > 64)
+    {
+        h = h - 64;
+        result += (h>>1);
+        if(h >= 16)
+        {
+            do 
+            {
+                h -= 16;
+                result += h;
+            } while(h >= 16);
+            result += h;
+        }
+    }
+    if(result > 240) result = 240;
+	#endif
 #else
     #ifdef CN1100_WINNER                    
     if(h < 16)   
@@ -4433,9 +4551,25 @@ uint16_t FingProc_RECV_NolinearMapping_Bottom(uint16_t h)
     #endif
 
 #ifdef BORDER_SIMPLE_ADJUSTABLE
-    h = h<<1;
-	result = (((h>>5)+1)<<5)-16;
-    if(result > 230) result = 230;
+    #ifdef OUTSCREEN4EDGE
+	//result = h<<1;
+	result = h;
+    if(h > 64)
+    {
+        h = h - 64;
+        result += (h>>1);
+        if(h >= 16)
+        {
+            do 
+            {
+                h -= 16;
+                result += h;
+            } while(h >= 16);
+            result += h;
+        }
+    }
+    if(result > 240) result = 240;
+	#endif
 #else
     #ifdef CN1100_WINNER                     
     if(h < 16)   
@@ -4599,7 +4733,6 @@ uint16_t FingProc_RECV_NolinearMapping_Bottom(uint16_t h)
 }
 
 
-
 /*******************************************************************************
 * Function Name  : 
 * Description    : 
@@ -4651,6 +4784,17 @@ void FingProc_ImproveEdgePoint(void)
             bdt.Bottom_h=h;
             #endif
             bdt.DPD[index].Finger_Y_RECV = ((SRECV_NUM<<8) - MAX_MAP_VALUE) + FingProc_RECV_NolinearMapping_Bottom(h);
+
+			#ifdef OUTSCREEN4EDGE
+			//bdt.Debug_X = bdt.DPD[index].Finger_X_XMTR;
+			//bdt.Debug_Y = bdt.DPD[index].Finger_Y_RECV;
+			if(bdt.DPD[index].Finger_Y_RECV > ((SRECV_NUM<<8)-50))
+			{
+				//bdt.Debug_Y = bdt.DPD[index].Finger_Y_RECV;
+				//bdt.DPD[index].Finger_X_XMTR = 0;
+				//bdt.DPD[index].Finger_Y_RECV = 0;
+			}
+			#endif
         }
     }
 }

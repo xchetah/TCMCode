@@ -931,6 +931,7 @@ void TC1126_Init_GlobalVariables(void)
             bdt.DPD[i].Prev_Finger_X[j]  = 0;
             bdt.DPD[i].Prev_Finger_Y[j]  = 0;
         }
+
         
         bdt.DPD[i].EdgeInfo.EdgeNum = 0;
         bdt.DPD[i].EdgeInfo.PrevEdgeNum = 0;
@@ -1111,6 +1112,14 @@ void TC1126_Init_GlobalVariables(void)
         bdt.AbnormalPoint[i] = 0;
     }
     #endif
+	
+	#ifdef OUTSCREEN4EDGE
+	bdt.Debug_X = 0;
+	bdt.Debug_Y = 0;
+	bdt.Debug_Z = 0;
+	bdt.EdgeDirFlag = 0;
+	#endif
+	
     bdt.FingerReqNum = FINGER_REQUIREMENT_NUM;   //R01 -a
 }
 
