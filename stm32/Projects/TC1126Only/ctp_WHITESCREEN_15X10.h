@@ -38,7 +38,7 @@
 #define DOZE_LOREF_GAIN_SET  REF_GAIN_12PF
 #define DOZE_TX_DRIVE_PL     TX_DRIVE_NORM
 
-#define DOZE_TXREADNUM       2
+#define DOZE_TXREADNUM       3
 
 
 #define XMTR_STR             0
