@@ -396,7 +396,8 @@ typedef struct BasData {
     uint16_t   Debug_Y;
     int16_t    Debug[12];
     #endif
-    uint16_t   EdgeDirFlag;
+	uint16_t   EdgeCount;
+    uint16_t   SlipDirFlag;
     #endif
 
     uint16_t FingerReqNum;   //R01 -a

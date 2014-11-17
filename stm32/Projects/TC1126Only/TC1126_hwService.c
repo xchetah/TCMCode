@@ -1120,7 +1120,8 @@ void TC1126_Init_GlobalVariables(void)
     for(i=0; i<12; i++)
         bdt.Debug[i] = 0;
     #endif
-    bdt.EdgeDirFlag = 0;
+    bdt.SlipDirFlag = 0;
+	bdt.EdgeCount = 0;
     #endif
     
     bdt.FingerReqNum = FINGER_REQUIREMENT_NUM;   //R01 -a
