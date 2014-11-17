@@ -1458,47 +1458,47 @@ void FingProc_JudgeSlippingDir(uint16_t idx, uint16_t curx, uint16_t cury, uint1
             }
         }
     }
-	
-	if(dirx == 1)
-		bdt.SlipDirFlag = 1;					// X方向画直线
-	else if(diry == 4)
-		bdt.SlipDirFlag = 2;					// Y方向画直线
-	else if(dirx == 2)							// 沿X正方向画线
-	{
-		switch(diry)
-		{
-			case 5:
-				bdt.SlipDirFlag = 3;			// 右下方向
-				break;
-			case 6:
-				bdt.SlipDirFlag = 4;			// 右上方向
-				break;
-			default:
-				break;
-		}
-	}
-	else if(dirx == 3)							// 沿X负方向画线
-	{
-		switch(diry)
-		{
-			case 5:
-				bdt.SlipDirFlag = 5;			// 左下方向
-				break;
-			case 6:
-				bdt.SlipDirFlag = 6;			// 左上方向
-				break;
-			default:
-				break;
-		}
-	}
+    
+    if(dirx == 1)
+        bdt.SlipDirFlag = 1;                    // X方向画直线
+    else if(diry == 4)
+        bdt.SlipDirFlag = 2;                    // Y方向画直线
+    else if(dirx == 2)                          // 沿X正方向画线
+    {
+        switch(diry)
+        {
+            case 5:
+                bdt.SlipDirFlag = 3;            // 右下方向
+                break;
+            case 6:
+                bdt.SlipDirFlag = 4;            // 右上方向
+                break;
+            default:
+                break;
+        }
+    }
+    else if(dirx == 3)                          // 沿X负方向画线
+    {
+        switch(diry)
+        {
+            case 5:
+                bdt.SlipDirFlag = 5;            // 左下方向
+                break;
+            case 6:
+                bdt.SlipDirFlag = 6;            // 左上方向
+                break;
+            default:
+                break;
+        }
+    }
 
-	#ifdef DIRDEBUG
+    #ifdef DIRDEBUG
     bdt.Debug_X = dirx;
     bdt.Debug_Y = diry; 
     bdt.Debug[8] = countx;
     bdt.Debug[9] = county;
-	bdt.Debug[10] = bdt.SlipDirFlag;
-	#endif
+    bdt.Debug[10] = bdt.SlipDirFlag;
+    #endif
 }
 
 
@@ -1545,21 +1545,21 @@ void FingProc_JudgeSlippingXYDir(uint16_t idx, uint16_t curx, uint16_t cury, uin
     #endif
     for(i=0; i<3; i++)
     {
-    	if(abs16(dx[i]) < thr)
-    	{
-			countx++;
-			if(countx == 3)
-				bdt.SlipDirFlag = 1;
-		}
-		if(abs16(dy[i]) < thr)
-    	{
-			county++;
-			if(county == 3)
-				bdt.SlipDirFlag = 2;
-		}	
-		
+        if(abs16(dx[i]) < thr)
+        {
+            countx++;
+            if(countx == 3)
+                bdt.SlipDirFlag = 1;
+        }
+        if(abs16(dy[i]) < thr)
+        {
+            county++;
+            if(county == 3)
+                bdt.SlipDirFlag = 2;
+        }   
+        
     }
-	bdt.Debug[10] = bdt.SlipDirFlag;
+    bdt.Debug[10] = bdt.SlipDirFlag;
 }
 #endif
 
@@ -1584,37 +1584,37 @@ void FingProc_MultiFilterProcess(uint16_t i, uint16_t curx, uint16_t cury, uint1
     bdt.DPD[i].Finger_X_Reported = bdt.DPD[i].Finger_X_XMTR;
     bdt.DPD[i].Finger_Y_Reported = bdt.DPD[i].Finger_Y_RECV;
 
-	#ifdef SLIPDIRJUDGEMENT
-	curx = bdt.DPD[i].Finger_X_Reported;
-	cury = bdt.DPD[i].Finger_Y_Reported;
-	
-	FingProc_JudgeSlippingXYDir(i, curx, cury, x, y);
+    #ifdef SLIPDIRJUDGEMENT
+    curx = bdt.DPD[i].Finger_X_Reported;
+    cury = bdt.DPD[i].Finger_Y_Reported;
+    
+    FingProc_JudgeSlippingXYDir(i, curx, cury, x, y);
 
-	#if 0
-	if((bdt.SlipDirFlag != 1)&&(bdt.SlipDirFlag != 2))
-	{
-		if(bdt.DPD[i].Finger_X_Reported > ((SXMTR_NUM<<8)-MAX_MAP_VALUE))		// 右边界
-		{
-			if(bdt.DPD[i].Finger_X_Reported > ((SXMTR_NUM<<8)-38))
-			{
-				bdt.Debug[7] = 3333;
-				bdt.SlipDirFlag = 0;
-				if(x[0] < ((SXMTR_NUM<<8)-MAX_MAP_VALUE))
-				{
-					bdt.Debug_X = bdt.DPD[i].Finger_X_Reported;
-					bdt.Debug_Y = bdt.DPD[i].Finger_Y_Reported;
-				}
-				else
-				{
-					bdt.DPD[i].Finger_X_Reported = bdt.Debug_X;
-					bdt.DPD[i].Finger_Y_Reported = bdt.Debug_Y;
-				}
-			}
-		}
-	}
-	bdt.SlipDirFlag = 0;
-	#endif
-	#endif
+    #if 0
+    if((bdt.SlipDirFlag != 1)&&(bdt.SlipDirFlag != 2))
+    {
+        if(bdt.DPD[i].Finger_X_Reported > ((SXMTR_NUM<<8)-MAX_MAP_VALUE))       // 右边界
+        {
+            if(bdt.DPD[i].Finger_X_Reported > ((SXMTR_NUM<<8)-38))
+            {
+                bdt.Debug[7] = 3333;
+                bdt.SlipDirFlag = 0;
+                if(x[0] < ((SXMTR_NUM<<8)-MAX_MAP_VALUE))
+                {
+                    bdt.Debug_X = bdt.DPD[i].Finger_X_Reported;
+                    bdt.Debug_Y = bdt.DPD[i].Finger_Y_Reported;
+                }
+                else
+                {
+                    bdt.DPD[i].Finger_X_Reported = bdt.Debug_X;
+                    bdt.DPD[i].Finger_Y_Reported = bdt.Debug_Y;
+                }
+            }
+        }
+    }
+    bdt.SlipDirFlag = 0;
+    #endif
+    #endif
 
 	FingProc_TapFilterStateUpdate(i);
 	

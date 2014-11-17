@@ -1074,7 +1074,7 @@ void TC1126_Init_GlobalVariables(void)
         bdt.Debug[i] = 0;
     #endif
     bdt.SlipDirFlag = 0;
-	bdt.EdgeCount = 0;
+    bdt.EdgeCount = 0;
     #endif
     
     bdt.FingerReqNum = FINGER_REQUIREMENT_NUM;   //R01 -a

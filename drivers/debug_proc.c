@@ -124,7 +124,8 @@ int chm_ts_write_config(cn1100_t config)
         {
             pp[config.index] = config.value;
             if(config.index >= 6 && config.index <= 11){
-            TC1126_Init_VarRegSetting();
+                //TC1126_Init_VarRegSetting();              // unused
+                ;
             }else if(config.index == 12){
             printk("write config:%d,%d\n",config.index,config.value);
             if(1 == config.value)
@@ -250,7 +251,7 @@ ssize_t chm_proc_read(struct file *file, char __user *buf, size_t size, loff_t *
             bdt.DeltaDat16A[1][0] = bdt.Debug[7];
             bdt.DeltaDat16A[1][1] = bdt.Debug[8];
             bdt.DeltaDat16A[1][2] = bdt.Debug[9];
-			bdt.DeltaDat16A[1][3] = bdt.Debug[10];
+            bdt.DeltaDat16A[1][3] = bdt.Debug[10];
             #endif
             #endif
             if(copy_to_user(buf,&bdt.DeltaDat16A[0][0],len)){

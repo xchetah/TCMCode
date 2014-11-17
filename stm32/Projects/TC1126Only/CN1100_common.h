@@ -170,6 +170,9 @@
 #define REASONABLE_VALUE        2048         // 穷举中希望接近的原始值
 #endif
 
+//#define SLIPDIRJUDGEMENT
+//#define DIRDEBUG
+
 #define INVALID_CHORPOINT       15          // 无效的通道或者点
 
 #ifdef CHANNEL_ADAPTIVE
