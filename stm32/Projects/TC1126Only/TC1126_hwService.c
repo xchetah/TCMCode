@@ -1112,15 +1112,17 @@ void TC1126_Init_GlobalVariables(void)
         bdt.AbnormalPoint[i] = 0;
     }
     #endif
-	
-	#ifdef OUTSCREEN4EDGE
-	bdt.Debug_X = 0;
-	bdt.Debug_Y = 0;
-	for(i=0; i<12; i++)
-		bdt.Debug[i] = 0;
-	bdt.EdgeDirFlag = 0;
-	#endif
-	
+    
+    #ifdef SLIPDIRJUDGEMENT
+    #ifdef DIRDEBUG
+    bdt.Debug_X = 0;
+    bdt.Debug_Y = 0;
+    for(i=0; i<12; i++)
+        bdt.Debug[i] = 0;
+    #endif
+    bdt.EdgeDirFlag = 0;
+    #endif
+    
     bdt.FingerReqNum = FINGER_REQUIREMENT_NUM;   //R01 -a
 }
 

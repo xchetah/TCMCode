@@ -178,8 +178,8 @@
 #define ABNORMALPOINT_MAXNUM    4           // 最大值、最小值、次大值、次小值
 #endif
 
-#define OUTSCREEN4EDGE
-#define STOREPOSNUM			  3
+//#define SLIPDIRJUDGEMENT
+//#define DIRDEBUG
 
 #define SUPER_FILTER4EDGE
 //#define SUPER_FILTER4EDGE_DEBUGSHOW

@@ -1396,7 +1396,7 @@ void FingProc_ShowXYResultOnLine(uint16_t line)
 }
 
 
-#ifdef OUTSCREEN4EDGE
+#ifdef SLIPDIRJUDGEMENT
 /*******************************************************************************
 * Function Name  : FingProc_JudgeSlippingDir
 * Description    : 判断手指滑动趋势
@@ -1406,82 +1406,104 @@ void FingProc_ShowXYResultOnLine(uint16_t line)
 *******************************************************************************/
 void FingProc_JudgeSlippingDir(uint16_t idx, uint16_t curx, uint16_t cury, uint16_t *x, uint16_t *y)
 {
-	uint16_t i = 0;
-	int16_t countx = 0;
-	int16_t county = 0;
-	uint16_t dirx = 0;
-	uint16_t diry = 0;
-	int16_t dx[STOREPOSNUM];
-	int16_t dy[STOREPOSNUM];
+    uint16_t i = 0;
+    int16_t countx = 0;
+    int16_t county = 0;
+    uint16_t dirx = 0;
+    uint16_t diry = 0;
+    uint16_t thr = 20;                      // 方向判断门限值
+    int16_t dx[3];
+    int16_t dy[3];
 
-	for(i=0; i<STOREPOSNUM; i++)
-	{
-		if(i == 0)
-			dx[0] = curx - x[0];
-		else
-			dx[i] = x[i-1] - x[i];
-	}
+    for(i=0; i<3; i++)
+    {
+        if(i == 0)
+            dx[0] = curx - x[0];
+        else
+            dx[i] = x[i-1] - x[i];
+    }
 
-	for(i=0; i<STOREPOSNUM; i++)
-	{
-		if(i == 0)
-			dy[0] = cury - y[0];
-		else
-			dy[i] = y[i-1] - y[i];
-	}
-	bdt.Debug[0] = dx[0];
-	bdt.Debug[1] = dx[1];
-	bdt.Debug[2] = dx[2];
-	bdt.Debug[3] = 1111;
-	bdt.Debug[4] = dy[0];
-	bdt.Debug[5] = dy[1];
-	bdt.Debug[6] = dy[2];
-	for(i=0; i<STOREPOSNUM; i++)
-	{
-		if(dx[i] < 0)
-		{
-			bdt.Debug[7] = 2222;
-			countx = countx-1;
-			if(countx == (-STOREPOSNUM))
-				dirx = 2;				// backward
-		}
-		if(dx[i] > 0)
-		{
-			countx++;
-			if(countx == STOREPOSNUM)
-				dirx = 1;				// forward
-		}
-		
-		if((dx[i] == 0)&&(dy[0]||dy[1]||dy[2]))
-		{
-			county++;
-			if(county == STOREPOSNUM)
-				diry = 3;				// linearity
-		}
+    for(i=0; i<3; i++)
+    {
+        if(i == 0)
+            dy[0] = cury - y[0];
+        else
+            dy[i] = y[i-1] - y[i];
+    }
 
-		if(dy[i] > 0)
-		{
-			county++;
-			if(county == STOREPOSNUM)
-				diry = 4;				// down
-		}
-		if(dy[i] < 0)
-		{
-			county = county-1;
-			if(county == (-STOREPOSNUM))
-				diry = 5;				// up
-		}
-		if((dy[i] == 0)&&(dx[0]||dx[1]||dx[2]))
-		{
-			countx++;
-			if(countx == STOREPOSNUM)
-				dirx = 6;				// linearity
-		}
-	}
-	bdt.Debug_X = dirx;
-	bdt.Debug_Y = diry;	
-	bdt.Debug[8] = countx;
-	bdt.Debug[9] = county;
+    #ifdef DIRDEBUG
+    bdt.Debug[0] = dx[0];
+    bdt.Debug[1] = dx[1];
+    bdt.Debug[2] = dx[2];
+    bdt.Debug[3] = 1111;
+    bdt.Debug[4] = dy[0];
+    bdt.Debug[5] = dy[1];
+    bdt.Debug[6] = dy[2];
+    #endif
+    for(i=0; i<3; i++)
+    {
+        if((abs16(dy[i]) <= thr)&&((dx[0]!=0)&&(dx[1]!=0)&&(dx[2]!=0)))     // start X direction judgement
+        {
+            countx++;
+            if(countx == 3)
+            {
+                countx = 0;
+                dirx = 6;               // linearity    forward or backward
+            }
+        }
+        else if(dx[i] > thr)
+        {
+            countx++;
+            if(countx == 3)
+            {
+                countx = 0;
+                dirx = 1;               // forward
+            }
+                
+        }
+        else if(dx[i] < -thr)
+        {
+            bdt.Debug[7] = 2222;
+            countx = countx-1;
+            if(countx == (-3))
+            {
+                countx = 0;
+                dirx = 2;               // backward
+            }
+        }
+
+        if((abs16(dx[i]) <= thr)&&((dy[0]!=0)&&(dy[1]!=0)&&(dy[2]!=0)))     // start X direction judgement
+        {
+            county++;
+            if(county == 3)
+            {
+                county = 0;
+                diry = 3;               // linearity    up or down
+            }
+        }
+        else if(dy[i] > thr)
+        {
+            county++;
+            if(county == 3)
+            {
+                county = 0;
+                diry = 4;               // down
+            }
+        }
+        else if(dy[i] < -thr)
+        {
+            county = county-1;
+            if(county == (-3))
+            {
+                county = 0;
+                diry = 5;               // up
+            }
+        }
+    }
+    bdt.Debug_X = dirx;
+    bdt.Debug_Y = diry; 
+    bdt.Debug[8] = countx;
+    bdt.Debug[9] = county;
 }
 #endif
 
@@ -1506,38 +1528,11 @@ void FingProc_MultiFilterProcess(uint16_t i, uint16_t curx, uint16_t cury, uint1
     bdt.DPD[i].Finger_X_Reported = bdt.DPD[i].Finger_X_XMTR;
     bdt.DPD[i].Finger_Y_Reported = bdt.DPD[i].Finger_Y_RECV;
 
-	#ifdef OUTSCREEN4EDGE
+	#ifdef SLIPDIRJUDGEMENT
 	curx = bdt.DPD[i].Finger_X_Reported;
 	cury = bdt.DPD[i].Finger_Y_Reported;
 	
 	FingProc_JudgeSlippingDir(i, curx, cury, x, y);
-	
-	//bdt.Debug_X = bdt.DPD[i].Finger_X_Reported;
-	//bdt.Debug_Y = bdt.DPD[i].Finger_Y_Reported;
-	if(bdt.DPD[i].Finger_X_Reported > ((SXMTR_NUM<<8)-MAX_MAP_VALUE))
-	{
-		if(bdt.EdgeDirFlag)
-		{
-			if(bdt.DPD[i].Finger_X_Reported > ((SXMTR_NUM<<8)-38))
-			{
-				bdt.EdgeDirFlag = 0;
-				bdt.DPD[i].Finger_X_Reported = 0;
-				bdt.DPD[i].Finger_Y_Reported = 0;
-			}
-		}
-	}
-	if(bdt.DPD[i].Finger_Y_Reported > ((SRECV_NUM<<8)-MAX_MAP_VALUE))
-	{
-		if(bdt.EdgeDirFlag)
-		{
-			if(bdt.DPD[i].Finger_X_Reported > ((SRECV_NUM<<8)-50))
-			{
-				bdt.EdgeDirFlag = 0;
-				bdt.DPD[i].Finger_X_Reported = 0;
-				bdt.DPD[i].Finger_Y_Reported = 0;
-			}
-		}
-	}
 	#endif
 
 	FingProc_TapFilterStateUpdate(i);
@@ -4019,7 +4014,6 @@ uint16_t FingProc_XMTR_NolinearMapping_Left(uint16_t h)
     #endif
     
 #ifdef BORDER_SIMPLE_ADJUSTABLE
-	#ifdef OUTSCREEN4EDGE
 	//result = h<<1;
 	result = h;
     if(h > 64)
@@ -4037,7 +4031,6 @@ uint16_t FingProc_XMTR_NolinearMapping_Left(uint16_t h)
         }
     }
     if(result > 240) result = 240;
-	#endif
 #else
     #ifdef CN1100_WINNER                    
     if(h < 16)    
@@ -4207,7 +4200,6 @@ uint16_t FingProc_XMTR_NolinearMapping_Right(uint16_t h)
     #endif
 
 #ifdef BORDER_SIMPLE_ADJUSTABLE
-    #ifdef OUTSCREEN4EDGE
 	//result = h<<1;
 	result = h;
     if(h > 64)
@@ -4225,7 +4217,6 @@ uint16_t FingProc_XMTR_NolinearMapping_Right(uint16_t h)
         }
     }
     if(result > 240) result = 240;
-	#endif
 #else
     #ifdef CN1100_WINNER                    
     if(h < 16)
@@ -4411,7 +4402,6 @@ uint16_t FingProc_RECV_NolinearMapping_Top(uint16_t h)
     #endif
 
 #ifdef BORDER_SIMPLE_ADJUSTABLE
-    #ifdef OUTSCREEN4EDGE
 	//result = h<<1;
 	result = h;
     if(h > 64)
@@ -4429,7 +4419,6 @@ uint16_t FingProc_RECV_NolinearMapping_Top(uint16_t h)
         }
     }
     if(result > 240) result = 240;
-	#endif
 #else
     #ifdef CN1100_WINNER                    
     if(h < 16)   
@@ -4607,7 +4596,6 @@ uint16_t FingProc_RECV_NolinearMapping_Bottom(uint16_t h)
     #endif
 
 #ifdef BORDER_SIMPLE_ADJUSTABLE
-    #ifdef OUTSCREEN4EDGE
 	//result = h<<1;
 	result = h;
     if(h > 64)
@@ -4625,7 +4613,6 @@ uint16_t FingProc_RECV_NolinearMapping_Bottom(uint16_t h)
         }
     }
     if(result > 240) result = 240;
-	#endif
 #else
     #ifdef CN1100_WINNER                     
     if(h < 16)   
@@ -4840,17 +4827,6 @@ void FingProc_ImproveEdgePoint(void)
             bdt.Bottom_h=h;
             #endif
             bdt.DPD[index].Finger_Y_RECV = ((SRECV_NUM<<8) - MAX_MAP_VALUE) + FingProc_RECV_NolinearMapping_Bottom(h);
-
-			#ifdef OUTSCREEN4EDGE
-			//bdt.Debug_X = bdt.DPD[index].Finger_X_XMTR;
-			//bdt.Debug_Y = bdt.DPD[index].Finger_Y_RECV;
-			if(bdt.DPD[index].Finger_Y_RECV > ((SRECV_NUM<<8)-50))
-			{
-				//bdt.Debug_Y = bdt.DPD[index].Finger_Y_RECV;
-				//bdt.DPD[index].Finger_X_XMTR = 0;
-				//bdt.DPD[index].Finger_Y_RECV = 0;
-			}
-			#endif
         }
     }
 }

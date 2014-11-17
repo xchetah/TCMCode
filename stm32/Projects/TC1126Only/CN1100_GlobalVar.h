@@ -390,12 +390,14 @@ typedef struct BasData {
     uint32_t  TxRxjFCAP;
 #endif
 
-	#ifdef OUTSCREEN4EDGE
-	uint16_t   Debug_X;
-	uint16_t   Debug_Y;
-	int16_t   Debug[12];
-	uint16_t   EdgeDirFlag;
-	#endif
+    #ifdef SLIPDIRJUDGEMENT
+    #ifdef DIRDEBUG
+    uint16_t   Debug_X;
+    uint16_t   Debug_Y;
+    int16_t    Debug[12];
+    #endif
+    uint16_t   EdgeDirFlag;
+    #endif
 
     uint16_t FingerReqNum;   //R01 -a
 
