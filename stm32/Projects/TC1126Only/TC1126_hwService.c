@@ -267,16 +267,6 @@ void  STM32_GPIO_InitProcess(void)
     GPIO_Init(GPIOC, &GPIO_InitStructure);
     }
     
-    #ifdef SLEEP_EVENT_SIM
- /****************************************************
-    * Change to use PIN_E (to PC8) changed as Input
-    **************************************************** */
-    GPIO_InitStructure.GPIO_Pin   = (GPIO_Pin_8);
-    GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_IN_FLOATING;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIOC, &GPIO_InitStructure);
-    #endif
-
     #ifdef STM32VC_LCD
  /****************************************************
     * Configure KEY1 (GPIOC-4)
@@ -324,34 +314,6 @@ void STM32_ScanDoneIRQ_Setup(void)
     CN1100_FrameScanDone_GPIO_Init();
     CN1100_FrameScanDone_NVIC_Init();
     CN1100_FrameScanDone_EXTI_Init();
-    
-    #ifdef SLEEP_EVENT_SIM
-    {
-    NVIC_InitTypeDef NVIC_InitStructure;
-    
-    /* 2 bit for pre-emption priority, 2 bits for subpriority */
-    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
-    
-    NVIC_InitStructure.NVIC_IRQChannel = EXTI9_5_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x0F;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x0F;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure); 
-    }
-    {
-    EXTI_InitTypeDef EXTI_InitStructure;
-    
-    /* Connect Button EXTI Line to Button GPIO Pin */
-    GPIO_EXTILineConfig(GPIO_PortSourceGPIOC, GPIO_PinSource8);
-    
-    /* Configure Button EXTI line */
-    EXTI_InitStructure.EXTI_Line = EXTI_Line8;
-    EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;  
-    EXTI_InitStructure.EXTI_LineCmd = ENABLE;
-    EXTI_Init(&EXTI_InitStructure);
-    }
-    #endif
     
     #ifdef STM32VC_LCD
     
@@ -664,9 +626,6 @@ void TC1126_Init_HostCPUStep1(void)
 {
 #ifdef CN1100_STM32
     STM32_GPIO_InitProcess();   /* initialize GPIOA\B\C. */
-    #ifdef SLEEP_EVENT_SIM
-    STM32_WakeupToucIC();
-    #endif
     STM32_RCC_initialize();        /*  initialize RCC     */
     /***********************************
     * RESET the Touch IC
@@ -911,17 +870,12 @@ void TC1126_Init_GlobalVariables(void)
         bdt.DPD[i].Stay_YSum            = 0;
 
 #ifdef SUPER_FILTER4EDGE
-        bdt.DPD[i].EdgeShift_L          = 3;
-        bdt.DPD[i].EdgeOffset_L         = 8;
-        bdt.DPD[i].EdgeShift_R          = 3;
-        bdt.DPD[i].EdgeOffset_R         = 8;
-        bdt.DPD[i].EdgeShift_T          = 3;
-        bdt.DPD[i].EdgeOffset_T         = 8;
-        bdt.DPD[i].EdgeShift_B          = 3;
-        bdt.DPD[i].EdgeOffset_B         = 8;
+        bdt.DPD[i].EdgeShift_LR         = 0;
+        bdt.DPD[i].EdgeOffset_LR        = 64;
+        bdt.DPD[i].EdgeShift_TB         = 0;
+        bdt.DPD[i].EdgeOffset_TB        = 64;
         bdt.DPD[i].FingerRealNum1_X     = 0;
         bdt.DPD[i].FingerRealNum2_X     = 0;
-        bdt.DPD[i].FingerRealNum2R_X    = 0;
         bdt.DPD[i].FingerRealNum1_Y     = 0;
         bdt.DPD[i].FingerRealNum2_Y     = 0;
         bdt.DPD[i].FingMovingSpeed      = FINGER_FINGER_SPEED_LOW;
@@ -932,7 +886,6 @@ void TC1126_Init_GlobalVariables(void)
             bdt.DPD[i].Prev_Finger_Y[j]  = 0;
         }
 
-        
         bdt.DPD[i].EdgeInfo.EdgeNum = 0;
         bdt.DPD[i].EdgeInfo.PrevEdgeNum = 0;
 
@@ -1374,26 +1327,15 @@ void TC1126_Init_RefHLRegWRITE(void)
     low  |= (bdt.PCBA.LowRefPlSet<<5);
     
     #ifdef COEF_SCALE_ENABLE
+    if(iAUTOSCAN_MODE == bdt.ModeSelect)
+    {
     high |= REFH_SCALE_EN;
     high |= REFH_SCALE_MODE(SCALE_MODE_SELECT);
+    }
     #endif
     SPI_write_singleData(REFH_REG, high);
     SPI_write_singleData(REFL_REG, low); 
 }
-
-
-/*******************************************************************************
-* Function Name  : 
-* Description    : 
-* Input          : 
-* Output         : 
-* Return         : 
-*******************************************************************************/
-void TC1126_Init_VarRegSetting(void)
-{
-    TC1126_Init_RefHLRegWRITE();
-}
-
 
 
 /*******************************************************************************
@@ -1432,7 +1374,7 @@ void TC1126_Init_CapHighLowSetting(void)
 *******************************************************************************/
 void TC1126_Init_CapHighLowSetting4SLEEP(void)
 {
-    #ifdef SCREEN_FULL_ADAPTIVE
+    #if 0 //def SCREEN_FULL_ADAPTIVE
     uint16_t high;
     uint16_t low;
     
@@ -1474,6 +1416,7 @@ void TC1126_Init_CapHighLowSetting4SLEEP(void)
 void TC1126_Init_AbsModeSetting(void)
 {
     #ifdef COEF_SCALE_ENABLE
+    #if 0
     SPI_write_singleData(TFC0_REG, TFC0_T0R0_FCAP_COEF(8) | TFC0_T0R1_FCAP_COEF(8)
                         | TFC0_T0R2_FCAP_COEF(8) | TFC0_T0R3_FCAP_COEF(8));  
     SPI_write_singleData(TFC1_REG, TFC1_T0R4_FCAP_COEF(8) | TFC1_T0R5_FCAP_COEF(8)
@@ -1484,6 +1427,13 @@ void TC1126_Init_AbsModeSetting(void)
                         | DIAG_SEPCIAL_TXI_COORD(14)); 
     SPI_write_singleData(TXMAPTOTX16MORE_REG, TXMAPTO16M_TXJ_CORD(14)
                         | TXMAPTO16M_RXJ_CORD(10) | TXMAPTO16M_TXRXJ_FCAP(2/*RCVM_RCVR_FCAP_SET*/)); 
+    #else
+    SPI_write_singleData(TFC0_REG, 0);  
+    SPI_write_singleData(TFC1_REG, 0);  
+    SPI_write_singleData(TFC2_REG, 0); 
+    SPI_write_singleData(DIAG_REG, 0); 
+    SPI_write_singleData(TXMAPTOTX16MORE_REG, 0);
+    #endif
     #endif
     SPI_write_singleData(FLEN_REG, RECV_NUM*DOZE_TXREADNUM);                 /*  XMTR_NUM * RECV_NUM */
 }
@@ -1756,7 +1706,7 @@ void TC1126_Init_REVM_REG0X27(void)
         case DOZE_MODE:
         case SLEEP_MODE:
         {
-            SPI_write_singleData(RCVM_REG, RCVM_RCVR_ABS_EN|RCVM_CHAN_RST_EN|RCVM_RCVR_FCAP(bdt.PCBA.RcvmRcvrFcapSet));
+            SPI_write_singleData(RCVM_REG, RCVM_RCVR_ABS_EN|RCVM_CHAN_RST_EN|RCVM_RCVR_FCAP(RCVM_RCVR_FCAP_SET));
             break;
         }
         default:
@@ -2005,15 +1955,20 @@ void TC1126_GotoDozeMode(void)
         CN1100_print("==>DOZE_MODE\n");
     #endif
    
+    //******************************************
+    // DISABLE TIMING_EN
+    //******************************************
     SPI_write_singleData(ADCM_REG, ADCM_ADC_SPEED(ADC_SPEED_SET) | ADCM_ACS(ACS_SPEED_SET) | ADCM_MB_EN);
-   
-    TC1126_Init_SleepModeSetting(DOZE_MODE_PERIOD);
-    /*set PERD_REG small to reduce the time of throwing useless frames*/
-    SPI_write_singleData(PERD_REG, 0x200);
-    SPI_write_singleData(FLAG_REG, FLAG_FRM0_RDDONE+FLAG_FRM1_RDDONE); // Clear the interrupt Bit3(Buffer A Just Filled)
     bdt.ModeSelect            = DOZE_MODE;
     bdt.MTD.mtdc.Doze_FirstIn = 0;
     bdt.MTD.mtdc.Doze_OddNum  = 0;
+   
+    TC1126_Init_SleepModeSetting(DOZE_MODE_PERIOD);
+    //**********************************************************************
+    // Reset PERD_REG small to reduce the time of throwing useless frames
+    //**********************************************************************
+    SPI_write_singleData(PERD_REG, 0x200);
+    SPI_write_singleData(FLAG_REG, FLAG_FRM0_RDDONE+FLAG_FRM1_RDDONE); // Clear the interrupt Bit3(Buffer A Just Filled)
    
     #ifdef FINGER_HWDET4DOZE
     SPI_write_singleData(TTHR_REG, (TTHR_TOUCH_DETECT | TTHR_TOUCH_TH0(0x30)) );
@@ -2159,9 +2114,8 @@ uint16_t TC1126_DozeModeDataHandling(uint16_t BufferID)
     return rtnValue;
 
 }
+
 #else
-
-
 
 /*******************************************************************************
 * Function Name  : 
@@ -2208,7 +2162,9 @@ uint16_t TC1126_DozeModeDataHandling(uint16_t BufferID)
     }
     else
     {
-        /* CN1100_print("DeltaBuf:\n"); */
+        #ifdef DOZEMODE_DIFFSHOW
+        CN1100_print("DeltaBuf:\n");
+        #endif
         for(j=0; j<DOZE_TXREADNUM; j++)
         {
             for(i=0; i<RECV_NUM; i++) 
@@ -2235,8 +2191,9 @@ uint16_t TC1126_DozeModeDataHandling(uint16_t BufferID)
                     tempMax = tempint16;
                 }
 
-                #if 1
-                /* CN1100_print("%4d ", tempint16); */
+              #ifdef DOZEMODE_DEBUGSHOW
+                #ifdef DOZEMODE_DIFFSHOW
+                CN1100_print("%4d ", tempint16);
                 #else
                 if(BUFFER_A == BufferID)
                 {
@@ -2248,79 +2205,30 @@ uint16_t TC1126_DozeModeDataHandling(uint16_t BufferID)
                 }
                 CN1100_print("%4x ", tempint16);
                 #endif
+              #endif
             }
-            /* CN1100_print("\n"); */
+            #ifdef DOZEMODE_DEBUGSHOW
+            CN1100_print("\n");
+            #endif
         }
-        /* CN1100_print("tempMax: %4d\n", tempMax); */
-        /* CN1100_print("\n"); */
+        #ifdef DOZEMODE_DEBUGSHOW
+        CN1100_print("tempMax: %4d\n", tempMax);
+        CN1100_print("\n");
+        #endif
         
         if(tempMax > DOZE_MODE_FINGER_THR) 
         {
             #ifdef CN1100_iSCANMODE
-                TC1126_GotoAutoScanMode(iAUTOSCAN_MODE);
+                //TC1126_GotoAutoScanMode(iAUTOSCAN_MODE);
             #endif
             
-            rtnValue = 1;
+            //rtnValue = 1;
         }
     }
     #endif
     
     return rtnValue;
 
-}
-#endif
-
-
-#ifdef SLEEP_EVENT_SIM
-/*******************************************************************************
-* Function Name  : 
-* Description    : 
-* Input          : 
-* Output         : 
-* Return         : 
-*******************************************************************************/
-uint16_t Glitch_Protect    = 0;
-void CN1100_SLEEP_EVENT_SIM_ISR()
-{
-    if(0 == Glitch_Protect)
-    {
-        Glitch_Protect = 1000;
-        switch(bdt.ModeSelect)
-        {
-            case DOZE_MODE:
-            {
-                CN1100_print("BP-Doze\n");
-                #ifdef FINGER_HWDET4DOZE
-                STM32_WakeupToucIC();
-                #endif
-                bdt.Prepare2SleepMode = 1;
-                break;
-            }
-            
-            case iAUTOSCAN_MODE:
-            {
-                CN1100_print("BP-iScan\n");
-                bdt.Prepare2SleepMode = 1;
-                break;
-            }
-
-            case SLEEP_MODE:
-            {
-                CN1100_print("BP-Sleep\n");
-                STM32_WakeupToucIC();
-                #ifdef CN1100_iSCANMODE
-                    TC1126_GotoAutoScanMode(iAUTOSCAN_MODE);
-                #endif
-                STM32_ExtiIRQControl(ENABLE);
-                CN1100_print("Scan.Ready\n");
-                break;
-            }
-        }
-    }
-    else
-    {
-        CN1100_print("Invalid Button Pressed\n");
-    }
 }
 #endif
 
@@ -2340,13 +2248,6 @@ void CN1100_SysTick_ISR(void)
 {  
 
     #ifdef CN1100_STM32
-        #ifdef SLEEP_EVENT_SIM
-            if(Glitch_Protect>0) 
-            {
-                Glitch_Protect--;
-            }
-        #endif
-    
         #ifdef STM32VC_LCD
             if(bdt.Button_Glitch_Protect>0)
             {
@@ -2360,6 +2261,7 @@ void CN1100_SysTick_ISR(void)
         if(!(spidev->mode & CN1100_IS_SUSPENDED))
             spidev->ticks++;
     }    
+
     #if defined(CN1100_RESET_ENABLE)
         if((spidev->ticks>5000)){
                 printk("%d\n",spidev->ticks);
@@ -2367,37 +2269,8 @@ void CN1100_SysTick_ISR(void)
                 queue_work(spidev->workqueue,&spidev->reset_work);
         }    
     #endif
+
     hrtimer_start(&spidev->systic, ktime_set(0, 1000000), HRTIMER_MODE_REL);
-    #endif
-    
-    switch(bdt.ModeSelect)
-    {
-        case iAUTOSCAN_MODE:
-        {
-            if(bdt.MTD.NoFingerCnt4Doze > WORK_MODE_NOFING_MAXPERD)
-            {
-                bdt.MTD.NoFingerCnt4Doze = 0;
-                #ifdef DOZE_ALLOWED
-                    #ifdef CN1100_STM32
-                        TC1126_GotoDozeMode();
-                    #else
-                        spidev->mode |= CN1100_IS_DOZE;
-                    #endif
-                #endif
-            } 
-            break;
-        }
-        case SLEEP_MODE:
-        {
-            break;
-        }
-        case DOZE_MODE:
-        {
-            break;
-        }
-    }
-    
-    #ifdef CN1100_LINUX
         return HRTIMER_NORESTART;
     #endif
 }
@@ -2421,7 +2294,7 @@ void CN1100_FrameScanDoneInt_ISR()
 {
     uint16_t DONE_VALUE;
     
-    #if defined(CN1100_LINUX) && !defined(SLEEP_EVENT_SIM)
+    #ifdef CN1100_LINUX
         if(spidev->mode & CN1100_IS_SUSPENDED)
         {
 	    #ifndef CN1100_MTK
@@ -2429,7 +2302,7 @@ void CN1100_FrameScanDoneInt_ISR()
 	    #endif
             return;
         }
-    #elif !defined(CN1100_LINUX)
+    #else
         STM32_LEDx_TURN_ONorOFF(LED2, LED_ON);
     #endif
     
@@ -2437,24 +2310,9 @@ void CN1100_FrameScanDoneInt_ISR()
     {
         case DOZE_MODE:
         {
-            #ifdef SLEEP_EVENT_SIM
-            if(1 == bdt.Prepare2SleepMode)
-            {
-                bdt.Prepare2SleepMode = 0;
-                TC1126_GotoSleepMode();
-                #ifdef CN1100_LINUX
-                spidev->mode |= CN1100_IS_SUSPENDED;
-                wake_up(&spidev->waitq);
-                #ifdef CN1100_S5PV210
-                msleep(10);
-                #endif
-                #endif
-            }
-            else
-            #endif
-            {
                 bdt.BFD.bbdc.NoFingerCnt4Base = 0;
                 bdt.BFD.FingerLeftProtectTime = 0;
+
                 /***************************************************************************
                 * set BaseUpdateCase as BASE_FRAME_DISCARD so we can discard the first frame 
                 * when come back to normal mode
@@ -2491,12 +2349,13 @@ void CN1100_FrameScanDoneInt_ISR()
                 #ifdef CN1100_STM32
                 Tiny_Delay(2000);
                 #endif
+
                 #ifdef CN1100_LINUX
 		#ifndef CN1100_MTK
                 enable_irq(spidev->irq);
 		#endif
                 #endif
-            }
+
             break;
         }
         
@@ -2517,22 +2376,6 @@ void CN1100_FrameScanDoneInt_ISR()
             }
             #endif
             
-            #ifdef SLEEP_EVENT_SIM
-            if(1 == bdt.Prepare2SleepMode)
-            {
-                bdt.Prepare2SleepMode = 0;
-                TC1126_GotoSleepMode();
-                #ifdef CN1100_LINUX
-                spidev->mode |= CN1100_IS_SUSPENDED;
-                wake_up(&spidev->waitq);
-                #ifdef CN1100_S5PV210
-                msleep(10);
-                #endif
-                #endif
-            }
-            else
-            #endif
-            {   
                 #ifdef SCREEN_SIMPLE_ADAPTIVE
                 if(bdt.ScreenAdaptiveFlag)
                 {
@@ -2540,6 +2383,7 @@ void CN1100_FrameScanDoneInt_ISR()
                     bdt.ScreenAdaptiveFlag=0;
                 }
                 #endif
+
                 #ifdef SCREEN_FULL_ADAPTIVE
                 // 轮流设置每次的参考电压
                 if(bdt.PCBA.RefHLSetCount <= 16)
@@ -2587,6 +2431,17 @@ void CN1100_FrameScanDoneInt_ISR()
            
                 TC1126_iAutoMode_SubISR();
          
+                if(bdt.MTD.NoFingerCnt4Doze > WORK_MODE_NOFING_MAXPERD)
+                {
+                    bdt.MTD.NoFingerCnt4Doze = 0;
+                    #ifdef DOZE_ALLOWED
+                      #ifdef CN1100_STM32
+                        TC1126_GotoDozeMode();
+                      #else
+                        spidev->mode |= CN1100_IS_DOZE;
+                      #endif
+                    #endif
+                }
                 
                 #ifdef CN1100_LINUX
                 if(FRAME_FILLED == bdt.BSDSTS.iBuf_A_Fill)
@@ -2602,13 +2457,15 @@ void CN1100_FrameScanDoneInt_ISR()
                     BufferBHandle();
                     /*Clear the interrupt Bit4(Buffer B Just Filled)*/
                 }
+
 		#ifndef CN1100_MTK
                 enable_irq(spidev->irq);
 		#endif
                 #endif
-            }
+
             break;
         }
+
         case SLEEP_MODE:
         {
             CN1100_print("s1..");
@@ -2643,6 +2500,7 @@ void CN1100_FrameScanDoneInt_ISR()
             }
             
             CN1100_print("s4..");
+
             #ifdef CN1100_STM32
             STM32_ExtiIRQControl(DISABLE);
             #endif
@@ -2655,6 +2513,7 @@ void CN1100_FrameScanDoneInt_ISR()
             spidev->mode |= CN1100_IS_SUSPENDED;
             wake_up(&spidev->waitq);
             #endif
+
             break;
         }
         default:

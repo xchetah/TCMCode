@@ -110,9 +110,14 @@
 //#define CN1100_SLEEPMODE
 #define CN1100_iSCANMODE
 //#define CN1100_DOZEMODE
-//#define SLEEP_EVENT_SIM    // Simulate the Sleep Command with STM32's GPIO
+
 //#define DOZE_ALLOWED       // Allow to Doze mode if finger unexist for long time
-#define FINGER_HWDET4DOZE    // @ Doze, enable Finger auto detection
+//#define FINGER_HWDET4DOZE    // @ Doze, enable Finger auto detection
+
+//#define DOZEMODE_DEBUGSHOW    // Working only during NO HW Detecting way
+//#define DOZEMODE_DIFFSHOW     // Working only during NO HW Detecting way
+//#define DOZEMODE_ORIGSHOW     // Working only during NO HW Detecting way
+
 //#define SHUT_DOWN_TEST     // Working for TC1126A only
 
 
@@ -177,13 +182,10 @@
 #define ABCHANDPOINT_MAXNUM     2           // 可调节的通道、异常点最大数目
 #define ABNORMALPOINT_MAXNUM    4           // 最大值、最小值、次大值、次小值
 #endif
-
-//#define SLIPDIRJUDGEMENT
-//#define DIRDEBUG
+//#define WINNER_TWD                       //for 全志通文达
 
 #define SUPER_FILTER4EDGE
 //#define SUPER_FILTER4EDGE_DEBUGSHOW
-#define DUALDIR_SUPER_FILTER
 #define FROMOUT2IN_INORDER
 #define SUPFIL_RANGE          256
 
@@ -368,7 +370,7 @@
 //**********************************************************
 #define DOZE_MODE_PERIOD                0x1000  // 160ms
 #define DOZE_MODE_FINGER_THR            200     // The MAX of the Frame Diff is bigger than 200, finger is coming or lost
-#define WORK_MODE_NOFING_MAXPERD        1000    // After 10 Seconds, NO finger appeared, then Doze Mode
+#define WORK_MODE_NOFING_MAXPERD        300    // After 10 Seconds, NO finger appeared, then Doze Mode
 
 #define FINGER_ADJUST_DISTANCE_MIN      24
 #define FINGER_ADJUST_DISTANCE_MAX      72
@@ -406,7 +408,11 @@
 #endif
 
 #else // CN1100_STM32
-  #define ISCANMODE_PERD_REG_VALUE             0x1C0   //12.5ms      
+#ifdef WINNER_TWD                                    //for 全志通文达
+#define ISCANMODE_PERD_REG_VALUE             0x1C0
+#else
+#define ISCANMODE_PERD_REG_VALUE             0x140   //12.5ms   
+#endif
 
   #define RAW_DATA_DIFF_THR                    1100
 

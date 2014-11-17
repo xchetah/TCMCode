@@ -95,17 +95,12 @@ typedef struct DeltaPData {
     uint16_t   AdjustOrigin_y;
 
 #ifdef SUPER_FILTER4EDGE
-    uint16_t   EdgeShift_L;
-    uint16_t   EdgeOffset_L;
-    uint16_t   EdgeShift_R;
-    uint16_t   EdgeOffset_R;
-    uint16_t   EdgeShift_T;
-    uint16_t   EdgeOffset_T;
-    uint16_t   EdgeShift_B;
-    uint16_t   EdgeOffset_B;
+    uint16_t   EdgeShift_LR;
+    uint16_t   EdgeOffset_LR;
+    uint16_t   EdgeShift_TB;
+    uint16_t   EdgeOffset_TB;
     uint8_t    FingerRealNum1_X;
     uint8_t    FingerRealNum2_X;
-    uint8_t    FingerRealNum2R_X;
     uint8_t    FingerRealNum1_Y;
     uint8_t    FingerRealNum2_Y;
 #endif
