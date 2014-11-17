@@ -171,6 +171,7 @@ typedef struct
     uint32_t       FingerLeftProtectTime;      //
     uint32_t       TooLongTime4BaseUpdate;
     uint32_t       AfterBaseUpdatedTime;
+    uint32_t       JustAfter2AutoScanTime;
     uint8_t        AdjustCount;
     uint8_t        AbnormalUpdateDelay;
     int16_t        DeltaSumMaxThreshold;

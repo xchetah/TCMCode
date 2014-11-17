@@ -799,6 +799,7 @@ void TC1126_Init_GlobalVariables(void)
     }
     #endif
 
+    bdt.BFD.JustAfter2AutoScanTime = 0;
     bdt.BFD.SettledPointExistTime  = 0;    
     bdt.BFD.AdjustCount            = 0;
     bdt.BFD.AbnormalUpdateDelay    = 0;
@@ -1967,15 +1968,25 @@ void TC1126_GotoDozeMode(void)
     //**********************************************************************
     // Reset PERD_REG small to reduce the time of throwing useless frames
     //**********************************************************************
-    SPI_write_singleData(PERD_REG, 0x200);
-    SPI_write_singleData(FLAG_REG, FLAG_FRM0_RDDONE+FLAG_FRM1_RDDONE); // Clear the interrupt Bit3(Buffer A Just Filled)
+    SPI_write_singleData(PERD_REG, 0x100);
+    SPI_write_singleData(PROB_REG, 0x0); 
    
     #ifdef FINGER_HWDET4DOZE
     SPI_write_singleData(TTHR_REG, (TTHR_TOUCH_DETECT | TTHR_TOUCH_TH0(0x30)) );
     SPI_write_singleData(FLEN_REG, FLEN_FRAME_LEN(2*RECV_NUM) | FLEN_TOUCH_TH1(2) );
     #endif
    
+#if 1
+{
+    SPI_write_singleData(FLAG_REG,  0x009f);
+    SPI_write_singleData(ADCM_REG,  ADCM_ADC_SPEED(ADC_SPEED_SET) | ADCM_ACS(ACS_SPEED_SET) | ADCM_SHRT_CKT_EN 
+                        | ADCM_TIMING_EN | ADCM_MB_EN | ADCM_ACTV_CONF | ADCM_XMTR_STR(XMTR_STRENGTH_SET));
+    SPI_write_singleData(ADCM_REG,  ADCM_ADC_SPEED(ADC_SPEED_SET) | ADCM_ACS(ACS_SPEED_SET) 
+                        | ADCM_XMTR_STR_ENB | ADCM_TIMING_EN | ADCM_MB_EN | ADCM_XMTR_STR(XMTR_STRENGTH_SET));
+}
+#else
     TC1126_Init_StartADCByReg21();
+#endif
 }
 
 
@@ -1994,9 +2005,11 @@ void TC1126_GotoAutoScanMode(uint16_t auto_mode_sel)
         #if defined(DOZE_ALLOWED)
             CN1100_print("==>iAUTOSCAN_MODE\n");
         #endif
+
+        bdt.ModeSelect  = iAUTOSCAN_MODE;
             TC1126_Init_iAutoScanModeSetting();
-        bdt.ModeSelect           = iAUTOSCAN_MODE;
     } 
+    bdt.BFD.JustAfter2AutoScanTime = 0;
     
     #ifdef FINGER_HWDET4DOZE
     SPI_write_singleData(TTHR_REG, (TTHR_TOUCH_TH0(0x30)) );
@@ -2154,11 +2167,13 @@ uint16_t TC1126_DozeModeDataHandling(uint16_t BufferID)
     if(bdt.MTD.mtdc.Doze_FirstIn<SkipFrameNUM)
     {
         bdt.MTD.mtdc.Doze_FirstIn++;
-        if(SkipFrameNUM == bdt.MTD.mtdc.Doze_FirstIn)
+        if(bdt.MTD.mtdc.Doze_FirstIn >= SkipFrameNUM)
         {
             /*set PERD_REG as DOZE_MODE_PERIOD when we will compute delta value */
-            SPI_write_singleData(PERD_REG, DOZE_MODE_PERIOD);
+            SPI_write_singleData(PROB_REG, (uint16_t)((DOZE_MODE_PERIOD>>12)&0xfff) ); /*  Change the sleeping time */
+            SPI_write_singleData(PERD_REG, (uint16_t)(DOZE_MODE_PERIOD&0xfff) );       /*  cfg_reg39 */
         }
+        return rtnValue;
     }
     else
     {
@@ -2219,10 +2234,10 @@ uint16_t TC1126_DozeModeDataHandling(uint16_t BufferID)
         if(tempMax > DOZE_MODE_FINGER_THR) 
         {
             #ifdef CN1100_iSCANMODE
-                //TC1126_GotoAutoScanMode(iAUTOSCAN_MODE);
+                TC1126_GotoAutoScanMode(iAUTOSCAN_MODE);
             #endif
             
-            //rtnValue = 1;
+            rtnValue = 1;
         }
     }
     #endif
@@ -2285,7 +2300,7 @@ void CN1100_SysTick_ISR(void)
 * Output         : 
 * Return         : 
 *******************************************************************************/
-
+//uint16_t dozedebug = 0;
 #if defined(CN1100_LINUX)&&!defined(CN1100_MTK)
 void CN1100_FrameScanDoneInt_ISR(struct work_struct *work)
 #else
@@ -2312,7 +2327,6 @@ void CN1100_FrameScanDoneInt_ISR()
         {
                 bdt.BFD.bbdc.NoFingerCnt4Base = 0;
                 bdt.BFD.FingerLeftProtectTime = 0;
-
                 /***************************************************************************
                 * set BaseUpdateCase as BASE_FRAME_DISCARD so we can discard the first frame 
                 * when come back to normal mode
@@ -2320,6 +2334,17 @@ void CN1100_FrameScanDoneInt_ISR()
                 bdt.BFD.bbdc.BaseUpdateCase   = BASE_FRAME_DISCARD;
 
                 DONE_VALUE = SPI_read_singleData(DONE_REG);
+            #if 0
+            CN1100_print("di=%d %4x\n", dozedebug++, DONE_VALUE);
+            if(0 == (dozedebug&0x7))
+            {
+                #ifdef CN1100_iSCANMODE
+                TC1126_GotoAutoScanMode(iAUTOSCAN_MODE);
+                #endif
+            }
+            else
+            #endif
+            {
                 if( DONE_VALUE & DONE_FRM0_READABLE )
                 {
                     /* Buffer A is ready in CN1100*/
@@ -2331,8 +2356,6 @@ void CN1100_FrameScanDoneInt_ISR()
                         spidev->irq_count = 0;
                     #endif
                 }
-                else 
-                {
                     if( DONE_VALUE & DONE_FRM1_READABLE )
                     {
                         /* Buffer B is ready in CN1100*/
@@ -2429,19 +2452,20 @@ void CN1100_FrameScanDoneInt_ISR()
                 }
                 #endif
            
-                TC1126_iAutoMode_SubISR();
-         
+            #ifdef DOZE_ALLOWED
                 if(bdt.MTD.NoFingerCnt4Doze > WORK_MODE_NOFING_MAXPERD)
                 {
                     bdt.MTD.NoFingerCnt4Doze = 0;
-                    #ifdef DOZE_ALLOWED
                       #ifdef CN1100_STM32
                         TC1126_GotoDozeMode();
                       #else
                         spidev->mode |= CN1100_IS_DOZE;
                       #endif
-                    #endif
+                    break;
                 }
+                    #endif
+
+                TC1126_iAutoMode_SubISR();
                 
                 #ifdef CN1100_LINUX
                 if(FRAME_FILLED == bdt.BSDSTS.iBuf_A_Fill)
@@ -2468,7 +2492,6 @@ void CN1100_FrameScanDoneInt_ISR()
 
         case SLEEP_MODE:
         {
-            CN1100_print("s1..");
             /***************************************
             * Just Disable TIMING_EN (bit4)
             ***************************************/
@@ -2481,10 +2504,8 @@ void CN1100_FrameScanDoneInt_ISR()
             * when come back to normal mode
             ****************************************************************************/
             bdt.BFD.bbdc.BaseUpdateCase   = BASE_FRAME_DISCARD;
-            CN1100_print("s2..");
             
             DONE_VALUE = SPI_read_singleData(DONE_REG);
-            CN1100_print("s3:DONE_REG=%x ", DONE_VALUE);
             if( DONE_VALUE & DONE_FRM0_READABLE )
             {
                 /*Buffer A is ready in CN1100*/
@@ -2499,12 +2520,9 @@ void CN1100_FrameScanDoneInt_ISR()
                 }
             }
             
-            CN1100_print("s4..");
-
             #ifdef CN1100_STM32
             STM32_ExtiIRQControl(DISABLE);
             #endif
-            CN1100_print("Sleep ISR Done\n");
             
             #ifdef CN1100_LINUX
             #ifdef CN1100_S5PV210

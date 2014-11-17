@@ -373,7 +373,7 @@
 //**********************************************************
 #define DOZE_MODE_PERIOD                0x1000  // 160ms
 #define DOZE_MODE_FINGER_THR            200     // The MAX of the Frame Diff is bigger than 200, finger is coming or lost
-#define WORK_MODE_NOFING_MAXPERD        300    // After 10 Seconds, NO finger appeared, then Doze Mode
+#define WORK_MODE_NOFING_MAXPERD        400     // After 10 Seconds, NO finger appeared, then Doze Mode
 
 #define FINGER_ADJUST_DISTANCE_MIN      24
 #define FINGER_ADJUST_DISTANCE_MAX      72
@@ -414,7 +414,7 @@
 #ifdef WINNER_TWD                                    //for 全志通文达
 #define ISCANMODE_PERD_REG_VALUE             0x1C0
 #else
-#define ISCANMODE_PERD_REG_VALUE             0x140   //12.5ms   
+#define ISCANMODE_PERD_REG_VALUE             0x1C0   //12.5ms   
 #endif
 
   #define RAW_DATA_DIFF_THR                    1100

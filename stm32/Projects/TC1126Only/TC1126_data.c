@@ -3757,12 +3757,12 @@ uint16_t FingProc_IEdgeP_Left(uint16_t h)
     #endif
     
 #ifdef BORDER_SIMPLE_ADJUSTABLE
-  #if 0
+  #if 1
     h = h<<1;
     result = (((h>>5)+1)<<5)-16;
     if(result > 230) result = 230;
   #else
-    #define ASCLOSEASPOSSIBLE_LEFT 64
+    #define ASCLOSEASPOSSIBLE_LEFT 45
     result = FingProc_IEdgeP_Mapping(h, ASCLOSEASPOSSIBLE_LEFT);
   #endif
 #else
@@ -3934,12 +3934,12 @@ uint16_t FingProc_IEdgeP_Right(uint16_t h)
     #endif
 
 #ifdef BORDER_SIMPLE_ADJUSTABLE
-  #if 0
+  #if 1
     h = h<<1;
     result = (((h>>5)+1)<<5)-16;
     if(result > 230) result = 230;
   #else
-    #define ASCLOSEASPOSSIBLE_RIGHT 64
+    #define ASCLOSEASPOSSIBLE_RIGHT 35
     result = FingProc_IEdgeP_Mapping(h, ASCLOSEASPOSSIBLE_RIGHT);
   #endif
 #else
@@ -4127,12 +4127,12 @@ uint16_t FingProc_IEdgeP_Top(uint16_t h)
     #endif
 
 #ifdef BORDER_SIMPLE_ADJUSTABLE
-  #if 0
+  #if 1
     h = h<<1;
     result = (((h>>5)+1)<<5)-16;
     if(result > 230) result = 230;
   #else
-    #define ASCLOSEASPOSSIBLE_TOP 64
+    #define ASCLOSEASPOSSIBLE_TOP 42
     result = FingProc_IEdgeP_Mapping(h, ASCLOSEASPOSSIBLE_TOP);
   #endif
 #else
@@ -4312,7 +4312,7 @@ uint16_t FingProc_IEdgeP_Bottom(uint16_t h)
     #endif
 
 #ifdef BORDER_SIMPLE_ADJUSTABLE
-  #if 0
+  #if 1
     h = h<<1;
     result = (((h>>5)+1)<<5)-16;
     if(result > 230) result = 230;
@@ -7428,6 +7428,7 @@ void DataProc_FrequencyHopByStretch(uint16_t *buf)
     #endif
     #endif
 
+    bdt.MTD.NoFingerCnt4Doze = 0;
     if(bdt.TxScanNoiseCount >= NOISECAL_SKIPNUM)
         bdt.SumNoiseDataFrFrame += bdt.NoiseDataFrFrame;
 
@@ -7993,6 +7994,7 @@ void FrameBuffer_Full_Handled(uint16_t *buffer)
         DataProc_FBFHStartFrameBaseLineInit(buffer);
         #endif
         bdt.BFD.InitCount++;
+        bdt.MTD.NoFingerCnt4Doze = 0;
         return;
     }
     else

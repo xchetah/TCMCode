@@ -20,7 +20,7 @@
 #ifdef WINNER_TWD                    //for 全志通文达
 #define DUR_INTEG             63
 #else
-#define DUR_INTEG             36
+#define DUR_INTEG             63
 #endif
 
 #define DUR_STRETCH          1      // TX Freq: 150K
@@ -28,7 +28,7 @@
 #ifdef WINNER_TWD                   //for 全志通文达
 #define BURST_CNT            0x81C
 #else
-#define BURST_CNT            0x82f  //0x81C
+#define BURST_CNT            0x81C  //0x81C
 #endif
 
 
