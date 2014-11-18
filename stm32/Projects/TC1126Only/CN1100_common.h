@@ -2,7 +2,7 @@
  * 版权所有(C) TRUECOREING
  * DEPARTMENT:
  * MANUAL_PERCENT:
- * 文件名称: CN1000_common.h 
+ * 文件名称: CN1000_data.c 
  * 文件标识:    
  * 内容摘要: 
  * 其它说明:
@@ -97,8 +97,8 @@
   //#define LCD_LINE_ENDPOINT_SHOW
   //#define RESET_LCD_PE0              // BEEP now
   
-  //#define LCD_800X480_1PixelsOnlyWorking  // LCD Screen Selection
-  #define LCD_800X480_2PixelsOnlyWorking  // LCD Screen Selection
+  #define LCD_800X480_1PixelsOnlyWorking  // LCD Screen Selection
+  //#define LCD_800X480_2PixelsOnlyWorking  // LCD Screen Selection
   //#define LCD_320X240_ILI9328            // ILI9325(9328), 320X240
   
   #define LCD_SYSTEM_20140804              // PCB Type Selection
@@ -111,7 +111,7 @@
 #define CN1100_iSCANMODE
 //#define CN1100_DOZEMODE
 
-//#define DOZE_ALLOWED       // Allow to Doze mode if finger unexist for long time
+#define DOZE_ALLOWED       // Allow to Doze mode if finger unexist for long time
 //#define FINGER_HWDET4DOZE    // @ Doze, enable Finger auto detection
 
 //#define DOZEMODE_DEBUGSHOW    // Working only during NO HW Detecting way
@@ -161,8 +161,8 @@
 //#define FOURPOINTS4STICKMOVING         // Four Ponts is needed for Stick Finger moving
 
 //#define SCREEN_NONE_ADAPTIVE               // None Adaptive parameter for different screen
-//#define SCREEN_SIMPLE_ADAPTIVE             // Simple Adaptive parameter for different screen
-#define SCREEN_FULL_ADAPTIVE                 // Full Adaptive parameter for different screen
+#define SCREEN_SIMPLE_ADAPTIVE             // Simple Adaptive parameter for different screen
+//#define SCREEN_FULL_ADAPTIVE                 // Full Adaptive parameter for different screen
 //#define CHANNEL_ADAPTIVE                     // Channel adaptive for adjust channel or point fcap
 
 #ifdef SCREEN_FULL_ADAPTIVE
@@ -170,10 +170,7 @@
 #define REASONABLE_VALUE        2048          // 穷举中希望接近的原始值
 #endif
 
-//#define SLIPDIRJUDGEMENT
-//#define DIRDEBUG
-
-#define INVALID_CHORPOINT       15          // 无效的通道或者点
+#define INVALID_CHORPOINT        15            // 无效的通道或者点
 
 #ifdef CHANNEL_ADAPTIVE
 #define RXCHANNEL_THRESHOLD     700         // RX通道与总平均值差值限度
@@ -221,14 +218,14 @@
 /**** 1.8    *********  关于 触摸屏 类型  *****************************/
 /**********************************************************************/
 
-//#define WHITESCREEN_15X10               // White or Black screen DITO, 15X10
+#define WHITESCREEN_15X10               // White or Black screen DITO, 15X10
 //#define SITO_SCREEN_10X15             // Black Screen SITO, 15X10
 //#define ITO_BORDERLINE_15X10          // ITO走线 DITO 屏
 
 //#define PHONESCREEN_13X10               // 手机屏(单层ITO), GT960
 //#define SH_FEATUREPHONE_13X9            // 手机屏(单层ITO), GT1688 ( //// FREQY_HOP_ONLY has to be disabled ////)
 
-#define FPCSCREEN_17X10                   // FPC屏(DITO), GT960
+//#define FPCSCREEN_17X10                   // FPC屏(DITO), GT960
 
 //#define PCB_DITO_SCREEN_15X10         // PCB 标准 DITO 图案
 //#define PCB_RHOMBUS_15X10             // PCB - 菱形图案
@@ -298,7 +295,7 @@
 #define ADC_SPEED_SET          ADCM_ADC_SPEED_DIV4
 #define ACS_SPEED_SET          ADCM_ACS_DIV01
 
-#define FINGER_NUM_MAX         10  //R01 -m
+#define FINGER_NUM_MAX         6  //R01 -m
 #define FINGER_REQUIREMENT_NUM 5   //R01 -a(5,4,3,2,1 has tested)
 
 #define DEBUG_VALUE_NUM_MAX    10
@@ -373,7 +370,7 @@
 //**********************************************************
 #define DOZE_MODE_PERIOD                0x1000  // 160ms
 #define DOZE_MODE_FINGER_THR            200     // The MAX of the Frame Diff is bigger than 200, finger is coming or lost
-#define WORK_MODE_NOFING_MAXPERD        300    // After 10 Seconds, NO finger appeared, then Doze Mode
+#define WORK_MODE_NOFING_MAXPERD        400     // After 10 Seconds, NO finger appeared, then Doze Mode
 
 #define FINGER_ADJUST_DISTANCE_MIN      24
 #define FINGER_ADJUST_DISTANCE_MAX      72
@@ -414,7 +411,7 @@
 #ifdef WINNER_TWD                                    //for 全志通文达
 #define ISCANMODE_PERD_REG_VALUE             0x1C0
 #else
-#define ISCANMODE_PERD_REG_VALUE             0x140   //12.5ms   
+#define ISCANMODE_PERD_REG_VALUE             0x1c0   //12.5ms   
 #endif
 
   #define RAW_DATA_DIFF_THR                    1100
