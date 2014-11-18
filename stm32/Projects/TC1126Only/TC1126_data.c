@@ -2782,7 +2782,7 @@ void FingProc_SuperFilter4Edge(void)
                     //************************************************************
                     // Just from AA to Edge area, (Less than 20/35 points)
                     //************************************************************
-                    if(bdt.DPD[i].FingerRealNum2_X > 20)  
+                    if(bdt.DPD[i].FingerRealNum2_X > 20)
                     { 
                         if(xRpt < SUPFIL_RANGE && x[0] < SUPFIL_RANGE && x[1] < SUPFIL_RANGE && x[2] < SUPFIL_RANGE)
                             FingProc_SuperF4EAGE_LR(i,x,y);
