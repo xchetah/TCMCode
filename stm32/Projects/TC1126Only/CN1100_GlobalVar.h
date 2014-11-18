@@ -95,17 +95,12 @@ typedef struct DeltaPData {
     uint16_t   AdjustOrigin_y;
 
 #ifdef SUPER_FILTER4EDGE
-    uint16_t   EdgeShift_L;
-    uint16_t   EdgeOffset_L;
-    uint16_t   EdgeShift_R;
-    uint16_t   EdgeOffset_R;
-    uint16_t   EdgeShift_T;
-    uint16_t   EdgeOffset_T;
-    uint16_t   EdgeShift_B;
-    uint16_t   EdgeOffset_B;
+    uint16_t   EdgeShift_LR;
+    uint16_t   EdgeOffset_LR;
+    uint16_t   EdgeShift_TB;
+    uint16_t   EdgeOffset_TB;
     uint8_t    FingerRealNum1_X;
     uint8_t    FingerRealNum2_X;
-    uint8_t    FingerRealNum2R_X;
     uint8_t    FingerRealNum1_Y;
     uint8_t    FingerRealNum2_Y;
 #endif
@@ -389,6 +384,15 @@ typedef struct BasData {
     uint32_t  TxRxiFCAP;                            // 调节后该点的FCAP值
     uint32_t  TxRxjFCAP;
 #endif
+    #ifdef DIRDEBUG
+    uint16_t   Debug_X;
+    uint16_t   Debug_Y;
+    int16_t    Debug[12];
+    #endif
+    uint16_t   EdgeCount;
+    uint16_t   SlipDirFlag;
+    #endif
+
     uint16_t FingerReqNum;   //R01 -a
 
 } BasData_t;

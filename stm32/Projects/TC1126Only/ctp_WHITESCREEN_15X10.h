@@ -17,23 +17,26 @@
 
 #define DUR_RESET            8
 
-//#ifdef CN1100_WINNER  
-//#define DUR_INTEG            63
-//#else
+#ifdef WINNER_TWD                    //for 全志通文达
 #define DUR_INTEG             63
-//#endif
-//#define DUR_INTEG            48
+#else
+#define DUR_INTEG             36
+#endif
 
 #define DUR_STRETCH          1      // TX Freq: 150K
 
-#define BURST_CNT            0x82f //0x81C
-//#define BURST_CNT            0x81F
+#ifdef WINNER_TWD                   //for 全志通文达
+#define BURST_CNT            0x81C
+#else
+#define BURST_CNT            0x82f  //0x81C
+#endif
 
 
-#define DOZE_HIREF_SETTING   HIGH_REF_4PF
-#define DOZE_LOREF_SETTING   LOW_REF_0PF
+
+#define DOZE_HIREF_SETTING   HIGH_REF_2PF
+#define DOZE_LOREF_SETTING   LOW_REF_2PF
 #define DOZE_HIREF_PL_SET    HIGH_REF_POS
-#define DOZE_LOREF_PL_SET    LOW_REF_POS
+#define DOZE_LOREF_PL_SET    LOW_REF_NEG
 #define DOZE_HIREF_GAIN_SET  REF_GAIN_12PF
 #define DOZE_LOREF_GAIN_SET  REF_GAIN_12PF
 #define DOZE_TX_DRIVE_PL     TX_DRIVE_NORM

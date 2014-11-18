@@ -30,10 +30,6 @@ extern void USART1_IRQHandler_ISR(void);
 extern void Print_FrameAndDelta_Data(uint16_t *buffer);
 #endif
 
-#ifdef SLEEP_EVENT_SIM
-void CN1100_SLEEP_EVENT_SIM_ISR(void);
-#endif
-
 #endif
 
 extern void BufferAHandle(void);
