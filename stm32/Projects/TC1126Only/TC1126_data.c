@@ -2609,7 +2609,7 @@ uint16_t FingProc_SuperF4EAGE_ShiftCalc(uint16_t OrigShiftVal, uint16_t curp, ui
             ShiftResult += 1;
         }
     }
-    else if(DirVal > 1)
+    else if(DirVal > 2)
     {
         //********************************************************
         // Finger Moving Direction show a kind of fixing method
@@ -3757,8 +3757,8 @@ uint16_t FingProc_IEdgeP_Left(uint16_t h)
 #ifdef BORDER_SIMPLE_ADJUSTABLE
   #if 1
     h = h<<1;
-    result = h;
-    //result = (((h>>5)+1)<<5)-16;
+    //result = h;
+    result = (((h>>5)+1)<<5)-16;
     if(result > 230) result = 230;
   #else
     #define ASCLOSEASPOSSIBLE_LEFT 45
@@ -3935,8 +3935,8 @@ uint16_t FingProc_IEdgeP_Right(uint16_t h)
 #ifdef BORDER_SIMPLE_ADJUSTABLE
   #if 1
     h = h<<1;
-    result = h;
-    //result = (((h>>5)+1)<<5)-16
+    //result = h;
+    result = (((h>>5)+1)<<5)-16;
     if(result > 230) result = 230;
   #else
     #define ASCLOSEASPOSSIBLE_RIGHT 35
@@ -4129,8 +4129,8 @@ uint16_t FingProc_IEdgeP_Top(uint16_t h)
 #ifdef BORDER_SIMPLE_ADJUSTABLE
   #if 1
     h = h<<1;
-    result = h;
-    //result = (((h>>5)+1)<<5)-16
+    //result = h;
+    result = (((h>>5)+1)<<5)-16;
     if(result > 230) result = 230;
   #else
     #define ASCLOSEASPOSSIBLE_TOP 42
@@ -4315,8 +4315,8 @@ uint16_t FingProc_IEdgeP_Bottom(uint16_t h)
 #ifdef BORDER_SIMPLE_ADJUSTABLE
   #if 1
     h = h<<1;
-    result = h;
-    //result = (((h>>5)+1)<<5)-16
+    //result = h;
+    result = (((h>>5)+1)<<5)-16;
     if(result > 230) result = 230;
   #else
     #define ASCLOSEASPOSSIBLE_BOTTOM 64
@@ -4670,6 +4670,191 @@ void FingProc_FingerInfoReorder(void)
     } 
 }
 
+
+#if 1
+uint16_t measurestep3(uint16_t *p, uint16_t Rpt)
+{
+    int16_t i, dx;
+
+    i=0;
+    dx = (int16_t)Rpt - (int16_t)p[0];
+    if(dx<72&&dx>-72)
+    {
+        dx = (int16_t)p[0] - (int16_t)p[1];
+        if(dx<72&&dx>-72)
+        {
+            dx = (int16_t)p[1] - (int16_t)p[2];
+            if(dx<72&&dx>-72)
+            {
+                dx = (int16_t)p[2] - (int16_t)p[3];
+                if(dx<72&&dx>-72)
+                {
+                    dx = (int16_t)p[3] - (int16_t)p[4];
+                    if(dx<72&&dx>-72)
+                    {
+                        dx = (int16_t)p[4] - (int16_t)p[5];
+                        if(dx<72&&dx>-72)
+                        {
+                            dx = (int16_t)p[5] - (int16_t)p[6];
+                            if(dx<72&&dx>-72)
+                            {
+                                i = 1;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return i;
+}
+uint16_t measurestep4(uint16_t *p, uint16_t Rpt)
+{
+    int16_t i, dx;
+
+    i=0;
+    dx = (int16_t)Rpt - (int16_t)p[3];
+    if(dx>0)
+    {
+        dx = (int16_t)p[0] - (int16_t)p[4];
+        if(dx>0)
+        {
+            dx = (int16_t)p[1] - (int16_t)p[5];
+            if(dx>0)
+            {
+                dx = (int16_t)p[2] - (int16_t)p[6];
+                if(dx>0)
+                {
+                    i = 1;
+                }
+            }
+        }
+    }
+    return i;
+}
+uint16_t measurestep5(uint16_t *p, uint16_t Rpt)
+{
+    int16_t i, dx;
+
+    i=0;
+    dx = (int16_t)Rpt - (int16_t)p[3];
+    if(dx<0)
+    {
+        dx = (int16_t)p[0] - (int16_t)p[4];
+        if(dx<0)
+        {
+            dx = (int16_t)p[1] - (int16_t)p[5];
+            if(dx<0)
+            {
+                dx = (int16_t)p[2] - (int16_t)p[6];
+                if(dx<0)
+                {
+                    i = 1;
+                }
+            }
+        }
+    }
+    return i;
+}
+uint16_t measurestep6(uint16_t *p, uint16_t Rpt)
+{
+    int16_t i, dx;
+
+    i=0;
+    dx = (int16_t)Rpt - (int16_t)p[0];
+    if(dx<72&&dx>-72)
+    {
+        dx = (int16_t)p[0] - (int16_t)p[1];
+        if(dx<72&&dx>-72)
+        {
+            dx = (int16_t)p[1] - (int16_t)p[2];
+            if(dx<72&&dx>-72)
+            {
+                dx = (int16_t)p[2] - (int16_t)p[3];
+                if(dx<72&&dx>-72)
+                {
+                    dx = (int16_t)p[3] - (int16_t)p[4];
+                    if(dx<72&&dx>-72)
+                    {
+                        i = 1;
+                    }
+                }
+            }
+        }
+    }
+    return i;
+}
+void FingProc_ImproveAll(void)
+{
+    uint16_t *x, *y, xRpt, yRpt;
+    uint16_t i, dx, dy;
+    #define XXXX 256
+    for (i = 0;i < FINGER_NUM_MAX;i++)
+    {
+        if(bdt.DPD[i].FingerStateFlag < STATE_SERIAL_FINGER)
+        {
+            continue;
+        }
+
+        x    = bdt.DPD[i].Prev_Finger_X;    /* Point to the saving array*/
+        y    = bdt.DPD[i].Prev_Finger_Y;
+
+        xRpt = bdt.DPD[i].Finger_X_XMTR;    /* Just calculated from raw data*/
+        yRpt = bdt.DPD[i].Finger_Y_RECV;    /* Just calculated from raw data */
+        if( xRpt || yRpt) /* Finger Point*/
+        {
+            dx = FingProc_Dist4Uint16Var(xRpt, x[0]);
+            dy = FingProc_Dist4Uint16Var(yRpt, y[0]);
+            if((dx > (dy>>2)) && (dy < 256))
+            {
+                //  bdt.DPD[i].EdgeShift =3;
+                //  bdt.DPD[i].EdgeOffset =8;
+                if( measurestep3(x,xRpt))
+                {
+                    bdt.FingerDetectNum1++;
+                    if(bdt.FingerDetectNum1>10)
+                        bdt.FingerDetectNum1=10;
+                    if(measurestep4(x,xRpt)||measurestep5(x,xRpt))
+                    {
+                        if(bdt.FingerDetectNum1>5)
+                            bdt.FingerDetectNum1 =3;
+                    }
+                }
+                else
+                    bdt.FingerDetectNum1 =0;
+                if(bdt.FingerDetectNum1>5)
+                {
+                    bdt.DPD[i].EdgeShift =3;
+                    bdt.DPD[i].EdgeOffset =8;
+                }
+                else
+                {
+                    bdt.DPD[i].EdgeShift =0;
+                    bdt.DPD[i].EdgeOffset =0;
+                }
+            }
+        }
+        if(dx<128) 
+        {
+            dx = dx>>(bdt.DPD[i].EdgeShift);
+        }
+        else  
+        {
+            dx = bdt.DPD[i].EdgeOffset + (dx>>(bdt.DPD[i].EdgeShift+1));
+        }
+        if(xRpt>x[0])
+        {
+            xRpt = x[0]+dx;
+        }
+        else
+        { 
+            xRpt = x[0]-dx;
+        }
+
+        bdt.DPD[i].Finger_X_XMTR = xRpt;
+    }
+}
+#endif
 /*******************************************************************************
 * Function Name  : 
 * Description    : 
@@ -4689,6 +4874,45 @@ void DataProc_HandleFingerInfo(void)
     FingProc_PostSortFingers();
 
     FingProc_SuperFilter4Edge();
+    #if 1
+    {
+        uint16_t *x, *y, xRpt, yRpt;
+		uint16_t i = 0;
+        if(bdt.FingerDetectNum)
+        {
+            for (i = 0;i < FINGER_NUM_MAX;i++)
+            {
+                x    = bdt.DPD[i].Prev_Finger_X;    /*Point to the saving array*/
+                y    = bdt.DPD[i].Prev_Finger_Y;
+
+                xRpt = bdt.DPD[i].Finger_X_XMTR;    /* Just calculated from raw data*/
+                yRpt = bdt.DPD[i].Finger_Y_RECV;    /* Just calculated from raw data */
+                if(measurestep6(x,xRpt))
+                    bdt.FingerDetectNum2++;
+                else
+                    bdt.FingerDetectNum2 = 0;
+                if(bdt.FingerDetectNum2>50)
+                    bdt.FingerDetectNum2=50;
+            }
+        }
+        else
+            bdt.FingerDetectNum2 = 0;
+
+        if(bdt.FingerDetectNum)
+        {
+            if(bdt.FingerDetectNum2>8)
+            { 
+                for(i=0; i<bdt.FingerDetectNum; i++)
+                {
+                    if(bdt.DPD[i].Finger_X_XMTR || bdt.DPD[i].Finger_Y_RECV) 
+                        bdt.DPD[i].Finger_X_XMTR= (((bdt.DPD[i].Finger_X_XMTR>>5)+1)<<5)-16;
+                    //  bdt.DPD[i].Finger_Y_RECV= (((bdt.DPD[i].Finger_Y_RECV>>5)+1)<<5)-16;
+                }
+            }
+        }
+        FingProc_ImproveAll();  
+    }
+    #endif
     FingProc_ImproveByMultiFilters();
     bdt.PrevFingerDetectNum2 = bdt.PrevFingerDetectNum;
     bdt.PrevFingerDetectNum  = bdt.FingerDetectNum;

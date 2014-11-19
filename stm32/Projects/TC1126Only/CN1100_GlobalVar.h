@@ -46,7 +46,11 @@ typedef struct DeltaPData {
     uint8_t    LifeNumber;
     uint16_t   Finger_X_Reported;                      // Final report finger point X, Q8
     uint16_t   Finger_Y_Reported;                      // Final report finger point Y, Q8
-    EdgeCtrl   EdgeInfo;        
+    EdgeCtrl   EdgeInfo;
+    // hsqdebug for FingProc_ImproveAll()
+    uint16_t   EdgeShift;
+    uint16_t   EdgeOffset;
+    // hsqdebug for FingProc_ImproveAll()
 
     uint16_t   StayCount;
     int32_t    Stay_XSum;
@@ -295,6 +299,10 @@ typedef struct BasData {
     uint16_t        FaceDetectDelay;       // 
 #endif
     uint16_t        FingerDetectNum;       // 
+    // hsqdebug for FingProc_ImproveAll()
+    uint16_t        FingerDetectNum1;
+    uint16_t        FingerDetectNum2;
+    // hsqdebug for FingProc_ImproveAll()
     uint16_t        PrevFingerDetectNum;   // used for sortfingers
     uint16_t        PrevFingerDetectNum2;  // used for sortfingers
 
