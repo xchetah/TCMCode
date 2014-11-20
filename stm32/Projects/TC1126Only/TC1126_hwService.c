@@ -1967,7 +1967,7 @@ void TC1126_GotoDozeMode(void)
     SPI_write_singleData(FLEN_REG, FLEN_FRAME_LEN(2*RECV_NUM) | FLEN_TOUCH_TH1(2) );
     #endif
     
-#if 0
+#if 1
 {
     SPI_write_singleData(FLAG_REG,  0x009f);
     SPI_write_singleData(ADCM_REG,  ADCM_ADC_SPEED(ADC_SPEED_SET) | ADCM_ACS(ACS_SPEED_SET) | ADCM_SHRT_CKT_EN 
@@ -2130,6 +2130,7 @@ uint16_t TC1126_DozeModeDataHandling(uint16_t BufferID)
 /*********************************************************
 * AutoDetection funcation is disabled @ Doze Mode
 *********************************************************/
+#define DOZEMODE_DEBUGSHOW
 uint16_t TC1126_DozeModeDataHandling(uint16_t BufferID)
 {
     uint16_t i, j, rtnValue = 0;
@@ -2225,9 +2226,9 @@ uint16_t TC1126_DozeModeDataHandling(uint16_t BufferID)
         {
             #ifdef CN1100_iSCANMODE
                 TC1126_GotoAutoScanMode(iAUTOSCAN_MODE);
+				rtnValue = 1;
             #endif
             
-            rtnValue = 1;
         }
     }
     #endif
@@ -2262,7 +2263,7 @@ void CN1100_SysTick_ISR(void)
     #endif
     
     #ifdef CN1100_LINUX
-        if(!(spidev->mode & CN1100_IS_DOZE)){
+        if(!(spidev->mode & CN1100_IS_DOZE)&&(bdt.ModeSelect!=DOZE_MODE)){
             if(!(spidev->mode & CN1100_IS_SUSPENDED))
                 spidev->ticks++;
         }    
@@ -2315,7 +2316,6 @@ void CN1100_FrameScanDoneInt_ISR()
     {
         case DOZE_MODE:
         {
-			printk("========>in DOZE_MODE\n");
             bdt.BFD.bbdc.NoFingerCnt4Base = 0;
             bdt.BFD.FingerLeftProtectTime = 0;
             /***************************************************************************
@@ -2325,6 +2325,7 @@ void CN1100_FrameScanDoneInt_ISR()
             bdt.BFD.bbdc.BaseUpdateCase   = BASE_FRAME_DISCARD;
 
             DONE_VALUE = SPI_read_singleData(DONE_REG);
+            CN1100_print("%4x\n", DONE_VALUE);
             #if 0
             CN1100_print("di=%d %4x\n", dozedebug++, DONE_VALUE);
             if(0 == (dozedebug&0x7))
@@ -2339,7 +2340,8 @@ void CN1100_FrameScanDoneInt_ISR()
                 if( DONE_VALUE & DONE_FRM0_READABLE )
                 {
                     /* Buffer A is ready in CN1100*/
-                    if(0 == TC1126_DozeModeDataHandling(BUFFER_A))
+					printk("BufferA\n");
+                    //if(0 == TC1126_DozeModeDataHandling(BUFFER_A))
                     {
                         SPI_write_singleData(FLAG_REG, FLAG_FRM0_RDDONE);
                     }
@@ -2350,7 +2352,8 @@ void CN1100_FrameScanDoneInt_ISR()
                 if( DONE_VALUE & DONE_FRM1_READABLE )
                 {
                     /* Buffer B is ready in CN1100*/
-                    if(0 == TC1126_DozeModeDataHandling(BUFFER_B))
+					printk("BufferB\n");
+                    //if(0 == TC1126_DozeModeDataHandling(BUFFER_B))
                     {
                         SPI_write_singleData(FLAG_REG, FLAG_FRM1_RDDONE);
                     }
@@ -2380,11 +2383,10 @@ void CN1100_FrameScanDoneInt_ISR()
                 {
                     bdt.MTD.NoFingerCnt4Doze = 0;
                     TC1126_GotoDozeMode();
-					enable_irq(spidev->irq);
+                    enable_irq(spidev->irq);
                     break;
                 }
             #endif
-
             #ifdef CN1100_LINUX
             spidev->ticks = 0;
             #endif

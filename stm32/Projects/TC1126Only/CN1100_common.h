@@ -108,10 +108,10 @@
 /**** 1.3    *********   System Working Mode  *************************/
 /**********************************************************************/
 //#define CN1100_SLEEPMODE
-#define CN1100_iSCANMODE
-//#define CN1100_DOZEMODE
+//#define CN1100_iSCANMODE
+#define CN1100_DOZEMODE
 
-#define DOZE_ALLOWED       // Allow to Doze mode if finger unexist for long time
+//#define DOZE_ALLOWED       // Allow to Doze mode if finger unexist for long time
 //#define FINGER_HWDET4DOZE    // @ Doze, enable Finger auto detection
 
 //#define DOZEMODE_DEBUGSHOW    // Working only during NO HW Detecting way
@@ -135,7 +135,7 @@
 //#define PREQY_CHIRP_ONLY      // Hardware Switch
 //#define DISBALE_HWFH_INSWFH   // Hardware Switch
 
-#define FREQHOP_BYSTRETCH     // Search a goof TX Freq by Stretch Setting
+//#define FREQHOP_BYSTRETCH     // Search a goof TX Freq by Stretch Setting
 #ifdef FREQHOP_BYSTRETCH
 //#define FHBS_DEBUG_INFOSHOW
 #define NOISECAL_SKIPNUM     2                   // Based on INTEG_DUR
@@ -150,6 +150,7 @@
 #define STRETCH_INC_REG25    0
 //#undef  FREQY_HOP_ONLY          // Hardware Switch
 #else
+#define TXSCAN_DISABLE       0                   // Based on INTEG_DUR 
 #define STRETCH_INC_REG25    3
 #endif
 
@@ -411,7 +412,7 @@
 #ifdef WINNER_TWD                                    //for 全志通文达
 #define ISCANMODE_PERD_REG_VALUE             0x1C0
 #else
-#define ISCANMODE_PERD_REG_VALUE             0x1c0   //12.5ms   
+#define ISCANMODE_PERD_REG_VALUE             0x140   //12.5ms   
 #endif
 
   #define RAW_DATA_DIFF_THR                    1100

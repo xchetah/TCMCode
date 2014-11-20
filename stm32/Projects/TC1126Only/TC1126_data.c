@@ -7184,7 +7184,7 @@ void DataProc_FrequencyHopByStretch(uint16_t *buf)
     #endif
     #endif
 
-//    bdt.MTD.NoFingerCnt4Doze = 0;
+    bdt.MTD.NoFingerCnt4Doze = 0;
     if(bdt.TxScanNoiseCount >= NOISECAL_SKIPNUM)
         bdt.SumNoiseDataFrFrame += bdt.NoiseDataFrFrame;
 
