@@ -7348,6 +7348,7 @@ void DataProc_WholeFrameProcess(uint16_t *buffer)
                 bdt.DeltaDat16A[i][j]=0;
               }
           #endif
+          DataProc_PressKeyDetect();
     #endif
     
     DataProc_FindMaxAndMinValue();       /* Find Max Value and its Location, also Min Value*/
@@ -7388,7 +7389,6 @@ void DataProc_WholeFrameProcess(uint16_t *buffer)
     if(bdt.FingerDetectNum > MIN_VALUE_POINT) 
     {
         #ifdef PRESS_KEY_DETECT
-        DataProc_PressKeyDetect();
         #endif
 
         /***********************************************************

@@ -371,7 +371,7 @@
 //**********************************************************
 #define DOZE_MODE_PERIOD                0x1000  // 160ms
 #define DOZE_MODE_FINGER_THR            200     // The MAX of the Frame Diff is bigger than 200, finger is coming or lost
-#define WORK_MODE_NOFING_MAXPERD        400     // After 10 Seconds, NO finger appeared, then Doze Mode
+#define WORK_MODE_NOFING_MAXPERD        1000     // After 10 Seconds, NO finger appeared, then Doze Mode
 
 #define FINGER_ADJUST_DISTANCE_MIN      24
 #define FINGER_ADJUST_DISTANCE_MAX      72

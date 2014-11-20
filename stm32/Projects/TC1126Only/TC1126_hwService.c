@@ -1175,7 +1175,8 @@ void TC1126_Init_TxMappingRegisters4SLEEP(void)
     * 2. Mapping setting should be changed;
     * 3. Polarity should be changed (maybe);
     *********************************************** */
-    for (i = 0; i < ((XMTR_NUM>>1)+0); i++)
+    for (i = 0; i < ((XMTR_NUM>>1)+1); i+=2)
+    //for (i = 0; i < 4; i++)
     {
         if(XmtrOrder[i+1] < 16)
         {
@@ -1198,7 +1199,8 @@ void TC1126_Init_TxMappingRegisters4SLEEP(void)
     }
     SPI_write_singleData(TXMAP0_REG, TX0_MAPPING);           /*  T0 */
     
-    for (i = ((XMTR_NUM>>1)+1); i < XMTR_NUM; i++)
+    for (i = ((XMTR_NUM>>1)+1); i < XMTR_NUM; i+=2)
+    //for (i = ((XMTR_NUM>>1)+1); i < ((XMTR_NUM>>1)+1)+4; i++)
     {
         if(XmtrOrder[i+1] < 16)
         {
@@ -2081,6 +2083,7 @@ uint16_t TC1126_DozeModeDataHandling(uint16_t BufferID)
     *********************************************/
     SPI_read_DATAs(0x400, DOZE_TXREADNUM*RECV_NUM, (uint16_t *)(bdt.FrameDatLoadA));
     SPI_read_DATAs(0x400+DOZE_TXREADNUM*RECV_NUM, DOZE_TXREADNUM*RECV_NUM, (uint16_t *)(bdt.FrameDatLoadB));
+
     if(bdt.MTD.mtdc.Doze_FirstIn<SkipFrameNUM)
     {
         bdt.MTD.mtdc.Doze_FirstIn++;
@@ -2104,14 +2107,15 @@ uint16_t TC1126_DozeModeDataHandling(uint16_t BufferID)
             }
         }
     }
+	CN1100_print("tmpMax:%d\n",tempMax);
     
     if(tempMax > DOZE_MODE_FINGER_THR) 
     {
         #ifdef CN1100_iSCANMODE
             TC1126_GotoAutoScanMode(iAUTOSCAN_MODE);
+			rtnValue = 1;
         #endif
         
-        rtnValue = 1;
     }
     
     return rtnValue;
@@ -2261,7 +2265,10 @@ void CN1100_SysTick_ISR(void)
             }
         #endif
     #endif
-    
+	if(bdt.ModeSelect==DOZE_MODE){
+		spidev->irq_count++;
+	}
+
     #ifdef CN1100_LINUX
         if(!(spidev->mode & CN1100_IS_DOZE)&&(bdt.ModeSelect!=DOZE_MODE)){
             if(!(spidev->mode & CN1100_IS_SUSPENDED))
@@ -2316,6 +2323,7 @@ void CN1100_FrameScanDoneInt_ISR()
     {
         case DOZE_MODE:
         {
+			spidev->irq_count = 0;
             bdt.BFD.bbdc.NoFingerCnt4Base = 0;
             bdt.BFD.FingerLeftProtectTime = 0;
             /***************************************************************************
@@ -2378,6 +2386,7 @@ void CN1100_FrameScanDoneInt_ISR()
         
         case iAUTOSCAN_MODE:
         {
+			spidev->irq_count = 20;
             #ifdef DOZE_ALLOWED
                 if(bdt.MTD.NoFingerCnt4Doze > WORK_MODE_NOFING_MAXPERD)
                 {
