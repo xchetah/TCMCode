@@ -2341,7 +2341,7 @@ void CN1100_FrameScanDoneInt_ISR()
                 {
                     /* Buffer A is ready in CN1100*/
 					printk("BufferA\n");
-                    //if(0 == TC1126_DozeModeDataHandling(BUFFER_A))
+                    if(0 == TC1126_DozeModeDataHandling(BUFFER_A))
                     {
                         SPI_write_singleData(FLAG_REG, FLAG_FRM0_RDDONE);
                     }
@@ -2353,7 +2353,7 @@ void CN1100_FrameScanDoneInt_ISR()
                 {
                     /* Buffer B is ready in CN1100*/
 					printk("BufferB\n");
-                    //if(0 == TC1126_DozeModeDataHandling(BUFFER_B))
+                    if(0 == TC1126_DozeModeDataHandling(BUFFER_B))
                     {
                         SPI_write_singleData(FLAG_REG, FLAG_FRM1_RDDONE);
                     }
