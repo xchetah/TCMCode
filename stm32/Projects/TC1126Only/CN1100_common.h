@@ -47,6 +47,17 @@
 #define TOUCH_KEY_4 0xf
 //#define TPD_PROXIMITY
 
+#if 1
+#define TCM_RESET       0
+#define TCM_SET         1
+#define TCM_DISABLE     0
+#define TCM_ENABLE      1 
+#define TCM_ERROR       0
+#define TCM_SUCCESS     1
+#define TCM_FALSE       0
+#define TCM_TRUE        0
+#endif
+
 /************************************************************************
 *******1111111111111111111111111111111111111111111111111111111111********
 *******1111111111111111111111111111111111111111111111111111111111********
@@ -146,13 +157,12 @@
 #define TXSCAN_FINGERDELAY   100                 // 100/80=1.25sec
 #define TXSCAN_VALIDPERIOD   480                 // 4800/80=60sec(1min)
 #define TXSCAN_ENABLE        1                   // Based on INTEG_DUR 
-#define TXSCAN_DISABLE       0                   // Based on INTEG_DUR 
 #define STRETCH_INC_REG25    0
 //#undef  FREQY_HOP_ONLY          // Hardware Switch
 #else
-#define TXSCAN_DISABLE       0                   // Based on INTEG_DUR 
 #define STRETCH_INC_REG25    3
 #endif
+#define TXSCAN_DISABLE       0                   // Based on INTEG_DUR 
 
 /**********************************************************************/
 /**** 1.6    *********  Feature and Funcation *************************/
@@ -219,14 +229,14 @@
 /**** 1.8    *********  关于 触摸屏 类型  *****************************/
 /**********************************************************************/
 
-#define WHITESCREEN_15X10               // White or Black screen DITO, 15X10
+//#define WHITESCREEN_15X10               // White or Black screen DITO, 15X10
 //#define SITO_SCREEN_10X15             // Black Screen SITO, 15X10
 //#define ITO_BORDERLINE_15X10          // ITO走线 DITO 屏
 
 //#define PHONESCREEN_13X10               // 手机屏(单层ITO), GT960
 //#define SH_FEATUREPHONE_13X9            // 手机屏(单层ITO), GT1688 ( //// FREQY_HOP_ONLY has to be disabled ////)
 
-//#define FPCSCREEN_17X10                   // FPC屏(DITO), GT960
+#define FPCSCREEN_17X10                   // FPC屏(DITO), GT960
 
 //#define PCB_DITO_SCREEN_15X10         // PCB 标准 DITO 图案
 //#define PCB_RHOMBUS_15X10             // PCB - 菱形图案
@@ -371,7 +381,7 @@
 //**********************************************************
 #define DOZE_MODE_PERIOD                0x1000  // 160ms
 #define DOZE_MODE_FINGER_THR            200     // The MAX of the Frame Diff is bigger than 200, finger is coming or lost
-#define WORK_MODE_NOFING_MAXPERD        1000     // After 10 Seconds, NO finger appeared, then Doze Mode
+#define WORK_MODE_NOFING_MAXPERD        400     // After 10 Seconds, NO finger appeared, then Doze Mode
 
 #define FINGER_ADJUST_DISTANCE_MIN      24
 #define FINGER_ADJUST_DISTANCE_MAX      72
@@ -412,7 +422,7 @@
 #ifdef WINNER_TWD                                    //for 全志通文达
 #define ISCANMODE_PERD_REG_VALUE             0x1C0
 #else
-#define ISCANMODE_PERD_REG_VALUE             0x1c0   //12.5ms   
+#define ISCANMODE_PERD_REG_VALUE             0x140   //12.5ms   
 #endif
 
   #define RAW_DATA_DIFF_THR                    1100

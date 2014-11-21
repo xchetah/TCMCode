@@ -970,7 +970,6 @@ static struct i2c_driver chm_ts_driver = {
 static int __init cn1100_spi_init(void)
 {
     int status = 0;
-    struct timespec tv;
 
     bd = kmalloc(sizeof(bd_t),GFP_KERNEL);
     if(!bd){

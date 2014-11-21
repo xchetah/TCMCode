@@ -1,3 +1,35 @@
+/******************************************************************************
+ * 版权所有(C) TRUECOREING
+ * DEPARTMENT:
+ * MANUAL_PERCENT:
+ * 文件名称: CN1000_data.c 
+ * 文件标识:    
+ * 内容摘要: 
+ * 其它说明:
+ * 当前版本: 
+ * 作    者: 
+ * 完成日期:
+ * 当前责任人: 
+ *
+ * 修改记录1: 代码合规
+ * 修改日期: 2014-09-15
+ * 版 本 号:
+ * 修 改 人: Wangpc
+ * 修改内容: 
+ *
+ * 修改记录2: Add one feature that acquire 10 fingers then parse 5 fingers 
+ * 修改日期: 2014-11-12
+ * 版 本 号:
+ * 修 改 人: Wangpc(R01)
+ * 修改内容: 
+ *
+ * 修改记录3: Rebuild structure of register
+ * 修改日期: 2014-11-19
+ * 版 本 号:
+ * 修 改 人: Wangpc(R02)
+ * 修改内容: 
+ *****************************************************************************/
+
 #ifndef CN1100_HWDEBUG_C
 #define  CN1100_HWDEBUG_C
 
@@ -1018,7 +1050,6 @@ uint32_t Get32bitData(uint8_t *pdata)
 void USART_COMM_Handle()
 {
     uint16_t tshort,i;
-    uint16_t high,low;
     uint32_t addr;
     
     #ifdef REG_MEM_16BITS_ADDR
@@ -1053,9 +1084,11 @@ void USART_COMM_Handle()
         * Format: SYNC(0xFA-F5-00-53) DATAH DATAL
         ******************************************* */
         tshort = SPI_read_singleData(addr);
+
         #ifdef USB_COMMUNICATION
         dbg.USB_dataflag = USB_DATA_BEGIN;
         #endif
+
         for (i=0; i<10; i++)
         {
             SendOutOneByte(0xfa);
@@ -1065,16 +1098,19 @@ void USART_COMM_Handle()
             SendOutOneByte((uint8_t)(tshort>>8));
             SendOutOneByte((uint8_t)(tshort&0xff));
         }
+
         #ifdef USB_COMMUNICATION
         dbg.USB_dataflag = USB_DATA_END;
         SendOutOneByte(0xff);
         #endif
-        }
+    }
     else if(SHOW_STM32_PARA == dbg.ReceiveBuf[0])
     {
         #ifdef USB_COMMUNICATION
         dbg.USB_dataflag = USB_DATA_BEGIN;
         #endif
+
+        #if 0
         /*send reply sync*/
         SendOutOneByte(0xfa);
         SendOutOneByte(0xf5);
@@ -1104,6 +1140,8 @@ void USART_COMM_Handle()
         SendOut32bitdata(bdt.PCBA.DurInteg);
         SendOut32bitdata(bdt.PCBA.DurStretch);
         SendOut32bitdata(bdt.PCBA.BurstCnt);
+        #endif
+
         #ifdef USB_COMMUNICATION
         dbg.USB_dataflag = USB_DATA_END;
         SendOutOneByte(0xff);
@@ -1114,6 +1152,7 @@ void USART_COMM_Handle()
         #ifdef USB_COMMUNICATION
         if( 0 == dbg.ReceiveBuf[1])
         {
+            #if 0
             bdt.PCBA.ProtectTime           = Get32bitData(&dbg.ReceiveBuf[2]);
             bdt.PCBA.FrameMaxSample        = Get32bitData(&dbg.ReceiveBuf[6]);
             bdt.PCBA.AbnormalMaxDiff       = Get32bitData(&dbg.ReceiveBuf[10]);
@@ -1129,19 +1168,37 @@ void USART_COMM_Handle()
             bdt.PCBA.TxPolarity            = Get32bitData(&dbg.ReceiveBuf[50]);
             bdt.PCBA.FinAdjDisMin          = Get32bitData(&dbg.ReceiveBuf[54]);
             bdt.PCBA.FinAdjDisMax          = Get32bitData(&dbg.ReceiveBuf[58]);
-
             if(1 == bdt.PCBA.TxPolarity)
             {
                 SPI_write_singleData(TPL1_REG, 0xffff); /*  cfg_reg30, 12'h000 */
-            }else if(0 == bdt.PCBA.TxPolarity)
+            }
+            else if(0 == bdt.PCBA.TxPolarity)
             {
                 SPI_write_singleData(TPL1_REG, 0x0000); /*  cfg_reg30, 12'h000 */
             }
+            //R02 -a
+            RegTab_t.Reg28BitDef_t.RefhRegConf = 0;
+            RegTab_t.Reg28BitDef_t.RcvmReg_t.REFH_REFHI_EN = 1;
+            RegTab_t.Reg28BitDef_t.RcvmReg_t.REFH_REFHI_INP= 1;
+            high  = RegTab_t.Reg28BitDef_t.RefhRegConf;
 
-            high  = REFH_REFHI_EN | REFH_REFHI_INP;
-            low   = REFL_REFLO_EN | REFL_REFLO_INP;
-            high |= REFH_REFHI_TCAP(bdt.PCBA.HighRefSet) | REFH_REFHI_FCAP(bdt.PCBA.HighRefGainSet); /*  Pos1PF; */
-            low  |= REFL_REFLO_TCAP(bdt.PCBA.LowRefSet)  | REFL_REFLO_FCAP(bdt.PCBA.LowRefGainSet);  /*  Neg2PF; */
+            RegTab_t.Reg29BitDef_t.ReflRegConf = 0;
+            RegTab_t.Reg29BitDef_t.RcvmReg_t.REFL_REFLO_EN = 1;
+            RegTab_t.Reg29BitDef_t.RcvmReg_t.REFL_REFLO_INP = 1;
+            low   =  RegTab_t.Reg29BitDef_t.ReflRegConf;
+
+            RegTab_t.Reg28BitDef_t.RcvmReg_t.REFH_REFHI_EN = 0;
+            RegTab_t.Reg28BitDef_t.RcvmReg_t.REFH_REFHI_INP= 0;
+            RegTab_t.Reg28BitDef_t.RcvmReg_t.REFH_REFHI_TCAP = bdt.PCBA.HighRefSet;
+            RegTab_t.Reg28BitDef_t.RcvmReg_t.REFH_REFHI_FCAP =	bdt.PCBA.HighRefGainSet;
+            high |= RegTab_t.Reg28BitDef_t.RefhRegConf; /*  Pos1PF; */
+
+            RegTab_t.Reg29BitDef_t.RcvmReg_t.REFL_REFLO_EN = 0;
+            RegTab_t.Reg29BitDef_t.RcvmReg_t.REFL_REFLO_INP = 0;
+            RegTab_t.Reg29BitDef_t.RcvmReg_t.REFL_REFLO_TCAP = bdt.PCBA.LowRefSet;
+            RegTab_t.Reg29BitDef_t.RcvmReg_t.REFL_REFLO_FCAP = bdt.PCBA.LowRefGainSet;
+            low  |= RegTab_t.Reg29BitDef_t.ReflRegConf;  /*  Neg2PF; */
+            //R02 -e
             high |= (bdt.PCBA.HighRefPlSet<<5);
             low  |= (bdt.PCBA.LowRefPlSet<<5);
             SPI_write_singleData(REFH_REG, high);
@@ -1149,9 +1206,11 @@ void USART_COMM_Handle()
             /* reinitialize baseline */
             bdt.BFD.InitCount = 0;
             USB_SendString(dbg.Transi_Buffer);
+            #endif
         }
         else if(1 == dbg.ReceiveBuf[1])
         {
+            #if 0
             bdt.PCBA.MaxValueNoFinger      = Get32bitData(&dbg.ReceiveBuf[2]);
             bdt.PCBA.FinThrMin             = Get32bitData(&dbg.ReceiveBuf[6]);
             bdt.PCBA.FinAdjDisX            = Get32bitData(&dbg.ReceiveBuf[10]);
@@ -1160,16 +1219,37 @@ void USART_COMM_Handle()
             bdt.PCBA.DurInteg              = Get32bitData(&dbg.ReceiveBuf[22]);
             bdt.PCBA.DurStretch            = Get32bitData(&dbg.ReceiveBuf[26]);
             bdt.PCBA.BurstCnt              = Get32bitData(&dbg.ReceiveBuf[30]);
-            SPI_write_singleData(RCVM_REG, RCVM_RJCT_EN |RCVM_RCVR_TURBO_EN1| RCVM_CHAN_RST_EN 
-                                |RCVM_RCVR_FCAP(bdt.PCBA.RcvmRcvrFcapSet)| RCVM_FILT_BW(3)); 
-                                
-            SPI_write_singleData(DURV_REG, DURV_RESET_DUR(bdt.PCBA.DurReset) | DURV_INTEG_DUR(bdt.PCBA.DurInteg)); /*  cfg_reg24, 12'h144 */
-            SPI_write_singleData(DURS_REG, DURS_STRETCH_DUR(bdt.PCBA.DurStretch)|DURS_STRETCH_INC(STRETCH_INC_REG25));  /*  cfg_reg25, 12'h000 */
-            SPI_write_singleData(BCNT_REG, BCNT_BURST_CNT(bdt.PCBA.BurstCnt)); /*  cfg_reg26, 12'h02f */
+            //R02 -a
+            RegTab_t.Reg27BitDef_t.RcvmRegConf = 0;
+            RegTab_t.Reg27BitDef_t.RcvmReg_t.RCVM_RJCT_EN = 1;
+            RegTab_t.Reg27BitDef_t.RcvmReg_t.RCVM_RCVR_TURBO_EN1 =1;
+            RegTab_t.Reg27BitDef_t.RcvmReg_t.RCVM_CHAN_RST_EN = 1;
+            RegTab_t.Reg27BitDef_t.RcvmReg_t.RCVM_RCVR_FCAP = bdt.PCBA.RcvmRcvrFcapSet;
+            RegTab_t.Reg27BitDef_t.RcvmReg_t.RCVM_FILT_BW = 3;
+            SPI_write_singleData(RCVM_REG,RegTab_t.Reg27BitDef_t.RcvmRegConf);
+
+
+            RegTab_t.Reg24BitDef_t.DurvRegConf = 0;
+            RegTab_t.Reg24BitDef_t.DurvReg_t.DURV_RESET_DUR = bdt.PCBA.DurReset;
+            RegTab_t.Reg24BitDef_t.DurvReg_t.DURV_INTEG_DUR = bdt.PCBA.DurInteg;
+            SPI_write_singleData(DURV_REG,RegTab_t.Reg24BitDef_t.DurvRegConf);/*  cfg_reg24, 12'h144 */
+
+            RegTab_t.Reg25BitDef_t.DursRegConf = 0;
+            RegTab_t.Reg25BitDef_t.DursReg_t.DURS_STRETCH_DUR = bdt.PCBA.DurStretch;
+            RegTab_t.Reg25BitDef_t.DursReg_t.DURS_STRETCH_INC = STRETCH_INC_REG25;	
+            SPI_write_singleData(DURS_REG,RegTab_t.Reg25BitDef_t.DursRegConf);  /*  cfg_reg25, 12'h000 */
+
+            RegTab_t.Reg26BitDef_t.BcntRegConf = 0;
+            RegTab_t.Reg26BitDef_t.BcntReg_t.BCNT_BURST_CNT = bdt.PCBA.BurstCnt;
+            SPI_write_singleData(BCNT_REG,RegTab_t.Reg26BitDef_t.BcntRegConf); /*  cfg_reg26, 12'h02f */
+            //R02 -e
             /* reinitialize baseline */
             bdt.BFD.InitCount = 0;
+            #endif
         }
         #else
+
+        #if 0
         bdt.PCBA.ProtectTime           = Get32bitData(&dbg.ReceiveBuf[1]);
         bdt.PCBA.FrameMaxSample        = Get32bitData(&dbg.ReceiveBuf[5]);
         bdt.PCBA.AbnormalMaxDiff       = Get32bitData(&dbg.ReceiveBuf[9]);
@@ -1200,22 +1280,62 @@ void USART_COMM_Handle()
         {
             SPI_write_singleData(TPL1_REG, 0x0000); /*  cfg_reg30, 12'h000 */
         }
-        high  = REFH_REFHI_EN | REFH_REFHI_INP;
-        low   = REFL_REFLO_EN | REFL_REFLO_INP;
-        high |= REFH_REFHI_TCAP(bdt.PCBA.HighRefSet) | REFH_REFHI_FCAP(bdt.PCBA.HighRefGainSet); /*  Pos1PF; */
-        low  |= REFL_REFLO_TCAP(bdt.PCBA.LowRefSet)  | REFL_REFLO_FCAP(bdt.PCBA.LowRefGainSet);  /*  Neg2PF; */
+        //R02 -a
+        RegTab_t.Reg28BitDef_t.RefhRegConf = 0;
+        RegTab_t.Reg28BitDef_t.RcvmReg_t.REFH_REFHI_EN = 1;
+        RegTab_t.Reg28BitDef_t.RcvmReg_t.REFH_REFHI_INP= 1;
+        high  = RegTab_t.Reg28BitDef_t.RefhRegConf;
+
+        RegTab_t.Reg29BitDef_t.ReflRegConf = 0;
+        RegTab_t.Reg29BitDef_t.RcvmReg_t.REFL_REFLO_EN = 1;
+        RegTab_t.Reg29BitDef_t.RcvmReg_t.REFL_REFLO_INP = 1;
+        low   = RegTab_t.Reg29BitDef_t.ReflRegConf;
+
+
+        RegTab_t.Reg28BitDef_t.RcvmReg_t.REFH_REFHI_EN = 0;
+        RegTab_t.Reg28BitDef_t.RcvmReg_t.REFH_REFHI_INP= 0;
+        RegTab_t.Reg28BitDef_t.RcvmReg_t.REFH_REFHI_TCAP = bdt.PCBA.HighRefSet;
+        RegTab_t.Reg28BitDef_t.RcvmReg_t.REFH_REFHI_FCAP= bdt.PCBA.HighRefGainSet;
+        high |= RegTab_t.Reg28BitDef_t.RefhRegConf; /*  Pos1PF; */
+
+
+        RegTab_t.Reg29BitDef_t.RcvmReg_t.REFL_REFLO_EN = 0;
+        RegTab_t.Reg29BitDef_t.RcvmReg_t.REFL_REFLO_INP = 0;
+        RegTab_t.Reg29BitDef_t.RcvmReg_t.REFL_REFLO_TCAP = bdt.PCBA.LowRefSet;
+        RegTab_t.Reg29BitDef_t.RcvmReg_t.REFL_REFLO_FCAP = bdt.PCBA.LowRefGainSet;
+        low  |= RegTab_t.Reg29BitDef_t.ReflRegConf;  /*  Neg2PF; */
+        //R02 -e
         high |= (bdt.PCBA.HighRefPlSet<<5);
         low  |= (bdt.PCBA.LowRefPlSet<<5);
         SPI_write_singleData(REFH_REG, high);
         SPI_write_singleData(REFL_REG, low); 
-        SPI_write_singleData(RCVM_REG, RCVM_RJCT_EN |RCVM_RCVR_TURBO_EN1| RCVM_CHAN_RST_EN 
-                            |RCVM_RCVR_FCAP(bdt.PCBA.RcvmRcvrFcapSet)| RCVM_FILT_BW(3)); 
-                            
-        SPI_write_singleData(DURV_REG, DURV_RESET_DUR(bdt.PCBA.DurReset) | DURV_INTEG_DUR(bdt.PCBA.DurInteg)); /*  cfg_reg24, 12'h144 */
-        SPI_write_singleData(DURS_REG, DURS_STRETCH_DUR(bdt.PCBA.DurStretch)|DURS_STRETCH_INC(STRETCH_INC_REG25));  /*  cfg_reg25, 12'h000 */
-        SPI_write_singleData(BCNT_REG, BCNT_BURST_CNT(bdt.PCBA.BurstCnt)); /*  cfg_reg26, 12'h02f */
+        //R02 -a
+        RegTab_t.Reg27BitDef_t.RcvmRegConf = 0;
+        RegTab_t.Reg27BitDef_t.RcvmReg_t.RCVM_RJCT_EN = 1;
+        RegTab_t.Reg27BitDef_t.RcvmReg_t.RCVM_RCVR_TURBO_EN1 =1;
+        RegTab_t.Reg27BitDef_t.RcvmReg_t.RCVM_CHAN_RST_EN = 1;
+        RegTab_t.Reg27BitDef_t.RcvmReg_t.RCVM_RCVR_FCAP = bdt.PCBA.RcvmRcvrFcapSet;
+        RegTab_t.Reg27BitDef_t.RcvmReg_t.RCVM_FILT_BW = 3;
+        SPI_write_singleData(RCVM_REG, RegTab_t.Reg27BitDef_t.RcvmRegConf);
+
+
+        RegTab_t.Reg24BitDef_t.DurvRegConf = 0;
+        RegTab_t.Reg24BitDef_t.DurvReg_t.DURV_RESET_DUR = bdt.PCBA.DurReset;
+        RegTab_t.Reg24BitDef_t.DurvReg_t.DURV_INTEG_DUR = bdt.PCBA.DurInteg;					
+        SPI_write_singleData(DURV_REG,RegTab_t.Reg24BitDef_t.DurvRegConf);  /*  cfg_reg24, 12'h144 */
+
+        RegTab_t.Reg25BitDef_t.DursRegConf = 0;
+        RegTab_t.Reg25BitDef_t.DursReg_t.DURS_STRETCH_DUR = bdt.PCBA.DurStretch;
+        RegTab_t.Reg25BitDef_t.DursReg_t.DURS_STRETCH_INC = STRETCH_INC_REG25;	
+        SPI_write_singleData(DURS_REG, RegTab_t.Reg25BitDef_t.DursRegConf);  /*  cfg_reg25, 12'h000 */
+
+        RegTab_t.Reg26BitDef_t.BcntRegConf = 0;
+        RegTab_t.Reg26BitDef_t.BcntReg_t.BCNT_BURST_CNT = bdt.PCBA.BurstCnt;
+        SPI_write_singleData(BCNT_REG,RegTab_t.Reg26BitDef_t.BcntRegConf); /*  cfg_reg26, 12'h02f */
+        //R02 -e
         /* reinitialize baseline */
         bdt.BFD.InitCount = 0;
+        #endif
         #endif
     }
     else if(STOP_DEBUG_INFO == dbg.ReceiveBuf[0])

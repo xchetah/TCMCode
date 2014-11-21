@@ -22,6 +22,12 @@
  * 版 本 号:
  * 修 改 人: Wangpc(R01)
  * 修改内容: 
+ *
+ * 修改记录3: Rebuild structure of register
+ * 修改日期: 2014-11-19
+ * 版 本 号:
+ * 修 改 人: Wangpc(R02)
+ * 修改内容: 
  *****************************************************************************/
 
 
@@ -5186,7 +5192,7 @@ void DataProc_CalculateDeltaData(uint16_t *buffer)
     /*******************************************************
     * Get the Delta Value in a X/Y point
     *******************************************************/
-    if(1 == bdt.PCBA.TxPolarity)
+    if(1 == TX_DRIVE_PL)
     {
         for (i=0; i<XMTR_NUM; i++)
             for (j=0; j<RECV_NUM; j++)
@@ -7044,8 +7050,10 @@ uint16_t  DataProc_FHBSOperatingSwitch(void)
          //**************************************************************
          if(bdt.StretchValue < STRETCH_STNUM)
          {
-             bdt.PCBA.DurStretch = bdt.StretchInReg;            // Restore the value into the previous one
-             SPI_write_singleData(DURS_REG, DURS_STRETCH_DUR(bdt.PCBA.DurStretch)|DURS_STRETCH_INC(STRETCH_INC_REG25));
+             RegTab_t.Reg25BitDef_t.DursRegConf = 0;
+             RegTab_t.Reg25BitDef_t.DursReg_t.DURS_STRETCH_DUR = bdt.StretchInReg;
+             RegTab_t.Reg25BitDef_t.DursReg_t.DURS_STRETCH_INC = STRETCH_INC_REG25;
+             SPI_write_singleData(DURS_REG,RegTab_t.Reg25BitDef_t.DursRegConf);
              bdt.StretchValue = (STRETCH_STNUM)<<1; // Make sure we start from the 0 next time
          }
          bdt.CurNoiseSum = (bdt.CurNoiseThrHi + bdt.CurNoiseThrLo)>>1;
@@ -7154,10 +7162,12 @@ uint16_t  DataProc_FHBSOperatingSwitch(void)
                     // We are prepare to do the measurement
                     //*******************************************************************
                     bdt.StretchValue        = 0;
-                    bdt.PCBA.DurStretch     = bdt.StretchValue;
                     bdt.SumNoiseDataFrFrame = 0;
                     bdt.TxScanNoiseCount    = 0;  // Init for next Stretch Measurement
-                    SPI_write_singleData(DURS_REG, DURS_STRETCH_DUR(bdt.PCBA.DurStretch)|DURS_STRETCH_INC(STRETCH_INC_REG25));
+                    RegTab_t.Reg25BitDef_t.DursRegConf = 0;
+                    RegTab_t.Reg25BitDef_t.DursReg_t.DURS_STRETCH_DUR = bdt.StretchValue;
+                    RegTab_t.Reg25BitDef_t.DursReg_t.DURS_STRETCH_INC = STRETCH_INC_REG25;	
+                    SPI_write_singleData(DURS_REG, RegTab_t.Reg25BitDef_t.DursRegConf);
                 }   // Prepare to TxScan again
             }
             else
@@ -7226,13 +7236,14 @@ void DataProc_FrequencyHopByStretch(uint16_t *buf)
         // This is the routine TX SCAN now on
         //***************************************************************
         bdt.StretchValue += STRETCH_STEP; // 0,1,2,3,4,..., 14, "15 will be 0"
+        RegTab_t.Reg25BitDef_t.DursRegConf = 0;
         if(bdt.StretchValue >= STRETCH_STNUM) 
         { 
             //*********************************************************************
             // All measuement are done
             //*********************************************************************
             DataProc_FHBSBestTXFreqSearch(bdt.NoiseDataTable); // bdt.StretchInReg
-            bdt.PCBA.DurStretch = bdt.StretchInReg;
+            RegTab_t.Reg25BitDef_t.DursReg_t.DURS_STRETCH_DUR = bdt.StretchInReg;
             bdt.CurNoiseSum     = bdt.NoiseDataTable[bdt.StretchInReg];
             temp = (bdt.CurNoiseSum>>2) + (bdt.CurNoiseSum>>3);
             bdt.CurNoiseThrHi   = bdt.CurNoiseSum + temp; // High Threshold should be lower based on testing
@@ -7261,14 +7272,12 @@ void DataProc_FrequencyHopByStretch(uint16_t *buf)
                     if(temp&0x8000) temp = 0;
                     if(bdt.BiggestBar < temp) bdt.BiggestBar = temp;
                 }
-
                 j = 0;
                 while(bdt.BiggestBar > (LCD_SCREEN_HIGH - (17<<3))) 
                 {
                     bdt.BiggestBar = bdt.BiggestBar>>1;
                     j++;
                 }
-
                 for(i=0; i<STRETCH_STNUM; i++)
                 {
                     temp = bdt.NoiseDataTable[i] - bdt.NoiseDataTable[bdt.StretchInReg];
@@ -7284,12 +7293,10 @@ void DataProc_FrequencyHopByStretch(uint16_t *buf)
             //*********************************************************************
             // Now, we change the stretch to the new value
             //*********************************************************************
-            bdt.PCBA.DurStretch = bdt.StretchValue;
+            RegTab_t.Reg25BitDef_t.DursReg_t.DURS_STRETCH_DUR = bdt.StretchValue;
         }
-        SPI_write_singleData(DURS_REG, DURS_STRETCH_DUR(bdt.PCBA.DurStretch)|DURS_STRETCH_INC(STRETCH_INC_REG25));
-
-
-
+        RegTab_t.Reg25BitDef_t.DursReg_t.DURS_STRETCH_INC = STRETCH_INC_REG25;
+        SPI_write_singleData(DURS_REG,RegTab_t.Reg25BitDef_t.DursRegConf);
     }
   #endif //FREQHOP_BYSTRETCH
 }
@@ -7336,7 +7343,7 @@ void DataProc_WholeFrameProcess(uint16_t *buffer)
               for(j=0; j<RECV_NUM; j++)
               {
                 bdt.DeltaDat_kp[j]    = bdt.DeltaDat16A[i][j];
-                bdt.DeltaDat16A[i][j]=0;
+               // bdt.DeltaDat16A[i][j]=0;
               }
           #endif
 
@@ -7345,10 +7352,9 @@ void DataProc_WholeFrameProcess(uint16_t *buffer)
               for(i=0;i<XMTR_NUM;i++)
               {
                 bdt.DeltaDat_kp[i]    = bdt.DeltaDat16A[i][j];
-                bdt.DeltaDat16A[i][j]=0;
+               // bdt.DeltaDat16A[i][j]=0;
               }
           #endif
-          DataProc_PressKeyDetect();
     #endif
     
     DataProc_FindMaxAndMinValue();       /* Find Max Value and its Location, also Min Value*/
@@ -7389,6 +7395,7 @@ void DataProc_WholeFrameProcess(uint16_t *buffer)
     if(bdt.FingerDetectNum > MIN_VALUE_POINT) 
     {
         #ifdef PRESS_KEY_DETECT
+        DataProc_PressKeyDetect();
         #endif
 
         /***********************************************************
