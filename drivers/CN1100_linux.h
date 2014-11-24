@@ -226,8 +226,6 @@ ssize_t chm_proc_read(struct file *file, char __user *buf, size_t size, loff_t *
 int chm_proc_write(struct file *file, const char __user *buffer, size_t size, loff_t *ppos);
 void DataProc_DeltaMatrix2Array(uint32_t *BitDat, int16_t thr);
  void DataProc_PullBitmapApart(uint32_t *buf);
- void TC1126_Init_VarRegSetting(void);
-void  TC1126_GotoAutoScanMode(uint16_t mode);
 
 
 #endif //CN1100_LINUX

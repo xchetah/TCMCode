@@ -197,7 +197,7 @@
 
 #define SUPER_FILTER4EDGE
 //#define SUPER_FILTER4EDGE_DEBUGSHOW
-#define FROMOUT2IN_INORDER
+//#define FROMOUT2IN_INORDER
 #define SUPFIL_RANGE          256
 
 #define BORDER_SIMPLE_ADJUSTABLE   // One Adjust Coef.
@@ -422,7 +422,7 @@
 #ifdef WINNER_TWD                                    //for 全志通文达
 #define ISCANMODE_PERD_REG_VALUE             0x1C0
 #else
-#define ISCANMODE_PERD_REG_VALUE             0x140   //12.5ms   
+#define ISCANMODE_PERD_REG_VALUE             0x1C0   //12.5ms   
 #endif
 
   #define RAW_DATA_DIFF_THR                    1100
