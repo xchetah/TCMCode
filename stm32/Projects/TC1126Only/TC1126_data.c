@@ -22,6 +22,12 @@
  * 版 本 号:
  * 修 改 人: Wangpc(R01)
  * 修改内容: 
+ *
+ * 修改记录3: Rebuild structure of register
+ * 修改日期: 2014-11-19
+ * 版 本 号:
+ * 修 改 人: Wangpc(R02)
+ * 修改内容: 
  *****************************************************************************/
 
 
@@ -752,7 +758,7 @@ void Baseline_BaseBufferHandled(uint16_t *buffer)
           ****************************************************************/
             if(bdt.BaseChangeFlag < 65535)  bdt.BaseChangeFlag++;               /* Counting 1 for baseline updating */
 
-            if(bdt.BaseChangeFlag<3)
+            if(bdt.BaseChangeFlag<=3)
             {
                 bdt.BFD.TooLongTime4BaseUpdate = MAX_MUST_UPDATE_PERIOD - 20;    /*  Reset the Timing Count*/
                 bdt.BFD.AfterBaseUpdatedTime   = MAX_HOLDTIME_AFTERUPDATE - 20;  /*  Reset the Timing Count*/
@@ -2609,7 +2615,7 @@ uint16_t FingProc_SuperF4EAGE_ShiftCalc(uint16_t OrigShiftVal, uint16_t curp, ui
             ShiftResult += 1;
         }
     }
-    else if(DirVal > 2)
+        else if(DirVal > 1)
     {
         //********************************************************
         // Finger Moving Direction show a kind of fixing method
@@ -2650,6 +2656,7 @@ void FingProc_SuperF4EAGE_LR(uint16_t i,uint16_t *x, uint16_t *y)
     { 
         bdt.DPD[i].EdgeShift_LR  = FingProc_SuperF4EAGE_ShiftCalc(bdt.DPD[i].EdgeShift_LR, xRpt, x);
         bdt.DPD[i].EdgeOffset_LR = OffsetTab[bdt.DPD[i].EdgeShift_LR];
+
         if(dx<128) 
         {
             dx = dx>>(bdt.DPD[i].EdgeShift_LR);
@@ -2659,6 +2666,7 @@ void FingProc_SuperF4EAGE_LR(uint16_t i,uint16_t *x, uint16_t *y)
             dx = bdt.DPD[i].EdgeOffset_LR + (dx>>(bdt.DPD[i].EdgeShift_LR+1));
         }
     }
+        
     if(xRpt>x[0]) 
     {
         bdt.DPD[i].Finger_X_XMTR = x[0]+dx;
@@ -4670,191 +4678,6 @@ void FingProc_FingerInfoReorder(void)
     } 
 }
 
-
-#if 1
-uint16_t measurestep3(uint16_t *p, uint16_t Rpt)
-{
-    int16_t i, dx;
-
-    i=0;
-    dx = (int16_t)Rpt - (int16_t)p[0];
-    if(dx<72&&dx>-72)
-    {
-        dx = (int16_t)p[0] - (int16_t)p[1];
-        if(dx<72&&dx>-72)
-        {
-            dx = (int16_t)p[1] - (int16_t)p[2];
-            if(dx<72&&dx>-72)
-            {
-                dx = (int16_t)p[2] - (int16_t)p[3];
-                if(dx<72&&dx>-72)
-                {
-                    dx = (int16_t)p[3] - (int16_t)p[4];
-                    if(dx<72&&dx>-72)
-                    {
-                        dx = (int16_t)p[4] - (int16_t)p[5];
-                        if(dx<72&&dx>-72)
-                        {
-                            dx = (int16_t)p[5] - (int16_t)p[6];
-                            if(dx<72&&dx>-72)
-                            {
-                                i = 1;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return i;
-}
-uint16_t measurestep4(uint16_t *p, uint16_t Rpt)
-{
-    int16_t i, dx;
-
-    i=0;
-    dx = (int16_t)Rpt - (int16_t)p[3];
-    if(dx>0)
-    {
-        dx = (int16_t)p[0] - (int16_t)p[4];
-        if(dx>0)
-        {
-            dx = (int16_t)p[1] - (int16_t)p[5];
-            if(dx>0)
-            {
-                dx = (int16_t)p[2] - (int16_t)p[6];
-                if(dx>0)
-                {
-                    i = 1;
-                }
-            }
-        }
-    }
-    return i;
-}
-uint16_t measurestep5(uint16_t *p, uint16_t Rpt)
-{
-    int16_t i, dx;
-
-    i=0;
-    dx = (int16_t)Rpt - (int16_t)p[3];
-    if(dx<0)
-    {
-        dx = (int16_t)p[0] - (int16_t)p[4];
-        if(dx<0)
-        {
-            dx = (int16_t)p[1] - (int16_t)p[5];
-            if(dx<0)
-            {
-                dx = (int16_t)p[2] - (int16_t)p[6];
-                if(dx<0)
-                {
-                    i = 1;
-                }
-            }
-        }
-    }
-    return i;
-}
-uint16_t measurestep6(uint16_t *p, uint16_t Rpt)
-{
-    int16_t i, dx;
-
-    i=0;
-    dx = (int16_t)Rpt - (int16_t)p[0];
-    if(dx<72&&dx>-72)
-    {
-        dx = (int16_t)p[0] - (int16_t)p[1];
-        if(dx<72&&dx>-72)
-        {
-            dx = (int16_t)p[1] - (int16_t)p[2];
-            if(dx<72&&dx>-72)
-            {
-                dx = (int16_t)p[2] - (int16_t)p[3];
-                if(dx<72&&dx>-72)
-                {
-                    dx = (int16_t)p[3] - (int16_t)p[4];
-                    if(dx<72&&dx>-72)
-                    {
-                        i = 1;
-                    }
-                }
-            }
-        }
-    }
-    return i;
-}
-void FingProc_ImproveAll(void)
-{
-    uint16_t *x, *y, xRpt, yRpt;
-    uint16_t i, dx, dy;
-    #define XXXX 256
-    for (i = 0;i < FINGER_NUM_MAX;i++)
-    {
-        if(bdt.DPD[i].FingerStateFlag < STATE_SERIAL_FINGER)
-        {
-            continue;
-        }
-
-        x    = bdt.DPD[i].Prev_Finger_X;    /* Point to the saving array*/
-        y    = bdt.DPD[i].Prev_Finger_Y;
-
-        xRpt = bdt.DPD[i].Finger_X_XMTR;    /* Just calculated from raw data*/
-        yRpt = bdt.DPD[i].Finger_Y_RECV;    /* Just calculated from raw data */
-        if( xRpt || yRpt) /* Finger Point*/
-        {
-            dx = FingProc_Dist4Uint16Var(xRpt, x[0]);
-            dy = FingProc_Dist4Uint16Var(yRpt, y[0]);
-            if((dx > (dy>>2)) && (dy < 256))
-            {
-                //  bdt.DPD[i].EdgeShift =3;
-                //  bdt.DPD[i].EdgeOffset =8;
-                if( measurestep3(x,xRpt))
-                {
-                    bdt.FingerDetectNum1++;
-                    if(bdt.FingerDetectNum1>10)
-                        bdt.FingerDetectNum1=10;
-                    if(measurestep4(x,xRpt)||measurestep5(x,xRpt))
-                    {
-                        if(bdt.FingerDetectNum1>5)
-                            bdt.FingerDetectNum1 =3;
-                    }
-                }
-                else
-                    bdt.FingerDetectNum1 =0;
-                if(bdt.FingerDetectNum1>5)
-                {
-                    bdt.DPD[i].EdgeShift =3;
-                    bdt.DPD[i].EdgeOffset =8;
-                }
-                else
-                {
-                    bdt.DPD[i].EdgeShift =0;
-                    bdt.DPD[i].EdgeOffset =0;
-                }
-            }
-        }
-        if(dx<128) 
-        {
-            dx = dx>>(bdt.DPD[i].EdgeShift);
-        }
-        else  
-        {
-            dx = bdt.DPD[i].EdgeOffset + (dx>>(bdt.DPD[i].EdgeShift+1));
-        }
-        if(xRpt>x[0])
-        {
-            xRpt = x[0]+dx;
-        }
-        else
-        { 
-            xRpt = x[0]-dx;
-        }
-
-        bdt.DPD[i].Finger_X_XMTR = xRpt;
-    }
-}
-#endif
 /*******************************************************************************
 * Function Name  : 
 * Description    : 
@@ -4874,45 +4697,6 @@ void DataProc_HandleFingerInfo(void)
     FingProc_PostSortFingers();
 
     FingProc_SuperFilter4Edge();
-    #if 1
-    {
-        uint16_t *x, *y, xRpt, yRpt;
-		uint16_t i = 0;
-        if(bdt.FingerDetectNum)
-        {
-            for (i = 0;i < FINGER_NUM_MAX;i++)
-            {
-                x    = bdt.DPD[i].Prev_Finger_X;    /*Point to the saving array*/
-                y    = bdt.DPD[i].Prev_Finger_Y;
-
-                xRpt = bdt.DPD[i].Finger_X_XMTR;    /* Just calculated from raw data*/
-                yRpt = bdt.DPD[i].Finger_Y_RECV;    /* Just calculated from raw data */
-                if(measurestep6(x,xRpt))
-                    bdt.FingerDetectNum2++;
-                else
-                    bdt.FingerDetectNum2 = 0;
-                if(bdt.FingerDetectNum2>50)
-                    bdt.FingerDetectNum2=50;
-            }
-        }
-        else
-            bdt.FingerDetectNum2 = 0;
-
-        if(bdt.FingerDetectNum)
-        {
-            if(bdt.FingerDetectNum2>8)
-            { 
-                for(i=0; i<bdt.FingerDetectNum; i++)
-                {
-                    if(bdt.DPD[i].Finger_X_XMTR || bdt.DPD[i].Finger_Y_RECV) 
-                        bdt.DPD[i].Finger_X_XMTR= (((bdt.DPD[i].Finger_X_XMTR>>5)+1)<<5)-16;
-                    //  bdt.DPD[i].Finger_Y_RECV= (((bdt.DPD[i].Finger_Y_RECV>>5)+1)<<5)-16;
-                }
-            }
-        }
-        FingProc_ImproveAll();  
-    }
-    #endif
     FingProc_ImproveByMultiFilters();
     bdt.PrevFingerDetectNum2 = bdt.PrevFingerDetectNum;
     bdt.PrevFingerDetectNum  = bdt.FingerDetectNum;
@@ -5656,7 +5440,7 @@ void DataProc_CalculateDeltaData(uint16_t *buffer)
     /*******************************************************
     * Get the Delta Value in a X/Y point
     *******************************************************/
-    if(1 == bdt.PCBA.TxPolarity)
+    if(1 == TX_DRIVE_PL)
     {
         for (i=0; i<XMTR_NUM; i++)
             for (j=0; j<RECV_NUM; j++)
@@ -7514,8 +7298,10 @@ uint16_t  DataProc_FHBSOperatingSwitch(void)
          //**************************************************************
          if(bdt.StretchValue < STRETCH_STNUM)
          {
-             bdt.PCBA.DurStretch = bdt.StretchInReg;            // Restore the value into the previous one
-             SPI_write_singleData(DURS_REG, DURS_STRETCH_DUR(bdt.PCBA.DurStretch)|DURS_STRETCH_INC(STRETCH_INC_REG25));
+             RegTab_t.Reg25BitDef_t.DursRegConf = 0;
+             RegTab_t.Reg25BitDef_t.DursReg_t.DURS_STRETCH_DUR = bdt.StretchInReg;
+             RegTab_t.Reg25BitDef_t.DursReg_t.DURS_STRETCH_INC = STRETCH_INC_REG25;
+             SPI_write_singleData(DURS_REG,RegTab_t.Reg25BitDef_t.DursRegConf);
              bdt.StretchValue = (STRETCH_STNUM)<<1; // Make sure we start from the 0 next time
          }
          bdt.CurNoiseSum = (bdt.CurNoiseThrHi + bdt.CurNoiseThrLo)>>1;
@@ -7624,10 +7410,12 @@ uint16_t  DataProc_FHBSOperatingSwitch(void)
                     // We are prepare to do the measurement
                     //*******************************************************************
                     bdt.StretchValue        = 0;
-                    bdt.PCBA.DurStretch     = bdt.StretchValue;
                     bdt.SumNoiseDataFrFrame = 0;
                     bdt.TxScanNoiseCount    = 0;  // Init for next Stretch Measurement
-                    SPI_write_singleData(DURS_REG, DURS_STRETCH_DUR(bdt.PCBA.DurStretch)|DURS_STRETCH_INC(STRETCH_INC_REG25));
+                    RegTab_t.Reg25BitDef_t.DursRegConf = 0;
+                    RegTab_t.Reg25BitDef_t.DursReg_t.DURS_STRETCH_DUR = bdt.StretchValue;
+                    RegTab_t.Reg25BitDef_t.DursReg_t.DURS_STRETCH_INC = STRETCH_INC_REG25;	
+                    SPI_write_singleData(DURS_REG, RegTab_t.Reg25BitDef_t.DursRegConf);
                 }   // Prepare to TxScan again
             }
             else
@@ -7696,13 +7484,14 @@ void DataProc_FrequencyHopByStretch(uint16_t *buf)
         // This is the routine TX SCAN now on
         //***************************************************************
         bdt.StretchValue += STRETCH_STEP; // 0,1,2,3,4,..., 14, "15 will be 0"
+        RegTab_t.Reg25BitDef_t.DursRegConf = 0;
         if(bdt.StretchValue >= STRETCH_STNUM) 
         { 
             //*********************************************************************
             // All measuement are done
             //*********************************************************************
             DataProc_FHBSBestTXFreqSearch(bdt.NoiseDataTable); // bdt.StretchInReg
-            bdt.PCBA.DurStretch = bdt.StretchInReg;
+            RegTab_t.Reg25BitDef_t.DursReg_t.DURS_STRETCH_DUR = bdt.StretchInReg;
             bdt.CurNoiseSum     = bdt.NoiseDataTable[bdt.StretchInReg];
             temp = (bdt.CurNoiseSum>>2) + (bdt.CurNoiseSum>>3);
             bdt.CurNoiseThrHi   = bdt.CurNoiseSum + temp; // High Threshold should be lower based on testing
@@ -7731,14 +7520,12 @@ void DataProc_FrequencyHopByStretch(uint16_t *buf)
                     if(temp&0x8000) temp = 0;
                     if(bdt.BiggestBar < temp) bdt.BiggestBar = temp;
                 }
-
                 j = 0;
                 while(bdt.BiggestBar > (LCD_SCREEN_HIGH - (17<<3))) 
                 {
                     bdt.BiggestBar = bdt.BiggestBar>>1;
                     j++;
                 }
-
                 for(i=0; i<STRETCH_STNUM; i++)
                 {
                     temp = bdt.NoiseDataTable[i] - bdt.NoiseDataTable[bdt.StretchInReg];
@@ -7754,12 +7541,10 @@ void DataProc_FrequencyHopByStretch(uint16_t *buf)
             //*********************************************************************
             // Now, we change the stretch to the new value
             //*********************************************************************
-            bdt.PCBA.DurStretch = bdt.StretchValue;
+            RegTab_t.Reg25BitDef_t.DursReg_t.DURS_STRETCH_DUR = bdt.StretchValue;
         }
-        SPI_write_singleData(DURS_REG, DURS_STRETCH_DUR(bdt.PCBA.DurStretch)|DURS_STRETCH_INC(STRETCH_INC_REG25));
-
-
-
+        RegTab_t.Reg25BitDef_t.DursReg_t.DURS_STRETCH_INC = STRETCH_INC_REG25;
+        SPI_write_singleData(DURS_REG,RegTab_t.Reg25BitDef_t.DursRegConf);
     }
   #endif //FREQHOP_BYSTRETCH
 }

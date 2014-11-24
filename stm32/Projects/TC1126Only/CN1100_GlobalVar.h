@@ -47,11 +47,6 @@ typedef struct DeltaPData {
     uint16_t   Finger_X_Reported;                      // Final report finger point X, Q8
     uint16_t   Finger_Y_Reported;                      // Final report finger point Y, Q8
     EdgeCtrl   EdgeInfo;
-    // hsqdebug for FingProc_ImproveAll()
-    uint16_t   EdgeShift;
-    uint16_t   EdgeOffset;
-    // hsqdebug for FingProc_ImproveAll()
-
     uint16_t   StayCount;
     int32_t    Stay_XSum;
     int32_t    Stay_YSum;
@@ -175,46 +170,31 @@ typedef struct
     uint32_t       FingerLeftProtectTime;      //
     uint32_t       TooLongTime4BaseUpdate;
     uint32_t       AfterBaseUpdatedTime;
-    uint32_t       JustAfter2AutoScanTime;
     uint8_t        AdjustCount;
     uint8_t        AbnormalUpdateDelay;
     int16_t        DeltaSumMaxThreshold;
     int32_t        DeltaSum;
 } BaseBufferDef;
 
-//typedef struct
-//{
-// int16_t    SimDeldaData[XMTR_NUM][RECV_NUM];
-// int16_t    DrawCount;
-// int16_t    LineCount;
-// int16_t    LineNumMax;
-//} SimDeltaData_t;
-
 typedef struct
 {
-    uint32_t    ProtectTime;
-    uint32_t    FrameMaxSample;
-    uint32_t    AbnormalMaxDiff;
-    uint32_t    AbnormalNumDiff;
-    uint32_t    FixPointMaxTime;
-    uint32_t    MaxUpdateTime;
+    uint32_t    ProtectTime;       // Baseline
+    uint32_t    FrameMaxSample;    // Baseline
+    uint32_t    AbnormalMaxDiff;   // Baseline
+    uint32_t    AbnormalNumDiff;   // Baseline
+    uint32_t    MaxUpdateTime;     // Baseline
+
+    uint32_t    MaxValueNoFinger;  // WholeProcess
+    uint32_t    FinThrMin;         // WholeProcess
+
     uint32_t    HighRefSet;    // 0,1,2,3
     uint32_t    HighRefPlSet;  // 0,1
+    uint32_t    HighRefGainSet;    // 0,1,2,3
     uint32_t    LowRefSet;     // 0,1,2,3
-    uint32_t    LowRefPlSet;   // 0,1,2,3
-    uint32_t    HighRefGainSet;// 0,1,2,3
-    int32_t     LowRefGainSet;  // 0,1,2,3	注：穷举法中LowRefGainSet值需初始化为-1，以便从0开始穷举
-    uint32_t    TxPolarity;
-    uint32_t    FinAdjDisMin;
-    uint32_t    FinAdjDisMax;
-    uint32_t    MaxValueNoFinger;
-    uint32_t    FinThrMin;
-    uint32_t    FinAdjDisX;
-    uint32_t    RcvmRcvrFcapSet;
-    uint32_t    DurReset;
-    uint32_t    DurInteg;
-    uint32_t    DurStretch;
-    uint32_t    BurstCnt;
+    uint32_t    LowRefPlSet;       // 0,1
+    uint32_t    LowRefGainSet;     // 0,1,2,3  注：穷举法中LowRefGainSet值需初始化为-1，以便从0开始穷举
+
+    uint32_t    RcvmRcvrFcapSet;   // 
 
     #ifdef SCREEN_FULL_ADAPTIVE
     uint32_t    RefHLSetCount;                // 计数参考电压的设置次数
@@ -299,10 +279,6 @@ typedef struct BasData {
     uint16_t        FaceDetectDelay;       // 
 #endif
     uint16_t        FingerDetectNum;       // 
-    // hsqdebug for FingProc_ImproveAll()
-    uint16_t        FingerDetectNum1;
-    uint16_t        FingerDetectNum2;
-    // hsqdebug for FingProc_ImproveAll()
     uint16_t        PrevFingerDetectNum;   // used for sortfingers
     uint16_t        PrevFingerDetectNum2;  // used for sortfingers
 
@@ -328,8 +304,6 @@ typedef struct BasData {
 
    uint16_t         ThrLow4DistanceFilter;
    uint16_t         ThrHigh4DistanceFilter;
-
-   uint16_t         REG3E_Value;
 
    uint16_t         LFrame_NUM;
      int8_t         LFrame_X_XMTR[FINGER_NUM_MAX];

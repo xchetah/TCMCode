@@ -47,6 +47,17 @@
 #define TOUCH_KEY_4 0xf
 //#define TPD_PROXIMITY
 
+#if 1
+#define TCM_RESET       0
+#define TCM_SET         1
+#define TCM_DISABLE     0
+#define TCM_ENABLE      1 
+#define TCM_ERROR       0
+#define TCM_SUCCESS     1
+#define TCM_FALSE       0
+#define TCM_TRUE        0
+#endif
+
 /************************************************************************
 *******1111111111111111111111111111111111111111111111111111111111********
 *******1111111111111111111111111111111111111111111111111111111111********
