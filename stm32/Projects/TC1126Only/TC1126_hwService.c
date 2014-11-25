@@ -875,7 +875,7 @@ void TC1126_Init_GlobalVariables(void)
     bdt.MaxNoise_Sum = 0;
     bdt.MaxNoise_SumCount = 0;
     bdt.Noise_Sum = 0;
-    bdt.updatecount =350;
+    bdt.updatecount = 350;
 
 
     for (i = 0; i < FINGER_NUM_MAX;i++)
@@ -1080,18 +1080,6 @@ void TC1126_Init_GlobalVariables(void)
         bdt.AbnormalPoint[i] = 0;
     }
     #endif
-    
-    #ifdef SLIPDIRJUDGEMENT
-    #ifdef DIRDEBUG
-    bdt.Debug_X = 0;
-    bdt.Debug_Y = 0;
-    for(i=0; i<12; i++)
-        bdt.Debug[i] = 0;
-    #endif
-    bdt.SlipDirFlag = 0;
-    bdt.EdgeCount = 0;
-    #endif
-    
     bdt.FingerReqNum = FINGER_REQUIREMENT_NUM;   //R01 -a
 }
 

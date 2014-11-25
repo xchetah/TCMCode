@@ -202,7 +202,7 @@ void Baseline_FingerupdateTX(void)
         for(i=0; i<XMTR_NUM; i++)
         {
            // if(bdt.DeltaDat16A[i][j] < Min_sum) Min_sum = bdt.DeltaDat16A[i][j];
-            if(bdt.DeltaDat16A[i][j]>50)
+            if(bdt.DeltaDat16A[i][j] > BASE_UPDATETXRXTHR)
             {
                 Max_sum += bdt.DeltaDat16A[i][j];
                 Max_num++;
@@ -278,7 +278,7 @@ void Baseline_FingerupdateRX(void)
         {
             if(bdt.DeltaDat16A[i][j] < Min_sum)
                 Min_sum = bdt.DeltaDat16A[i][j];
-            if(bdt.DeltaDat16A[i][j] > 50)
+            if(bdt.DeltaDat16A[i][j] > BASE_UPDATETXRXTHR)
             {
                 Max_sum += bdt.DeltaDat16A[i][j];
                 Max_num++;
@@ -370,7 +370,7 @@ void Baseline_FingerExistedHandled(uint16_t *buffer)
     Baseline_FingerupdateRX();
     if(bdt.PowerOnWithFinger)
         return;
-    if(bdt.MinValueInFrame < (0-(bdt.PCBA.FrameMaxSample<<1)))
+     if(bdt.MinValueInFrame < (0-(bdt.PCBA.FrameMaxSample<<1)))
     {
         if(bdt.MEM_MIN_XY_Count > ABNORMAL_HOLD_TIME)
         {
@@ -1359,217 +1359,6 @@ void FingProc_ShowXYResultOnLine(uint16_t line)
 #endif
 }
 
-
-#ifdef SLIPDIRJUDGEMENT
-/*******************************************************************************
-* Function Name  : FingProc_JudgeSlippingDir
-* Description    : 判断手指滑动趋势
-* Input          : 
-* Output         : 
-* Return         : 
-*******************************************************************************/
-void FingProc_JudgeSlippingDir(uint16_t idx, uint16_t curx, uint16_t cury, uint16_t *x, uint16_t *y)
-{
-    uint16_t i = 0;
-    int16_t countx = 0;
-    int16_t county = 0;
-    uint16_t dirx = 0;
-    uint16_t diry = 0;
-    uint16_t thr = 10;                      // 方向判断门限值
-    int16_t dx[3];
-    int16_t dy[3];
-
-    for(i=0; i<3; i++)
-    {
-        if(i == 0)
-            dx[0] = curx - x[0];
-        else
-            dx[i] = x[i-1] - x[i];
-    }
-
-    for(i=0; i<3; i++)
-    {
-        if(i == 0)
-            dy[0] = cury - y[0];
-        else
-            dy[i] = y[i-1] - y[i];
-    }
-
-    #ifdef DIRDEBUG
-    bdt.Debug[0] = dx[0];
-    bdt.Debug[1] = dx[1];
-    bdt.Debug[2] = dx[2];
-    bdt.Debug[3] = 1111;
-    bdt.Debug[4] = dy[0];
-    bdt.Debug[5] = dy[1];
-    bdt.Debug[6] = dy[2];
-    #endif
-    for(i=0; i<3; i++)
-    {
-        if((abs16(dy[i]) <= thr)&&((dx[0]!=0)&&(dx[1]!=0)&&(dx[2]!=0)))     // start X direction judgement
-        {
-            countx++;
-            if(countx == 3)
-            {
-                countx = 0;
-                dirx = 1;               // linearity    forward or backward
-            }
-        }
-        else if(dx[i] > thr)
-        {
-            countx++;
-            if(countx == 3)
-            {
-                countx = 0;
-                dirx = 2;               // forward
-            }
-                
-        }
-        else if(dx[i] < -thr)
-        {
-            bdt.Debug[7] = 2222;
-            countx = countx-1;
-            if(countx == (-3))
-            {
-                countx = 0;
-                dirx = 3;               // backward
-            }
-        }
-
-        if((abs16(dx[i]) <= thr)&&((dy[0]!=0)&&(dy[1]!=0)&&(dy[2]!=0)))     // start X direction judgement
-        {
-            county++;
-            if(county == 3)
-            {
-                county = 0;
-                diry = 4;               // linearity    up or down
-            }
-        }
-        else if(dy[i] > thr)
-        {
-            county++;
-            if(county == 3)
-            {
-                county = 0;
-                diry = 5;               // down
-            }
-        }
-        else if(dy[i] < -thr)
-        {
-            county = county-1;
-            if(county == (-3))
-            {
-                county = 0;
-                diry = 6;               // up
-            }
-        }
-    }
-    
-    if(dirx == 1)
-        bdt.SlipDirFlag = 1;                    // X方向画直线
-    else if(diry == 4)
-        bdt.SlipDirFlag = 2;                    // Y方向画直线
-    else if(dirx == 2)                          // 沿X正方向画线
-    {
-        switch(diry)
-        {
-            case 5:
-                bdt.SlipDirFlag = 3;            // 右下方向
-                break;
-            case 6:
-                bdt.SlipDirFlag = 4;            // 右上方向
-                break;
-            default:
-                break;
-        }
-    }
-    else if(dirx == 3)                          // 沿X负方向画线
-    {
-        switch(diry)
-        {
-            case 5:
-                bdt.SlipDirFlag = 5;            // 左下方向
-                break;
-            case 6:
-                bdt.SlipDirFlag = 6;            // 左上方向
-                break;
-            default:
-                break;
-        }
-    }
-
-    #ifdef DIRDEBUG
-    bdt.Debug_X = dirx;
-    bdt.Debug_Y = diry; 
-    bdt.Debug[8] = countx;
-    bdt.Debug[9] = county;
-    bdt.Debug[10] = bdt.SlipDirFlag;
-    #endif
-}
-
-
-/*******************************************************************************
-* Function Name  : FingProc_JudgeSlippingXYDir
-* Description    : 判断手指滑动趋势
-* Input          : 
-* Output         : 
-* Return         : 
-*******************************************************************************/
-void FingProc_JudgeSlippingXYDir(uint16_t idx, uint16_t curx, uint16_t cury, uint16_t *x, uint16_t *y)
-{
-    uint16_t i = 0;
-    int16_t countx = 0;
-    int16_t county = 0;
-    uint16_t thr = 10;                      // 方向判断门限值
-    int16_t dx[3];
-    int16_t dy[3];
-
-    for(i=0; i<3; i++)
-    {
-        if(i == 0)
-            dx[0] = curx - x[0];
-        else
-            dx[i] = x[i-1] - x[i];
-    }
-
-    for(i=0; i<3; i++)
-    {
-        if(i == 0)
-            dy[0] = cury - y[0];
-        else
-            dy[i] = y[i-1] - y[i];
-    }
-
-    #ifdef DIRDEBUG
-    bdt.Debug[0] = dx[0];
-    bdt.Debug[1] = dx[1];
-    bdt.Debug[2] = dx[2];
-    bdt.Debug[3] = 1111;
-    bdt.Debug[4] = dy[0];
-    bdt.Debug[5] = dy[1];
-    bdt.Debug[6] = dy[2];
-    #endif
-    for(i=0; i<3; i++)
-    {
-        if(abs16(dx[i]) < thr)
-        {
-            countx++;
-            if(countx == 3)
-                bdt.SlipDirFlag = 1;
-        }
-        if(abs16(dy[i]) < thr)
-        {
-            county++;
-            if(county == 3)
-                bdt.SlipDirFlag = 2;
-        }   
-        
-    }
-    bdt.Debug[10] = bdt.SlipDirFlag;
-}
-#endif
-
-
 /*******************************************************************************
 * Function Name  : FingProc_MultiFilterProcess
 * Description    : 
@@ -1591,39 +1380,6 @@ void FingProc_MultiFilterProcess(uint16_t i, uint16_t curx, uint16_t cury, uint1
     
     bdt.DPD[i].Finger_X_Reported = bdt.DPD[i].Finger_X_XMTR;
     bdt.DPD[i].Finger_Y_Reported = bdt.DPD[i].Finger_Y_RECV;
-
-    #ifdef SLIPDIRJUDGEMENT
-    curx = bdt.DPD[i].Finger_X_Reported;
-    cury = bdt.DPD[i].Finger_Y_Reported;
-    
-    FingProc_JudgeSlippingXYDir(i, curx, cury, x, y);
-
-    #if 0
-    if((bdt.SlipDirFlag != 1)&&(bdt.SlipDirFlag != 2))
-    {
-        if(bdt.DPD[i].Finger_X_Reported > ((SXMTR_NUM<<8)-MAX_MAP_VALUE))       // 右边界
-        {
-            if(bdt.DPD[i].Finger_X_Reported > ((SXMTR_NUM<<8)-38))
-            {
-                bdt.Debug[7] = 3333;
-                bdt.SlipDirFlag = 0;
-                if(x[0] < ((SXMTR_NUM<<8)-MAX_MAP_VALUE))
-                {
-                    bdt.Debug_X = bdt.DPD[i].Finger_X_Reported;
-                    bdt.Debug_Y = bdt.DPD[i].Finger_Y_Reported;
-                }
-                else
-                {
-                    bdt.DPD[i].Finger_X_Reported = bdt.Debug_X;
-                    bdt.DPD[i].Finger_Y_Reported = bdt.Debug_Y;
-                }
-            }
-        }
-    }
-    bdt.SlipDirFlag = 0;
-    #endif
-    #endif
-	
     #if 0
     {
         uint16_t max=0, mini=0xffff, cury;
@@ -7567,9 +7323,9 @@ void DataProc_WholeFrameProcess(uint16_t *buffer)
     *  Get the Maximum Value and its Location;
     *******************************************************/
     //if(1 == bdt.NDD.Frame_Count)
-    if(1 == bdt.PowerOnWithFinger)
+    if(bdt.updatecount)
     {
-        if(bdt.updatecount)
+        if(1 == bdt.PowerOnWithFinger)				//hsqdebug
         {
             bdt.PowerOnWithFinger  = 0;
             bdt.MEM_MIN_XY_Count = 0;

@@ -47,6 +47,7 @@ typedef struct DeltaPData {
     uint16_t   Finger_X_Reported;                      // Final report finger point X, Q8
     uint16_t   Finger_Y_Reported;                      // Final report finger point Y, Q8
     EdgeCtrl   EdgeInfo;
+
     uint16_t   StayCount;
     int32_t    Stay_XSum;
     int32_t    Stay_YSum;
@@ -367,16 +368,6 @@ typedef struct BasData {
     uint32_t  TxRxiFCAP;                            // 调节后该点的FCAP值
     uint32_t  TxRxjFCAP;
 #endif
-
-    #ifdef SLIPDIRJUDGEMENT
-    #ifdef DIRDEBUG
-    uint16_t   Debug_X;
-    uint16_t   Debug_Y;
-    int16_t    Debug[12];
-    #endif
-    uint16_t   EdgeCount;
-    uint16_t   SlipDirFlag;
-    #endif
 
     uint16_t FingerReqNum;   //R01 -a
 

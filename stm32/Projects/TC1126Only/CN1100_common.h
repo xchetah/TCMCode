@@ -172,17 +172,14 @@
 //#define FOURPOINTS4STICKMOVING         // Four Ponts is needed for Stick Finger moving
 
 //#define SCREEN_NONE_ADAPTIVE               // None Adaptive parameter for different screen
-//#define SCREEN_SIMPLE_ADAPTIVE             // Simple Adaptive parameter for different screen
-#define SCREEN_FULL_ADAPTIVE                 // Full Adaptive parameter for different screen
+#define SCREEN_SIMPLE_ADAPTIVE             // Simple Adaptive parameter for different screen
+//#define SCREEN_FULL_ADAPTIVE                 // Full Adaptive parameter for different screen
 //#define CHANNEL_ADAPTIVE                     // Channel adaptive for adjust channel or point fcap
 
 #ifdef SCREEN_FULL_ADAPTIVE
 #define CIRCLE_MAXCOUNT         16           // 穷举的最大次数
 #define REASONABLE_VALUE        2048         // 穷举中希望接近的原始值
 #endif
-
-//#define SLIPDIRJUDGEMENT
-//#define DIRDEBUG
 
 #define INVALID_CHORPOINT       15          // 无效的通道或者点
 
@@ -309,14 +306,15 @@
 #define ADC_SPEED_SET          ADCM_ADC_SPEED_DIV4
 #define ACS_SPEED_SET          ADCM_ACS_DIV01
 
-#define FINGER_NUM_MAX         6  //R01 -m
-#define FINGER_REQUIREMENT_NUM 5   //R01 -a(5,4,3,2,1 has tested)
+#define FINGER_NUM_MAX         6      //R01 -m
+#define FINGER_REQUIREMENT_NUM 5     //R01 -a(5,4,3,2,1 has tested)
 
 #define DEBUG_VALUE_NUM_MAX    10
 
-#define CALINUM_EVERYSTEP      5  // FrequencyHopByStretch
-#define BASE_FRAME_SHIFT       2  // Baseline Proc
-#define BASE_COUNT_MAX         4  // Baseline Proc
+#define CALINUM_EVERYSTEP      5      // FrequencyHopByStretch
+#define BASE_FRAME_SHIFT       2      // Baseline Proc
+#define BASE_COUNT_MAX         4      // Baseline Proc
+#define BASE_UPDATETXRXTHR     350   // Used for FingerupdateTXRX threshold
 
 //*********************************************************
 // Used for function of MACRO "AUTO_FACEDETECTION"
