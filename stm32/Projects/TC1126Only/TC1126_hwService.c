@@ -2660,13 +2660,16 @@ void CN1100_SysTick_ISR(void)
     #endif
     
     #ifdef CN1100_LINUX
-        if(!(spidev->mode & CN1100_IS_DOZE)){
+		if(bdt.ModeSelect==DOZE_MODE){
+			spidev->irq_count++;
+		}
+        if((!(spidev->mode & CN1100_IS_DOZE))&&(bdt.ModeSelect!=DOZE_MODE)){
             if(!(spidev->mode & CN1100_IS_SUSPENDED))
                 spidev->ticks++;
         }    
 
         #if defined(CN1100_RESET_ENABLE)
-        if((spidev->ticks>5000)){
+        if((spidev->ticks>5000)&&(bdt.ModeSelect!=DOZE_MODE)){
                 printk("%d\n",spidev->ticks);
                 spidev->ticks = 0; 
                 queue_work(spidev->workqueue,&spidev->reset_work);
@@ -2775,32 +2778,23 @@ void CN1100_FrameScanDoneInt_ISR()
         case iAUTOSCAN_MODE:
         {
             #ifdef CN1100_LINUX
+            spidev->irq_count = 20;
             spidev->ticks = 0;
-            if(spidev->mode & CN1100_IS_DOZE)
-            {
-                spidev->mode &= ~(CN1100_IS_DOZE);
-                spidev->irq_count = 0;
-                TC1126_GotoDozeMode();
-                msleep(10);
-              #ifndef CN1100_MTK
-                enable_irq(spidev->irq);
-              #endif
-                break;
-            }
             #endif
-            
             #ifdef DOZE_ALLOWED
                 if(bdt.MTD.NoFingerCnt4Doze > WORK_MODE_NOFING_MAXPERD)
                 {
                     bdt.MTD.NoFingerCnt4Doze = 0;
-                    #ifdef CN1100_STM32
                     TC1126_GotoDozeMode();
-                    #else
-                    spidev->mode |= CN1100_IS_DOZE;
+                    #ifdef CN1100_LINUX
+					  #ifndef CN1100_MTK
+                      enable_irq(spidev->irq);
+					  #endif
                     #endif
                     break;
                 }
             #endif
+            
 
                 TC1126_SubISR_ScreenAdaptive();
 

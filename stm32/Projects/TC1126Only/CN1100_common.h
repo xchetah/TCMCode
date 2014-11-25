@@ -122,7 +122,7 @@
 #define CN1100_iSCANMODE
 //#define CN1100_DOZEMODE
 
-//#define DOZE_ALLOWED       // Allow to Doze mode if finger unexist for long time
+#define DOZE_ALLOWED       // Allow to Doze mode if finger unexist for long time
 //#define FINGER_HWDET4DOZE    // @ Doze, enable Finger auto detection
 
 //#define DOZEMODE_DEBUGSHOW    // Working only during NO HW Detecting way
@@ -142,11 +142,11 @@
 /**** 1.5    *********    Anti-Noise  Setting *************************/
 /**********************************************************************/
 //#define PHASE_HOP_ONLY        // Hardware Switch
-#define FREQY_HOP_ONLY        // Hardware Switch
+//#define FREQY_HOP_ONLY        // Hardware Switch
 //#define PREQY_CHIRP_ONLY      // Hardware Switch
 //#define DISBALE_HWFH_INSWFH   // Hardware Switch
 
-#define FREQHOP_BYSTRETCH     // Search a goof TX Freq by Stretch Setting
+//#define FREQHOP_BYSTRETCH     // Search a goof TX Freq by Stretch Setting
 #ifdef FREQHOP_BYSTRETCH
 //#define FHBS_DEBUG_INFOSHOW
 #define NOISECAL_SKIPNUM     2                   // Based on INTEG_DUR
@@ -157,12 +157,12 @@
 #define TXSCAN_FINGERDELAY   100                 // 100/80=1.25sec
 #define TXSCAN_VALIDPERIOD   480                 // 4800/80=60sec(1min)
 #define TXSCAN_ENABLE        1                   // Based on INTEG_DUR 
-#define TXSCAN_DISABLE       0                   // Based on INTEG_DUR 
 #define STRETCH_INC_REG25    0
 //#undef  FREQY_HOP_ONLY          // Hardware Switch
 #else
 #define STRETCH_INC_REG25    3
 #endif
+#define TXSCAN_DISABLE       0                   // Based on INTEG_DUR 
 
 /**********************************************************************/
 /**** 1.6    *********  Feature and Funcation *************************/
