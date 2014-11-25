@@ -46,7 +46,8 @@ typedef struct DeltaPData {
     uint8_t    LifeNumber;
     uint16_t   Finger_X_Reported;                      // Final report finger point X, Q8
     uint16_t   Finger_Y_Reported;                      // Final report finger point Y, Q8
-    EdgeCtrl   EdgeInfo;
+    EdgeCtrl   EdgeInfo; 
+
     uint16_t   StayCount;
     int32_t    Stay_XSum;
     int32_t    Stay_YSum;
@@ -187,10 +188,10 @@ typedef struct
     uint32_t    MaxValueNoFinger;  // WholeProcess
     uint32_t    FinThrMin;         // WholeProcess
 
-    uint32_t    HighRefSet;    // 0,1,2,3
-    uint32_t    HighRefPlSet;  // 0,1
+    uint32_t    HighRefSet;        // 0,1,2,3
+    uint32_t    HighRefPlSet;      // 0,1
     uint32_t    HighRefGainSet;    // 0,1,2,3
-    uint32_t    LowRefSet;     // 0,1,2,3
+    uint32_t    LowRefSet;         // 0,1,2,3
     uint32_t    LowRefPlSet;       // 0,1
     uint32_t    LowRefGainSet;     // 0,1,2,3  注：穷举法中LowRefGainSet值需初始化为-1，以便从0开始穷举
 

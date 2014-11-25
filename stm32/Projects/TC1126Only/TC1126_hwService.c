@@ -132,6 +132,7 @@ void STM32_ShutDown_TouchIC(void)
     Tiny_Delay(500);                    /*  200 us */
     
     SPI_write_singleData(OSCC_REG, 0x0580); 
+
     //R02 -a
     RegTab_t.Reg3FBitDef_t.FctlRegConf = 0;
     RegTab_t.Reg3FBitDef_t.FctlReg_t.FCTL_S_SEL = 1;
@@ -574,7 +575,7 @@ void Tiny_Delay(uint32_t TimeCount)
 * Return         : 
 *******************************************************************************/
 void TC1126_Init_StartADCByReg21(void)
-{
+{    
    //R02 -a
     RegTab_t.Reg21BitDef_t.AdcmRegConf = 0;
     RegTab_t.Reg21BitDef_t.AdcmReg_t.ADCM_ADC_SPEED = ADC_SPEED_SET;
@@ -1435,12 +1436,12 @@ void TC1126_Init_RefHLRegWRITE(void)
 void TC1126_Init_CapHighLowSetting(void)
 {
     #if 1
-    bdt.PCBA.HighRefSet     = HIREF_SETTING;
-    bdt.PCBA.HighRefGainSet = HIREF_GAIN_SET;
-    bdt.PCBA.LowRefSet      = LOREF_SETTING;
-    bdt.PCBA.LowRefGainSet  = LOREF_GAIN_SET;
-    bdt.PCBA.HighRefPlSet   = HIREF_PL_SET;
-    bdt.PCBA.LowRefPlSet    = LOREF_PL_SET;
+    //bdt.PCBA.HighRefSet     = HIREF_SETTING;
+    //bdt.PCBA.HighRefGainSet = HIREF_GAIN_SET;
+    //bdt.PCBA.LowRefSet      = LOREF_SETTING;
+    //bdt.PCBA.LowRefGainSet  = LOREF_GAIN_SET;
+    //bdt.PCBA.HighRefPlSet   = HIREF_PL_SET;
+    //bdt.PCBA.LowRefPlSet    = LOREF_PL_SET;
     
     #ifdef SCREEN_FULL_ADAPTIVE
     bdt.PCBA.HighRefGainSet = 0;
@@ -1461,33 +1462,22 @@ void TC1126_Init_CapHighLowSetting(void)
 *******************************************************************************/
 void TC1126_Init_CapHighLowSetting4SLEEP(void)
 {
-    #if 0 //def SCREEN_FULL_ADAPTIVE
-    uint16_t high;
-    uint16_t low;
-    
-    high  = REFH_REFHI_EN | REFH_REFHI_INP;
-    low   = REFL_REFLO_EN | REFL_REFLO_INP;
-    high |= REFH_REFHI_TCAP(DOZE_HIREF_SETTING) | REFH_REFHI_FCAP(DOZE_HIREF_GAIN_SET); /*  Pos1PF; */
-    low  |= REFL_REFLO_TCAP(DOZE_LOREF_SETTING)  | REFL_REFLO_FCAP(DOZE_LOREF_GAIN_SET);  /*  Neg2PF; */
-    high |= (bdt.PCBA.HighRefPlSet<<5);
-    low  |= (bdt.PCBA.LowRefPlSet<<5);
-    #ifdef COEF_SCALE_ENABLE
-    high |= REFH_SCALE_EN;
-    high |= REFH_SCALE_MODE(SCALE_MODE_SELECT);
-    #endif
-    SPI_write_singleData(REFH_REG, high);
-    SPI_write_singleData(REFL_REG, low); 
-    
-    #else
+    RegTab_t.Reg28BitDef_t.RefhRegConf = 0;
+    RegTab_t.Reg28BitDef_t.RcvmReg_t.REFH_REFHI_EN   = TCM_ENABLE;
+    RegTab_t.Reg28BitDef_t.RcvmReg_t.REFH_REFHI_INP  = TCM_ENABLE;
+    RegTab_t.Reg28BitDef_t.RcvmReg_t.REFH_REFHI_TCAP = DOZE_HIREF_SETTING;
+    RegTab_t.Reg28BitDef_t.RcvmReg_t.REFH_REFHI_FCAP = DOZE_HIREF_GAIN_SET;
+    RegTab_t.Reg28BitDef_t.RcvmReg_t.REFH_REFHI_PL   = DOZE_HIREF_PL_SET;
 
-    bdt.PCBA.HighRefSet     = DOZE_HIREF_SETTING;
-    bdt.PCBA.HighRefGainSet = DOZE_HIREF_GAIN_SET;
-    bdt.PCBA.LowRefSet      = DOZE_LOREF_SETTING;
-    bdt.PCBA.LowRefGainSet  = DOZE_LOREF_GAIN_SET;
-    bdt.PCBA.HighRefPlSet   = DOZE_HIREF_PL_SET;
-    bdt.PCBA.LowRefPlSet    = DOZE_LOREF_PL_SET;
-    TC1126_Init_RefHLRegWRITE();
-    #endif
+    RegTab_t.Reg29BitDef_t.ReflRegConf = 0;
+    RegTab_t.Reg29BitDef_t.RcvmReg_t.REFL_REFLO_EN   = TCM_ENABLE;
+    RegTab_t.Reg29BitDef_t.RcvmReg_t.REFL_REFLO_INP  = TCM_ENABLE;
+    RegTab_t.Reg29BitDef_t.RcvmReg_t.REFL_REFLO_TCAP = DOZE_LOREF_SETTING;
+    RegTab_t.Reg29BitDef_t.RcvmReg_t.REFL_REFLO_FCAP = DOZE_LOREF_GAIN_SET;
+    RegTab_t.Reg29BitDef_t.RcvmReg_t.REFL_REFLO_PL   = DOZE_LOREF_PL_SET;
+    
+    SPI_write_singleData(REFH_REG, RegTab_t.Reg28BitDef_t.RefhRegConf);
+    SPI_write_singleData(REFL_REG, RegTab_t.Reg29BitDef_t.ReflRegConf); 
 }
 
 
@@ -1540,6 +1530,7 @@ void TC1126_Init_TransModeSetting(void)
     #ifdef COEF_SCALE_ENABLE
     uint16_t fcapvalue;
     fcapvalue = (bdt.PCBA.RcvmRcvrFcapSet<<2);
+
     RegTab_t.Reg32BitDef_t.Tfc0RegConf = 0;
     RegTab_t.Reg32BitDef_t.Tfc0Reg_t.TFC0_T0R0_FCAP_COEF = fcapvalue;
     RegTab_t.Reg32BitDef_t.Tfc0Reg_t.TFC0_T0R1_FCAP_COEF = fcapvalue;
@@ -1573,6 +1564,7 @@ void TC1126_Init_TransModeSetting(void)
     RegTab_t.Reg53BitDef_t.TxMapToTx16MoreReg_t.TXMAPTO16M_TXRXJ_FCAP = RCVM_RCVR_FCAP_SET;
     SPI_write_singleData(TXMAPTOTX16MORE_REG, RegTab_t.Reg53BitDef_t.TxMapToTx16MoreRegConf);
     #endif
+
     RegTab_t.Reg3BBitDef_t.FlenRegConf = 0;
     #ifdef ONE_MORE_LINE_SCAN
     RegTab_t.Reg3BBitDef_t.FlenReg_t.FLEN_FRAME_LEN = (XMTR_NUM*RECV_NUM + RECV_NUM);
@@ -1674,6 +1666,7 @@ void TC1126_ChAdaptive_TransModeSetting(uint32_t TxorRxFlag)
     RegTab_t.Reg32BitDef_t.Tfc0Reg_t.TFC0_T0R2_FCAP_COEF = (bdt.RxFcapValue[2]<<2);
     RegTab_t.Reg32BitDef_t.Tfc0Reg_t.TFC0_T0R3_FCAP_COEF = (bdt.RxFcapValue[3]<<2);
     SPI_write_singleData(TFC0_REG, RegTab_t.Reg32BitDef_t.Tfc0RegConf);
+
     RegTab_t.Reg33BitDef_t.Tfc1RegConf = 0
     RegTab_t.Reg33BitDef_t.Tfc1Reg_t.TFC1_T0R4_FCAP_COEF =(bdt.RxFcapValue[4]<<2);
     RegTab_t.Reg33BitDef_t.Tfc1Reg_t.TFC1_T0R5_FCAP_COEF =(bdt.RxFcapValue[5]<<2);
@@ -1705,7 +1698,7 @@ void TC1126_ChAdaptive_TransModeSetting(uint32_t TxorRxFlag)
             RegTab_t.Reg53BitDef_t.TxMapToTx16MoreReg_t.TXMAPTO16M_TXRXJ_FCAP =FcapValue;
             SPI_write_singleData(TXMAPTOTX16MORE_REG,RegTab_t.Reg53BitDef_t.TxMapToTx16MoreRegConf);
             //R02 -e  
-        }
+      }
         else if((bdt.AbnormalTxChNum == 0)&&(bdt.AbnormalRxChNum == 2))
         {
             FcapValue = bdt.RxAbnormalCh[bdt.RealAbnormalRxCh[0]];
@@ -1717,10 +1710,12 @@ void TC1126_ChAdaptive_TransModeSetting(uint32_t TxorRxFlag)
             RegTab_t.Reg34BitDef_t.Tfc2Reg_t.TFC2_TNR0_FCAP_COEF=(bdt.RxFcapValue[0]<<2);
             RegTab_t.Reg34BitDef_t.Tfc2Reg_t.TFC2_SPECIAL_RXI_COORD=bdt.RealAbnormalRxCh[0];
             SPI_write_singleData(TFC2_REG, RegTab_t.Reg34BitDef_t.Tfc2RegConf);
+
             RegTab_t.Reg35BitDef_t.DiagRegConf = 0;
             RegTab_t.Reg35BitDef_t.DiagReg_t.DIAG_SEPCIAL_TXRXI_FCAP = FcapValue;
             RegTab_t.Reg35BitDef_t.DiagReg_t.DIAG_SEPCIAL_TXI_COORD = INVALID_CHORPOINT;	
             SPI_write_singleData(DIAG_REG,RegTab_t.Reg35BitDef_t.DiagRegConf); 
+
             RegTab_t.Reg53BitDef_t.TxMapToTx16MoreRegConf = 0;
             RegTab_t.Reg53BitDef_t.TxMapToTx16MoreReg_t.TXMAPTO16M_TXJ_CORD =INVALID_CHORPOINT;
             RegTab_t.Reg53BitDef_t.TxMapToTx16MoreReg_t.TXMAPTO16M_RXJ_CORD =(bdt.RealAbnormalRxCh[1]);
@@ -1770,6 +1765,7 @@ void TC1126_ChAdaptive_TransModeSetting(uint32_t TxorRxFlag)
     else if(TxorRxFlag == SCALE_MODE_2_TXRX)    //SCALE_MODE_2_TXRX
     {
         FcapValue = bdt.TxAbnormalCh[bdt.RealAbnormalTxCh[0]];
+
         //R02 -a
         RegTab_t.Reg34BitDef_t.Tfc2RegConf = 0;
         RegTab_t.Reg34BitDef_t.Tfc2Reg_t.TFC2_T0R8_FCAP_COEF=(bdt.RxFcapValue[8]<<2);
@@ -1782,6 +1778,7 @@ void TC1126_ChAdaptive_TransModeSetting(uint32_t TxorRxFlag)
         RegTab_t.Reg35BitDef_t.DiagReg_t.DIAG_SEPCIAL_TXRXI_FCAP = FcapValue;
         RegTab_t.Reg35BitDef_t.DiagReg_t.DIAG_SEPCIAL_TXI_COORD = INVALID_CHORPOINT;	
         SPI_write_singleData(DIAG_REG, RegTab_t.Reg35BitDef_t.DiagRegConf);
+
 
 
         RegTab_t.Reg53BitDef_t.TxMapToTx16MoreRegConf = 0;
@@ -1800,13 +1797,14 @@ void TC1126_ChAdaptive_TransModeSetting(uint32_t TxorRxFlag)
             RegTab_t.Reg34BitDef_t.Tfc2Reg_t.TFC2_TNR0_FCAP_COEF=(bdt.RxFcapValue[0]<<2);
             RegTab_t.Reg34BitDef_t.Tfc2Reg_t.TFC2_SPECIAL_RXI_COORD=INVALID_CHORPOINT;
             SPI_write_singleData(TFC2_REG,RegTab_t.Reg34BitDef_t.Tfc2RegConf);
+            
 
             RegTab_t.Reg35BitDef_t.DiagRegConf = 0;
             RegTab_t.Reg35BitDef_t.DiagReg_t.DIAG_SEPCIAL_TXRXI_FCAP = bdt.TxRxiFCAP;
             RegTab_t.Reg35BitDef_t.DiagReg_t.DIAG_SEPCIAL_TXI_COORD = INVALID_CHORPOINT;	
             SPI_write_singleData(DIAG_REG,RegTab_t.Reg35BitDef_t.DiagRegConf);
 
-            
+
             RegTab_t.Reg53BitDef_t.TxMapToTx16MoreRegConf = 0;
             RegTab_t.Reg53BitDef_t.TxMapToTx16MoreReg_t.TXMAPTO16M_TXJ_CORD =bdt.AbPointTxiCoord;
             RegTab_t.Reg53BitDef_t.TxMapToTx16MoreReg_t.TXMAPTO16M_RXJ_CORD =(bdt.AbPointRxiCoord);
@@ -1828,6 +1826,7 @@ void TC1126_ChAdaptive_TransModeSetting(uint32_t TxorRxFlag)
             RegTab_t.Reg35BitDef_t.DiagReg_t.DIAG_SEPCIAL_TXRXI_FCAP = bdt.TxRxiFCAP;
             RegTab_t.Reg35BitDef_t.DiagReg_t.DIAG_SEPCIAL_TXI_COORD = bdt.AbPointTxiCoord;	
             SPI_write_singleData(DIAG_REG, RegTab_t.Reg35BitDef_t.DiagRegConf);
+
 
             RegTab_t.Reg53BitDef_t.TxMapToTx16MoreRegConf = 0;
             RegTab_t.Reg53BitDef_t.TxMapToTx16MoreReg_t.TXMAPTO16M_TXJ_CORD =bdt.AbPointTxjCoord;
@@ -1889,7 +1888,7 @@ void TC1126_Init_FCTL_REG0X3F(void)
         }
         case DOZE_MODE:
         case SLEEP_MODE:
-        {
+        {   
             RegTab_t.Reg3FBitDef_t.FctlReg_t.FCTL_SCAN_MODE = 3;
             RegTab_t.Reg3FBitDef_t.FctlReg_t.FCTL_TXCH_NUM = (DOZE_TXREADNUM);
             break;
@@ -1981,31 +1980,32 @@ void TC1126_Init_iAutoScanModeSetting(void)
     TC1126_Init_CapHighLowSetting();
     TC1126_Init_TransModeSetting();
     TC1126_Init_TxMappingRegisters();
-    
+
     RegTab_t.Reg3ABitDef_t.ProbRegConf = 0;
 
     /*  Set the Internal SCAN Mode Period */
-#ifdef COMMUNICATION_WITH_PC
-  #ifdef SHOW_EVERY_FRAME_DATA
-    SPI_write_singleData(PERD_REG, 0xFFF);
+    #ifdef COMMUNICATION_WITH_PC
+      #ifdef SHOW_EVERY_FRAME_DATA
+        SPI_write_singleData(PERD_REG, 0xFFF);
         RegTab_t.Reg3ABitDef_t.ProbReg_t.PROB_INTR_MODE = 3;
         SPI_write_singleData(PROB_REG, RegTab_t.Reg3ABitDef_t.ProbRegConf);
-  #else
-    if(dbg.DebugInfoLevel == DEBUG_INFO_NONE)
-        SPI_write_singleData(PERD_REG, ISCANMODE_PERD_REG_VALUE);
-    else if(dbg.DebugInfoLevel == DEBUG_INFO_FIGLOC)
-        SPI_write_singleData(PERD_REG, ISCANMODE_PERD_REG_VALUE_FINGER_ONLY);
-    else
-        SPI_write_singleData(PERD_REG, ISCANMODE_PERD_REG_VALUE_NORMAL);
-  #endif
-#else
-    SPI_write_singleData(PERD_REG, ISCANMODE_PERD_REG_VALUE); /*  cfg_reg39 */
-#endif
+      #else
+        if(dbg.DebugInfoLevel == DEBUG_INFO_NONE)
+          SPI_write_singleData(PERD_REG, ISCANMODE_PERD_REG_VALUE);
+        else if(dbg.DebugInfoLevel == DEBUG_INFO_FIGLOC)
+          SPI_write_singleData(PERD_REG, ISCANMODE_PERD_REG_VALUE_FINGER_ONLY);
+        else
+          SPI_write_singleData(PERD_REG, ISCANMODE_PERD_REG_VALUE_NORMAL);
+      #endif
+    #else
+      SPI_write_singleData(PERD_REG, ISCANMODE_PERD_REG_VALUE); /*  cfg_reg39 */
+    #endif
 
     //R02 -a
     RegTab_t.Reg3ABitDef_t.ProbReg_t.PROB_INTR_MODE = 0;
     SPI_write_singleData(PROB_REG,RegTab_t.Reg3ABitDef_t.ProbRegConf); /*  Choose .... */
      //R02 -e
+
     TC1126_Init_ADCI_REG0X22();
     TC1126_Init_REVM_REG0X27();
     TC1126_Init_FCTL_REG0X3F();
@@ -2090,17 +2090,6 @@ void TC1126_Init_AllRegisters(void)
     SPI_write_singleData(DURS_REG, RegTab_t.Reg25BitDef_t.DursRegConf); /*  cfg_reg25, 12'h000 */
 
     
-    RegTab_t.Reg24BitDef_t.DurvRegConf = 0;
-    RegTab_t.Reg24BitDef_t.DurvReg_t.DURV_RESET_DUR = DUR_RESET;
-    RegTab_t.Reg24BitDef_t.DurvReg_t.DURV_INTEG_DUR = DUR_INTEG;
-    SPI_write_singleData(DURV_REG, RegTab_t.Reg24BitDef_t.DurvRegConf);/*  cfg_reg24, 12'h144 */
-   
-    RegTab_t.Reg25BitDef_t.DursRegConf = 0;
-    RegTab_t.Reg25BitDef_t.DursReg_t.DURS_STRETCH_DUR = DUR_STRETCH;
-    RegTab_t.Reg25BitDef_t.DursReg_t.DURS_STRETCH_INC = STRETCH_INC_REG25;
-    SPI_write_singleData(DURS_REG, RegTab_t.Reg25BitDef_t.DursRegConf); /*  cfg_reg25, 12'h000 */
-
-    
     RegTab_t.Reg26BitDef_t.BcntRegConf = 0;
     RegTab_t.Reg26BitDef_t.BcntReg_t.BCNT_BURST_CNT      = BURST_CNT&0x7ff;   //bdt.PCBA.BurstCnt;
     RegTab_t.Reg26BitDef_t.BcntReg_t.BCNT_RCVR_TURBO_EN0 = (BURST_CNT>>11)&1; //bdt.PCBA.BurstCnt;
@@ -2133,6 +2122,7 @@ void TC1126_Init_AllRegisters(void)
     RegTab_t.Reg2DBitDef_t.Rmp3Reg_t.RMP3_CH_MAP9 =SCN_R9;
     SPI_write_singleData(RMP3_REG, RegTab_t.Reg2DBitDef_t.Rmp3RegConf);
     //R02 -e
+
     //R02 -a
     RegTab_t.Reg36BitDef_t.TcrsRegConf = 0;
     RegTab_t.Reg36BitDef_t.TcrsReg_t.TCRS_RCVR_FCAP_RST = TCM_ENABLE;
@@ -2164,10 +2154,13 @@ void TC1126_Init_AllRegisters(void)
     RegTab_t.Reg39BitDef_t.PerdRegConf = 0;
     RegTab_t.Reg39BitDef_t.PerdReg_t.PERD_PERIOD = 0x40;
     SPI_write_singleData(PERD_REG, RegTab_t.Reg39BitDef_t.PerdRegConf);                  /*  Period[11:0]; */
+
     RegTab_t.Reg3ABitDef_t.ProbRegConf = 0;
     RegTab_t.Reg3ABitDef_t.ProbReg_t.PROB_PERIOD = 0;
     RegTab_t.Reg3ABitDef_t.ProbReg_t.PROB_INTR_MODE = 0;
     SPI_write_singleData(PROB_REG,RegTab_t.Reg3ABitDef_t.ProbRegConf);  /*  Period[19:12],INTR_MOD[2:0],Frame_Repeat; */
+
+
     RegTab_t.Reg3CBitDef_t.TthrRegConf = 0;
     RegTab_t.Reg3CBitDef_t.TthrReg_t.TTHR_TOUCH_TH0 = 0xb0;
     SPI_write_singleData(TTHR_REG, RegTab_t.Reg3CBitDef_t.TthrRegConf); /*  REG3C */
@@ -2223,12 +2216,14 @@ void TC1126_GotoDozeMode(void)
     bdt.ModeSelect            = DOZE_MODE;
     bdt.MTD.mtdc.Doze_FirstIn = 0;
     bdt.MTD.mtdc.Doze_OddNum  = 0;
+    
     TC1126_Init_SleepModeSetting(DOZE_MODE_PERIOD);
     //**********************************************************************
     // Reset PERD_REG small to reduce the time of throwing useless frames
     //**********************************************************************
     SPI_write_singleData(PERD_REG, 0x100);
     SPI_write_singleData(PROB_REG, 0x0); 
+
     #ifdef FINGER_HWDET4DOZE
     //R02 -a
     RegTab_t.Reg3CBitDef_t.TthrRegConf = 0;
@@ -2242,7 +2237,7 @@ void TC1126_GotoDozeMode(void)
     SPI_write_singleData(FLEN_REG, RegTab_t.Reg3BBitDef_t.FlenRegConf);
     #endif
     //R02 -e
-   
+
 #if 1
 {
     SPI_write_singleData(FLAG_REG,  0x009f);
@@ -2285,7 +2280,7 @@ void TC1126_GotoAutoScanMode(uint16_t auto_mode_sel)
         #endif
 
         bdt.ModeSelect  = iAUTOSCAN_MODE;
-            TC1126_Init_iAutoScanModeSetting();
+        TC1126_Init_iAutoScanModeSetting();
     } 
 
     #ifdef FINGER_HWDET4DOZE
@@ -2327,6 +2322,9 @@ void TC1126_GotoSleepMode(void)
 {
     if(DOZE_MODE == bdt.ModeSelect)
     {
+        /*****************************************************************************
+        * Set the Sleeping Period when previous mode is DOZE mode
+        *****************************************************************************/
         SPI_write_singleData(PERD_REG, 0); // cfg_reg39
         SPI_write_singleData(PROB_REG, 0); // Change the sleeping time
     }
@@ -2660,19 +2658,15 @@ void CN1100_SysTick_ISR(void)
             }
         #endif
     #endif
-
-	if(bdt.ModeSelect==DOZE_MODE){
-		spidev->irq_count++;
-	}
     
     #ifdef CN1100_LINUX
-        if(!(spidev->mode&CN1100_IS_DOZE)&&(bdt.ModeSelect!=DOZE_MODE)){
+        if(!(spidev->mode & CN1100_IS_DOZE)){
             if(!(spidev->mode & CN1100_IS_SUSPENDED))
                 spidev->ticks++;
         }    
 
         #if defined(CN1100_RESET_ENABLE)
-        if((spidev->ticks>5000)&&(bdt.ModeSelect!=DOZE_MODE)){
+        if((spidev->ticks>5000)){
                 printk("%d\n",spidev->ticks);
                 spidev->ticks = 0; 
                 queue_work(spidev->workqueue,&spidev->reset_work);
@@ -2717,7 +2711,6 @@ void CN1100_FrameScanDoneInt_ISR()
     {
         case DOZE_MODE:
         {
-			spidev->irq_count = 0;
             bdt.BFD.bbdc.NoFingerCnt4Base = 0;
             bdt.BFD.FingerLeftProtectTime = 0;
             /***************************************************************************
@@ -2752,17 +2745,13 @@ void CN1100_FrameScanDoneInt_ISR()
                     #endif
                 }
                 if(1 == RegTab_t.Reg44BitDef_t.DoneReg_t.DONE_FRM1_READABLE)
+                {
+                    /* Buffer B is ready in CN1100*/
+                    if(0 == TC1126_DozeModeDataHandling(BUFFER_B))
                     {
-                        /* Buffer B is ready in CN1100*/
-                        if(0 == TC1126_DozeModeDataHandling(BUFFER_B))
-                        {
                         RegTab_t.Reg1FBitDef_t.FlagRegConf = 0;
                         RegTab_t.Reg1FBitDef_t.FlagReg_t.FLAG_FRM1_RDDONE =1;
                         SPI_write_singleData(FLAG_REG, RegTab_t.Reg1FBitDef_t.FlagRegConf);
-                        }
-                        #ifdef CN1100_LINUX
-                           spidev->irq_count = 0;
-                        #endif
                     }
                     #ifdef CN1100_LINUX
                        spidev->irq_count = 0;
@@ -2785,30 +2774,39 @@ void CN1100_FrameScanDoneInt_ISR()
         
         case iAUTOSCAN_MODE:
         {
-			spidev->irq_count = 20;
+            #ifdef CN1100_LINUX
+            spidev->ticks = 0;
+            if(spidev->mode & CN1100_IS_DOZE)
+            {
+                spidev->mode &= ~(CN1100_IS_DOZE);
+                spidev->irq_count = 0;
+                TC1126_GotoDozeMode();
+                msleep(10);
+              #ifndef CN1100_MTK
+                enable_irq(spidev->irq);
+              #endif
+                break;
+            }
+            #endif
+            
             #ifdef DOZE_ALLOWED
                 if(bdt.MTD.NoFingerCnt4Doze > WORK_MODE_NOFING_MAXPERD)
                 {
                     bdt.MTD.NoFingerCnt4Doze = 0;
-                    //TC1126_GotoAutoScanMode(iAUTOSCAN_MODE);
+                    #ifdef CN1100_STM32
                     TC1126_GotoDozeMode();
-                    #ifdef CN1100_LINUX
-                      #ifndef CN1100_MTK
-                       enable_irq(spidev->irq);
-                      #endif
-                    #endif 
+                    #else
+                    spidev->mode |= CN1100_IS_DOZE;
+                    #endif
                     break;
                 }
             #endif
-            #ifdef CN1100_LINUX
-            spidev->ticks = 0;
-            #endif
-            
+
                 TC1126_SubISR_ScreenAdaptive();
 
                 TC1126_SubISR_iAutoMode();
-                
-                #ifdef CN1100_LINUX
+
+            #ifdef CN1100_LINUX
                 if(FRAME_FILLED == bdt.BSDSTS.iBuf_A_Fill)
                 {    
                     bd->BufferID = 0;

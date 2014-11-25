@@ -2,7 +2,7 @@
  * 版权所有(C) TRUECOREING
  * DEPARTMENT:
  * MANUAL_PERCENT:
- * 文件名称: TC1126_hwDebug.c 
+ * 文件名称: CN1000_data.c 
  * 文件标识:    
  * 内容摘要: 
  * 其它说明:
@@ -1233,6 +1233,7 @@ void USART_COMM_Handle()
             RegTab_t.Reg24BitDef_t.DurvReg_t.DURV_RESET_DUR = bdt.PCBA.DurReset;
             RegTab_t.Reg24BitDef_t.DurvReg_t.DURV_INTEG_DUR = bdt.PCBA.DurInteg;
             SPI_write_singleData(DURV_REG,RegTab_t.Reg24BitDef_t.DurvRegConf);/*  cfg_reg24, 12'h144 */
+
             RegTab_t.Reg25BitDef_t.DursRegConf = 0;
             RegTab_t.Reg25BitDef_t.DursReg_t.DURS_STRETCH_DUR = bdt.PCBA.DurStretch;
             RegTab_t.Reg25BitDef_t.DursReg_t.DURS_STRETCH_INC = STRETCH_INC_REG25;	
@@ -1327,6 +1328,7 @@ void USART_COMM_Handle()
         RegTab_t.Reg25BitDef_t.DursReg_t.DURS_STRETCH_DUR = bdt.PCBA.DurStretch;
         RegTab_t.Reg25BitDef_t.DursReg_t.DURS_STRETCH_INC = STRETCH_INC_REG25;	
         SPI_write_singleData(DURS_REG, RegTab_t.Reg25BitDef_t.DursRegConf);  /*  cfg_reg25, 12'h000 */
+
         RegTab_t.Reg26BitDef_t.BcntRegConf = 0;
         RegTab_t.Reg26BitDef_t.BcntReg_t.BCNT_BURST_CNT = bdt.PCBA.BurstCnt;
         SPI_write_singleData(BCNT_REG,RegTab_t.Reg26BitDef_t.BcntRegConf); /*  cfg_reg26, 12'h02f */

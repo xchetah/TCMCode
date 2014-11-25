@@ -122,7 +122,7 @@
 #define CN1100_iSCANMODE
 //#define CN1100_DOZEMODE
 
-#define DOZE_ALLOWED       // Allow to Doze mode if finger unexist for long time
+//#define DOZE_ALLOWED       // Allow to Doze mode if finger unexist for long time
 //#define FINGER_HWDET4DOZE    // @ Doze, enable Finger auto detection
 
 //#define DOZEMODE_DEBUGSHOW    // Working only during NO HW Detecting way
@@ -146,7 +146,7 @@
 //#define PREQY_CHIRP_ONLY      // Hardware Switch
 //#define DISBALE_HWFH_INSWFH   // Hardware Switch
 
-//#define FREQHOP_BYSTRETCH     // Search a goof TX Freq by Stretch Setting
+#define FREQHOP_BYSTRETCH     // Search a goof TX Freq by Stretch Setting
 #ifdef FREQHOP_BYSTRETCH
 //#define FHBS_DEBUG_INFOSHOW
 #define NOISECAL_SKIPNUM     2                   // Based on INTEG_DUR
@@ -157,12 +157,12 @@
 #define TXSCAN_FINGERDELAY   100                 // 100/80=1.25sec
 #define TXSCAN_VALIDPERIOD   480                 // 4800/80=60sec(1min)
 #define TXSCAN_ENABLE        1                   // Based on INTEG_DUR 
+#define TXSCAN_DISABLE       0                   // Based on INTEG_DUR 
 #define STRETCH_INC_REG25    0
 //#undef  FREQY_HOP_ONLY          // Hardware Switch
 #else
 #define STRETCH_INC_REG25    3
 #endif
-#define TXSCAN_DISABLE       0                   // Based on INTEG_DUR 
 
 /**********************************************************************/
 /**** 1.6    *********  Feature and Funcation *************************/
@@ -197,7 +197,7 @@
 
 #define SUPER_FILTER4EDGE
 //#define SUPER_FILTER4EDGE_DEBUGSHOW
-//#define FROMOUT2IN_INORDER
+#define FROMOUT2IN_INORDER
 #define SUPFIL_RANGE          256
 
 #define BORDER_SIMPLE_ADJUSTABLE   // One Adjust Coef.
@@ -229,14 +229,14 @@
 /**** 1.8    *********  关于 触摸屏 类型  *****************************/
 /**********************************************************************/
 
-//#define WHITESCREEN_15X10               // White or Black screen DITO, 15X10
+#define WHITESCREEN_15X10               // White or Black screen DITO, 15X10
 //#define SITO_SCREEN_10X15             // Black Screen SITO, 15X10
 //#define ITO_BORDERLINE_15X10          // ITO走线 DITO 屏
 
 //#define PHONESCREEN_13X10               // 手机屏(单层ITO), GT960
 //#define SH_FEATUREPHONE_13X9            // 手机屏(单层ITO), GT1688 ( //// FREQY_HOP_ONLY has to be disabled ////)
 
-#define FPCSCREEN_17X10                   // FPC屏(DITO), GT960
+//#define FPCSCREEN_17X10                   // FPC屏(DITO), GT960
 
 //#define PCB_DITO_SCREEN_15X10         // PCB 标准 DITO 图案
 //#define PCB_RHOMBUS_15X10             // PCB - 菱形图案
@@ -422,7 +422,7 @@
 #ifdef WINNER_TWD                                    //for 全志通文达
 #define ISCANMODE_PERD_REG_VALUE             0x1C0
 #else
-#define ISCANMODE_PERD_REG_VALUE             0x1C0   //12.5ms   
+#define ISCANMODE_PERD_REG_VALUE             0x140   //12.5ms   
 #endif
 
   #define RAW_DATA_DIFF_THR                    1100

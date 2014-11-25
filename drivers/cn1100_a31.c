@@ -392,7 +392,7 @@ void Report_Coordinate_Wait4_SingleTime(int id,int X, int Y)
 			mouse_up=0;
 			down_ms=jiffies;
 			t1=jiffies_to_msecs(jiffies -up_ms);
-			printk("T1=%2d\n",t1);
+			printk("T1=%2lu\n",t1);
 			if(t1<500)
 			{
 				//	key_press++;
@@ -611,7 +611,7 @@ static int chm_ts_probe(struct i2c_client *client, const struct i2c_device_id *i
 	printk("type: %d\n", type);
 	if (SCIRPT_ITEM_VALUE_TYPE_PIO != type) {
 		printk("failed to fetch ctp_pwr_en\n");
-		return;
+		return -1;
 	}
 	pwr_en = val.gpio.gpio;
 
@@ -760,7 +760,7 @@ static int chm_ts_probe(struct i2c_client *client, const struct i2c_device_id *i
 		status = sw_gpio_irq_request(config_info.irq_gpio_number,TRIG_LEVL_HIGH,(peint_handle)cn1100_irq_handler,NULL); 
 		if (!status) {
 			printk( "tc1126_probe: request irq failed\n");
-			goto fail6;
+			goto fail5;
 		}
 
 	}
@@ -776,9 +776,8 @@ static int chm_ts_probe(struct i2c_client *client, const struct i2c_device_id *i
 
 	hrtimer_start(&spidev->systic, ktime_set(0, SCAN_SYSTIC_INTERVAL), HRTIMER_MODE_REL);
 	return 0;
-fail6:
-	unregister_early_suspend(&spidev->early_suspend);
 fail5:
+	unregister_early_suspend(&spidev->early_suspend);
 	input_unregister_device(spidev->dev);
 	input_unregister_device(spidev->mouse_dev);
 fail4:
