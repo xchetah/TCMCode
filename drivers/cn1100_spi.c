@@ -403,21 +403,25 @@ void DataProc_PressKeyDetect()
     //printk("KEY1:(%-5d,%-5d),KEY2:(%-5d,%-5d),KEY3:(%-5d),KEY4:(%-5d,%-5d)\n",bdt.DeltaDat_kp[2],bdt.DeltaDat_kp[3],bdt.DeltaDat_kp[7],bdt.DeltaDat_kp[8],bdt.DeltaDat_kp[5],bdt.DeltaDat_kp[12],bdt.DeltaDat_kp[13]);
     if((bdt.DeltaDat_kp[2] > KEY1_THRESH)|| (bdt.DeltaDat_kp[3] > KEY1_THRESH))
     {
+		  bdt.MTD.NoFingerCnt4Doze = 0;
           bdt.PressKeyFlag1 = TOUCH_KEY_1;
     }
 
     if((bdt.DeltaDat_kp[7] > KEY2_THRESH)|| (bdt.DeltaDat_kp[8] > KEY2_THRESH))
     {
+		  bdt.MTD.NoFingerCnt4Doze = 0;
           bdt.PressKeyFlag1 = TOUCH_KEY_2;
     }
 
     if((bdt.DeltaDat_kp[5] > KEY3_THRESH))
     {
+		  bdt.MTD.NoFingerCnt4Doze = 0;
           bdt.PressKeyFlag1 = TOUCH_KEY_3;
     }
 
     if((bdt.DeltaDat_kp[12] > KEY4_THRESH)|| (bdt.DeltaDat_kp[13] > KEY4_THRESH))
     {
+		  bdt.MTD.NoFingerCnt4Doze = 0;
           bdt.PressKeyFlag1 = TOUCH_KEY_4;
     }
 }
