@@ -122,7 +122,7 @@
 #define CN1100_iSCANMODE
 //#define CN1100_DOZEMODE
 
-#define DOZE_ALLOWED       // Allow to Doze mode if finger unexist for long time
+//#define DOZE_ALLOWED       // Allow to Doze mode if finger unexist for long time
 //#define FINGER_HWDET4DOZE    // @ Doze, enable Finger auto detection
 
 //#define DOZEMODE_DEBUGSHOW    // Working only during NO HW Detecting way
