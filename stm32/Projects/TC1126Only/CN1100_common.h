@@ -423,7 +423,7 @@
 #ifdef WINNER_TWD                                    //for 全志通文达
 #define ISCANMODE_PERD_REG_VALUE             0x1C0
 #else
-#define ISCANMODE_PERD_REG_VALUE             0x140   //12.5ms   
+#define ISCANMODE_PERD_REG_VALUE             0x1c0   //12.5ms   
 #endif
 
   #define RAW_DATA_DIFF_THR                    1100
