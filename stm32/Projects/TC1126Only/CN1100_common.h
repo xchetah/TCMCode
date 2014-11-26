@@ -2,7 +2,7 @@
  * 版权所有(C) TRUECOREING
  * DEPARTMENT:
  * MANUAL_PERCENT:
- * 文件名称: CN1000_common.h 
+ * 文件名称: CN1000_data.c 
  * 文件标识:    
  * 内容摘要: 
  * 其它说明:
@@ -122,7 +122,7 @@
 #define CN1100_iSCANMODE
 //#define CN1100_DOZEMODE
 
-//#define DOZE_ALLOWED       // Allow to Doze mode if finger unexist for long time
+#define DOZE_ALLOWED       // Allow to Doze mode if finger unexist for long time
 //#define FINGER_HWDET4DOZE    // @ Doze, enable Finger auto detection
 
 //#define DOZEMODE_DEBUGSHOW    // Working only during NO HW Detecting way
@@ -142,11 +142,11 @@
 /**** 1.5    *********    Anti-Noise  Setting *************************/
 /**********************************************************************/
 //#define PHASE_HOP_ONLY        // Hardware Switch
-#define FREQY_HOP_ONLY        // Hardware Switch
+//#define FREQY_HOP_ONLY        // Hardware Switch
 //#define PREQY_CHIRP_ONLY      // Hardware Switch
 //#define DISBALE_HWFH_INSWFH   // Hardware Switch
 
-#define FREQHOP_BYSTRETCH     // Search a goof TX Freq by Stretch Setting
+//#define FREQHOP_BYSTRETCH     // Search a goof TX Freq by Stretch Setting
 #ifdef FREQHOP_BYSTRETCH
 //#define FHBS_DEBUG_INFOSHOW
 #define NOISECAL_SKIPNUM     2                   // Based on INTEG_DUR
@@ -157,12 +157,12 @@
 #define TXSCAN_FINGERDELAY   100                 // 100/80=1.25sec
 #define TXSCAN_VALIDPERIOD   480                 // 4800/80=60sec(1min)
 #define TXSCAN_ENABLE        1                   // Based on INTEG_DUR 
-#define TXSCAN_DISABLE       0                   // Based on INTEG_DUR 
 #define STRETCH_INC_REG25    0
 //#undef  FREQY_HOP_ONLY          // Hardware Switch
 #else
 #define STRETCH_INC_REG25    3
 #endif
+#define TXSCAN_DISABLE       0                   // Based on INTEG_DUR 
 
 /**********************************************************************/
 /**** 1.6    *********  Feature and Funcation *************************/
@@ -177,15 +177,15 @@
 //#define CHANNEL_ADAPTIVE                     // Channel adaptive for adjust channel or point fcap
 
 #ifdef SCREEN_FULL_ADAPTIVE
-#define CIRCLE_MAXCOUNT         16           // 穷举的最大次数
-#define REASONABLE_VALUE        2048         // 穷举中希望接近的原始值
+#define CIRCLE_MAXCOUNT         16            // 穷举的最大次数
+#define REASONABLE_VALUE        2048          // 穷举中希望接近的原始值
 #endif
 
-#define INVALID_CHORPOINT       15          // 无效的通道或者点
+#define INVALID_CHORPOINT        15            // 无效的通道或者点
 
 #ifdef CHANNEL_ADAPTIVE
-#define RXCHANNEL_THRESHOLD     800         // RX通道与总平均值差值限度
-#define ABCHVALUE_THRESHOLD     800         // 各个通道平均值与总的平均值差值限度
+#define RXCHANNEL_THRESHOLD     700         // RX通道与总平均值差值限度
+#define ABCHVALUE_THRESHOLD     700         // 各个通道平均值与总的平均值差值限度
 #define ABCHANDPOINT_MAXNUM     2           // 可调节的通道、异常点最大数目
 #define ABNORMALPOINT_MAXNUM    4           // 最大值、最小值、次大值、次小值
 #define ABPOINTMAX_THRESHOLD    3500        // 异常点最大值限度
@@ -197,7 +197,7 @@
 
 #define SUPER_FILTER4EDGE
 //#define SUPER_FILTER4EDGE_DEBUGSHOW
-//#define FROMOUT2IN_INORDER
+#define FROMOUT2IN_INORDER
 #define SUPFIL_RANGE          256
 
 #define BORDER_SIMPLE_ADJUSTABLE   // One Adjust Coef.
@@ -423,7 +423,7 @@
 #ifdef WINNER_TWD                                    //for 全志通文达
 #define ISCANMODE_PERD_REG_VALUE             0x1C0
 #else
-#define ISCANMODE_PERD_REG_VALUE             0x1C0   //12.5ms   
+#define ISCANMODE_PERD_REG_VALUE             0x140   //12.5ms   
 #endif
 
   #define RAW_DATA_DIFF_THR                    1100

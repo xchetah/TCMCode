@@ -53,6 +53,8 @@
 #endif
 #ifdef CN1100_A31
 #include <linux/ctp.h>
+#include <mach/sys_config.h>
+#include <linux/regulator/consumer.h>
 #endif
 #ifdef CN1100_S5PV210
 #include <plat/irqs.h>
@@ -121,6 +123,8 @@
 
 #ifdef CN1100_LX //CN1100_LX
 
+#define TPD_PROXIMITY
+
 #ifdef TPD_PROXIMITY
 #include <linux/wakelock.h>
 #include <linux/miscdevice.h>
@@ -184,6 +188,7 @@ struct cn1100_spi_dev {
 
 	wait_queue_head_t waitq;
 	struct input_dev *dev;
+	struct input_dev *mouse_dev;
 	struct proc_dir_entry *chm_ts_proc;
 	struct i2c_client *client;
 	struct hrtimer systic;
@@ -221,7 +226,6 @@ ssize_t chm_proc_read(struct file *file, char __user *buf, size_t size, loff_t *
 int chm_proc_write(struct file *file, const char __user *buffer, size_t size, loff_t *ppos);
 void DataProc_DeltaMatrix2Array(uint32_t *BitDat, int16_t thr);
  void DataProc_PullBitmapApart(uint32_t *buf);
-//void TC1126_Init_VarRegSetting(void);
 
 
 #endif //CN1100_LINUX

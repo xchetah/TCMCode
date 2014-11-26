@@ -190,8 +190,8 @@ void Baseline_FingerupdateTX(void)
     uint16_t Max_num,i,j,average;
     int16_t Max_sum;
     uint16_t Max_cnt, Max_maxcnt, IvdCnt,IvdCnt1;
-	IvdCnt = 0;
-	IvdCnt1 = 0;
+    IvdCnt = 0;
+    IvdCnt1 = 0;
     for(j=0; j<RECV_NUM; j++)
     {
         Max_sum = 0;
@@ -335,14 +335,14 @@ void Baseline_Fingerupdatenoise(void)
     if(bdt.MaxNoise_Sum > BIGNOISE )
     {
         bdt.MaxNoise_SumCount++;
-        bdt.PowerOnWithFinger  = 0;
+        bdt.PowerOnWithFinger = 0;
     }
 
-    if(bdt.MaxNoise_SumCount > 80)
+    if(bdt.MaxNoise_SumCount>80)
     {
         bdt.MaxNoise_SumCount = 0;
         bdt.MaxNoise_Sum = 0;
-        bdt.updatecount = 100;
+        bdt.updatecount  = 100;
         bdt.PowerOnWithFinger = 1;
         return;
     }
@@ -534,11 +534,11 @@ uint8_t Baseline_ManyBigInvalidSampleinDeltaFrame(void)
     uint32_t temp_count = 0;
     
   /***********************************************************************
-  * 如果一个差分帧内:
-  *    数值超过"bdt.PCBA.AbnormalMaxDiff = ABNORMAL_MAX_DIFF(15)"
-  *    个数超过"bdt.PCBA.AbnormalNumDiff = ABNORMAL_NUM_DIFF(1/4帧)"
-  *    次数超过 ABNORMAL_HOLD_TIME(5)
-  ***********************************************************************/
+       * 如果一个差分帧内:
+       *    数值超过"bdt.PCBA.AbnormalMaxDiff = ABNORMAL_MAX_DIFF(15)"
+       *    个数超过"bdt.PCBA.AbnormalNumDiff = ABNORMAL_NUM_DIFF(1/4帧)"
+       *    次数超过 ABNORMAL_HOLD_TIME(5)
+       ***********************************************************************/
     for (i=0;i<XMTR_NUM;i++)
     for (j=0;j<RECV_NUM;j++)
     {
@@ -577,8 +577,8 @@ uint8_t Baseline_IsNeedUpdateBaseBuffer(void)
     uint8_t  result = BASE_FRAME_HOLD;
     
    /*********************************************************************************
-   * Step 1: Compute the sum of delta data
-   *********************************************************************************/
+    * Step 1: Compute the sum of delta data
+    *********************************************************************************/
     bdt.BFD.DeltaSum = 0;
     for (i=0;i<XMTR_NUM;i++)
     for (j=0;j<RECV_NUM;j++)
@@ -1375,7 +1375,7 @@ void FingProc_MultiFilterProcess(uint16_t i, uint16_t curx, uint16_t cury, uint1
     FingProc_TapFilterProcess(i, curx,cury,x,y);
 
     FingProc_DistanceFilter0(i, x[0], y[0], &bdt.DPD[i].Finger_X_XMTR, &bdt.DPD[i].Finger_Y_RECV);
-        
+    
     FingProc_TapFilterStateUpdate(i);
     
     bdt.DPD[i].Finger_X_Reported = bdt.DPD[i].Finger_X_XMTR;
@@ -1861,19 +1861,19 @@ void FingProc_FromStickCaseProcess(uint16_t i, uint16_t FF, uint16_t curx, uint1
             bdt.DPD[i].LifeNumber++;
         }
         /*****************************************************************
-        * 正常计算 手指点滤波过程
-        ******************************************************************/
+                  * 正常计算 手指点滤波过程
+                  ******************************************************************/
         FingProc_MultiFilterProcess(i, curx, cury, x, y);
         
         /*****************************************************************
-        * 但是不报告 到HOST系统 目前的手指点，报告到HOST的依旧是以前的点
-        ******************************************************************/
+                  * 但是不报告 到HOST系统 目前的手指点，报告到HOST的依旧是以前的点
+                  ******************************************************************/
         bdt.DPD[i].Finger_X_Reported = x[bdt.DPD[i].FingerStateFlag - STATE_S_OUT1_FINGER+2]; 
         bdt.DPD[i].Finger_Y_Reported = y[bdt.DPD[i].FingerStateFlag - STATE_S_OUT1_FINGER+2]; 
         
         /*****************************************************************
-        * 首先判断 最新手指点 到 基地手指点之间的距离 是否太近了?
-        ******************************************************************/ 
+                  * 首先判断 最新手指点 到 基地手指点之间的距离 是否太近了?
+                  ******************************************************************/ 
         if(FingProc_Dist2PMeasure(curx, cury, bdt.DPD[i].Finger_X_Reported, bdt.DPD[i].Finger_Y_Reported) < bdt.ThrLow4DistanceFilter)
         {
             /********************************************
@@ -1889,9 +1889,9 @@ void FingProc_FromStickCaseProcess(uint16_t i, uint16_t FF, uint16_t curx, uint1
         }
         else
         {
-            /********************************************
-            * 手指点依旧离基地有距离
-            **********************************************/
+         /********************************************
+         * 手指点依旧离基地有距离
+         **********************************************/
             bdt.DPD[i].FingerStateFlag  = NextFingerState;
             FingProc_SmallAngleTringleProcess(i, x, y, STATE_STAYAT_FINGER);
             FingProc_unreasonblespeedProcess(i, x, y, STATE_STAYAT_FINGER);
@@ -1921,7 +1921,7 @@ void FingProc_ImproveByMultiFilters(void)
         cury = bdt.DPD[i].Finger_Y_RECV;    /* Just calculated from raw data */
         if(curx || cury)
         {
-            FINGER_FLAG = 1;                /* Make sure there is finger @ i (index)*/
+            FINGER_FLAG = 1;   /* Make sure there is finger @ i (index)*/
         }
         else
         {    
@@ -2346,41 +2346,41 @@ uint16_t FingProc_SuperF4EAGE_ShiftCalc(uint16_t OrigShiftVal, uint16_t curp, ui
     //***********************************************************************
     if(0 == DirVal) 
     {
-        //****************************************************
-        // Finger Moving Direction is not fixed
-        //****************************************************
-        if(p[0] == p[1] && p[1]== p[2])
-        {
             //****************************************************
-            // The Finger Moving is locked
+            // Finger Moving Direction is not fixed
             //****************************************************
-            uint16_t tempflag = 0;
-            if((curp < SUPFIL_RANGE) && ((p[0]-curp)>16)) tempflag = 1;
-            else if((curp > (SUPFIL_RANGE<<1)) && ((curp-p[0])>16)) tempflag = 1;
+            if(p[0] == p[1] && p[1]== p[2])
+            {
+                //****************************************************
+                // The Finger Moving is locked
+                //****************************************************
+                uint16_t tempflag = 0;
+                if((curp < SUPFIL_RANGE) && ((p[0]-curp)>16)) tempflag = 1;
+                else if((curp > (SUPFIL_RANGE<<1)) && ((curp-p[0])>16)) tempflag = 1;
 
-            if((ShiftResult > 0) && 1 == tempflag)
+                if((ShiftResult > 0) && 1 == tempflag)
+                {  
+                    ShiftResult -= 1;
+                }
+            }
+            else if(ShiftResult < 3)
+            {
+                //****************************************************
+                // We are going to make filter more strong
+                //****************************************************
+                ShiftResult += 1;
+            }
+        }
+        else if(DirVal > 1)
+        {
+            //********************************************************
+            // Finger Moving Direction show a kind of fixing method
+            // We are going to make filter less strong
+            //********************************************************
+            if(ShiftResult > 0)
             {  
                 ShiftResult -= 1;
             }
-        }
-        else if(ShiftResult < 3)
-        {  
-            //****************************************************
-            // We are going to make filter more strong
-            //****************************************************
-            ShiftResult += 1;
-        }
-    }
-        else if(DirVal > 1)
-    {
-        //********************************************************
-        // Finger Moving Direction show a kind of fixing method
-        // We are going to make filter less strong
-        //********************************************************
-        if(ShiftResult > 0)
-        {  
-            ShiftResult -= 1;
-        }
     }
 #endif
     return ShiftResult;
@@ -2388,7 +2388,7 @@ uint16_t FingProc_SuperF4EAGE_ShiftCalc(uint16_t OrigShiftVal, uint16_t curp, ui
 
 /*******************************************************************************
 * Function Name  : 
-* Description    :         
+* Description    : 
 * Input          : 
 * Output         : 
 * Return         : 
@@ -2402,14 +2402,14 @@ void FingProc_SuperF4EAGE_LR(uint16_t i,uint16_t *x, uint16_t *y)
     //uint16_t DirVal;
     uint16_t OffsetTab[4] = {64,32,16,8};
 
-    xRpt = bdt.DPD[i].Finger_X_XMTR;    /* Just calculated from raw data*/
+    xRpt = bdt.DPD[i].Finger_X_XMTR;    /* Just calculated from raw data */
     yRpt = bdt.DPD[i].Finger_Y_RECV;    /* Just calculated from raw data */
-    
-    dx =FingProc_Dist4Uint16Var(xRpt, x[0]);
-    dy =FingProc_Dist4Uint16Var(yRpt, y[0]);
-        
+
+    dx = FingProc_Dist4Uint16Var(xRpt, x[0]);
+    dy = FingProc_Dist4Uint16Var(yRpt, y[0]);
+
     if((dx > (dy>>2)) && (dy < SUPFIL_RANGE))
-    { 
+    {
         bdt.DPD[i].EdgeShift_LR  = FingProc_SuperF4EAGE_ShiftCalc(bdt.DPD[i].EdgeShift_LR, xRpt, x);
         bdt.DPD[i].EdgeOffset_LR = OffsetTab[bdt.DPD[i].EdgeShift_LR];
 
@@ -2417,18 +2417,18 @@ void FingProc_SuperF4EAGE_LR(uint16_t i,uint16_t *x, uint16_t *y)
         {
             dx = dx>>(bdt.DPD[i].EdgeShift_LR);
         }
-        else
+        else  
         {
             dx = bdt.DPD[i].EdgeOffset_LR + (dx>>(bdt.DPD[i].EdgeShift_LR+1));
         }
     }
         
-    if(xRpt>x[0]) 
+    if(xRpt > x[0])
     {
         bdt.DPD[i].Finger_X_XMTR = x[0]+dx;
     }
-    else 
-    {    
+    else
+    { 
         bdt.DPD[i].Finger_X_XMTR = x[0]-dx;
     }
 #endif
@@ -2456,10 +2456,10 @@ void FingProc_SuperF4EAGE_TB(uint16_t i,uint16_t *x, uint16_t *y)
     dx =FingProc_Dist4Uint16Var(xRpt, x[0]);
     dy =FingProc_Dist4Uint16Var(yRpt, y[0]);
     if((dy > (dx>>2)) && (dx < SUPFIL_RANGE))
-    {  
+    {
         bdt.DPD[i].EdgeShift_TB  = FingProc_SuperF4EAGE_ShiftCalc(bdt.DPD[i].EdgeShift_TB, xRpt, x);
         bdt.DPD[i].EdgeOffset_TB = OffsetTab[bdt.DPD[i].EdgeShift_TB];
-                 
+
         if(dy<128) 
         { 
             dy = dy>>(bdt.DPD[i].EdgeShift_TB);
@@ -2469,7 +2469,7 @@ void FingProc_SuperF4EAGE_TB(uint16_t i,uint16_t *x, uint16_t *y)
             dy = bdt.DPD[i].EdgeOffset_TB + (dy>>(bdt.DPD[i].EdgeShift_TB + 1));
         }
     }
-
+                  
     if(yRpt>y[0])
     {
         bdt.DPD[i].Finger_Y_RECV = y[0]+dy ;
@@ -2526,13 +2526,13 @@ void FingProc_SuperFilter4Edge(void)
             } 
             else
             {
-            //********************************************************
-            // Finger really @ Out from SideArea, Num1_X Counting start
-            //********************************************************
-                bdt.DPD[i].FingerRealNum2_X   = 0;
+                //********************************************************
+                // Finger really @ Out from SideArea, Num1_X Counting start
+                //********************************************************
+                bdt.DPD[i].FingerRealNum2_X  = 0;
                 bdt.DPD[i].EdgeShift_LR       = 0;
                 bdt.DPD[i].EdgeOffset_LR      = 64;
-            }  
+            }
         }
         else
         {
@@ -2546,7 +2546,7 @@ void FingProc_SuperFilter4Edge(void)
                     //************************************************************
                     // Just from AA to Edge area, (Less than 20/35 points)
                     //************************************************************
-                    if(bdt.DPD[i].FingerRealNum2_X > 20)
+                    if(bdt.DPD[i].FingerRealNum2_X > 20)  
                     { 
                         if(xRpt < SUPFIL_RANGE && x[0] < SUPFIL_RANGE && x[1] < SUPFIL_RANGE && x[2] < SUPFIL_RANGE)
                             FingProc_SuperF4EAGE_LR(i,x,y);
@@ -2556,8 +2556,8 @@ void FingProc_SuperFilter4Edge(void)
                             #define RIEL_VAL  ((SXMTR_NUM<<8) - SUPFIL_RANGE)
                             if(xRpt > RIEL_VAL && x[0] > RIEL_VAL && x[1] > RIEL_VAL && x[2] > RIEL_VAL)
                                 FingProc_SuperF4EAGE_LR(i,x,y);
-                    }
-                    else bdt.DPD[i].FingerRealNum2_X++;
+                        }
+                        else bdt.DPD[i].FingerRealNum2_X++;
                     }
                     else bdt.DPD[i].FingerRealNum2_X++;
                 }
@@ -2575,10 +2575,10 @@ void FingProc_SuperFilter4Edge(void)
             }
             else
             {
-            //********************************************************
-            // Finger @ Out from SideArea, Num1_Y Counting start
-            //********************************************************
-            bdt.DPD[i].FingerRealNum2_Y = 0;
+                //********************************************************
+                // Finger @ Out from SideArea, Num1_Y Counting start
+                //********************************************************
+                bdt.DPD[i].FingerRealNum2_Y  = 0;
                 bdt.DPD[i].EdgeShift_TB      = 0;
                 bdt.DPD[i].EdgeOffset_TB     = 64;
             }
@@ -2914,16 +2914,16 @@ void FingProc_SortFingersWithMatrix(void)
                     if(j < bdt.FingerReqNum)
                     { 
                         //R01-e
-                Prev2CurID[Dim2idx[0]] = Dim2idx[1];  /* From Previous to Current*/
-                Cur2PrevID[Dim2idx[1]] = Dim2idx[0];
+                        Prev2CurID[Dim2idx[0]] = Dim2idx[1];  /* From Previous to Current*/
+                        Cur2PrevID[Dim2idx[1]] = Dim2idx[0];
 
-                bdt.DPD[Dim2idx[0]].Finger_X_XMTR = Pos_X[Dim2idx[1]];
-                bdt.DPD[Dim2idx[0]].Finger_Y_RECV = Pos_Y[Dim2idx[1]];
+                        bdt.DPD[Dim2idx[0]].Finger_X_XMTR = Pos_X[Dim2idx[1]];
+                        bdt.DPD[Dim2idx[0]].Finger_Y_RECV = Pos_Y[Dim2idx[1]];
 
-                if(MaxPos < Dim2idx[0]) 
-                {
-                    MaxPos = Dim2idx[0];
-                }
+                        if(MaxPos < Dim2idx[0]) 
+                        {
+                            MaxPos = Dim2idx[0];
+                        }
                         //R01-a
                     }
                     else 
@@ -3095,12 +3095,12 @@ void FingProc_SortFingersWithMatrix(void)
             {      //R01 -a
                    do{
                     if(j < bdt.FingerReqNum)
-            {
+                    {
                         //R01 -e
-                Prev2CurID[Dim2idx[0]] = Dim2idx[1];  /* Whatever, we found one match point*/
-                Cur2PrevID[Dim2idx[1]] = Dim2idx[0];  /* Whatever, we found one match point*/
-                bdt.DPD[Dim2idx[0]].Finger_X_XMTR = Pos_X[Dim2idx[1]];
-                bdt.DPD[Dim2idx[0]].Finger_Y_RECV = Pos_Y[Dim2idx[1]];
+                        Prev2CurID[Dim2idx[0]] = Dim2idx[1];  /* Whatever, we found one match point*/
+                        Cur2PrevID[Dim2idx[1]] = Dim2idx[0];  /* Whatever, we found one match point*/
+                        bdt.DPD[Dim2idx[0]].Finger_X_XMTR = Pos_X[Dim2idx[1]];
+                        bdt.DPD[Dim2idx[0]].Finger_Y_RECV = Pos_Y[Dim2idx[1]];
                      
                         if(MaxPos < Dim2idx[0])
                         {
@@ -3519,13 +3519,12 @@ uint16_t FingProc_IEdgeP_Left(uint16_t h)
     #endif
     
 #ifdef BORDER_SIMPLE_ADJUSTABLE
-  #if 1
+  #if 0
     h = h<<1;
-    //result = h;
     result = (((h>>5)+1)<<5)-16;
     if(result > 230) result = 230;
   #else
-    #define ASCLOSEASPOSSIBLE_LEFT 45
+    #define ASCLOSEASPOSSIBLE_LEFT 64
     result = FingProc_IEdgeP_Mapping(h, ASCLOSEASPOSSIBLE_LEFT);
   #endif
 #else
@@ -3697,13 +3696,12 @@ uint16_t FingProc_IEdgeP_Right(uint16_t h)
     #endif
 
 #ifdef BORDER_SIMPLE_ADJUSTABLE
-  #if 1
+  #if 0
     h = h<<1;
-    //result = h;
     result = (((h>>5)+1)<<5)-16;
     if(result > 230) result = 230;
   #else
-    #define ASCLOSEASPOSSIBLE_RIGHT 35
+    #define ASCLOSEASPOSSIBLE_RIGHT 64
     result = FingProc_IEdgeP_Mapping(h, ASCLOSEASPOSSIBLE_RIGHT);
   #endif
 #else
@@ -3891,13 +3889,12 @@ uint16_t FingProc_IEdgeP_Top(uint16_t h)
     #endif
 
 #ifdef BORDER_SIMPLE_ADJUSTABLE
-  #if 1
+  #if 0
     h = h<<1;
-    //result = h;
     result = (((h>>5)+1)<<5)-16;
     if(result > 230) result = 230;
   #else
-    #define ASCLOSEASPOSSIBLE_TOP 42
+    #define ASCLOSEASPOSSIBLE_TOP 64
     result = FingProc_IEdgeP_Mapping(h, ASCLOSEASPOSSIBLE_TOP);
   #endif
 #else
@@ -4077,9 +4074,8 @@ uint16_t FingProc_IEdgeP_Bottom(uint16_t h)
     #endif
 
 #ifdef BORDER_SIMPLE_ADJUSTABLE
-  #if 1
+  #if 0
     h = h<<1;
-    //result = h;
     result = (((h>>5)+1)<<5)-16;
     if(result > 230) result = 230;
   #else
@@ -7359,6 +7355,7 @@ void DataProc_WholeFrameProcess(uint16_t *buffer)
                 bdt.DeltaDat16A[i][j]=0;
               }
           #endif
+          DataProc_PressKeyDetect();
     #endif
     
     DataProc_FindMaxAndMinValue();       /* Find Max Value and its Location, also Min Value*/
@@ -7399,7 +7396,6 @@ void DataProc_WholeFrameProcess(uint16_t *buffer)
     if(bdt.FingerDetectNum > MIN_VALUE_POINT) 
     {
         #ifdef PRESS_KEY_DETECT
-        DataProc_PressKeyDetect();
         #endif
 
         /***********************************************************

@@ -381,6 +381,18 @@ out:
 }
 
 #ifdef PRESS_KEY_DETECT
+
+
+void set_finger_num(int num)
+{
+    if(bdt.FingerReqNum != num){
+        bdt.FingerReqNum = num;
+    }else{
+        bdt.FingerReqNum = 1;
+    }
+    printk("bdt.FingerReqNum:%d\n",bdt.FingerReqNum);
+}
+
 #define KEY1_THRESH 300
 #define KEY2_THRESH 300
 #define KEY3_THRESH 200
@@ -388,24 +400,28 @@ out:
 void DataProc_PressKeyDetect()
 {
     bdt.PressKeyFlag1          = NO_KEY_PRESSED;
-    printk("KEY1:(%-5d,%-5d),KEY2:(%-5d,%-5d),KEY3:(%-5d),KEY4:(%-5d,%-5d)\n",bdt.DeltaDat_kp[2],bdt.DeltaDat_kp[3],bdt.DeltaDat_kp[7],bdt.DeltaDat_kp[8],bdt.DeltaDat_kp[5],bdt.DeltaDat_kp[12],bdt.DeltaDat_kp[13]);
+    //printk("KEY1:(%-5d,%-5d),KEY2:(%-5d,%-5d),KEY3:(%-5d),KEY4:(%-5d,%-5d)\n",bdt.DeltaDat_kp[2],bdt.DeltaDat_kp[3],bdt.DeltaDat_kp[7],bdt.DeltaDat_kp[8],bdt.DeltaDat_kp[5],bdt.DeltaDat_kp[12],bdt.DeltaDat_kp[13]);
     if((bdt.DeltaDat_kp[2] > KEY1_THRESH)|| (bdt.DeltaDat_kp[3] > KEY1_THRESH))
     {
+		  bdt.MTD.NoFingerCnt4Doze = 0;
           bdt.PressKeyFlag1 = TOUCH_KEY_1;
     }
 
     if((bdt.DeltaDat_kp[7] > KEY2_THRESH)|| (bdt.DeltaDat_kp[8] > KEY2_THRESH))
     {
+		  bdt.MTD.NoFingerCnt4Doze = 0;
           bdt.PressKeyFlag1 = TOUCH_KEY_2;
     }
 
     if((bdt.DeltaDat_kp[5] > KEY3_THRESH))
     {
+		  bdt.MTD.NoFingerCnt4Doze = 0;
           bdt.PressKeyFlag1 = TOUCH_KEY_3;
     }
 
     if((bdt.DeltaDat_kp[12] > KEY4_THRESH)|| (bdt.DeltaDat_kp[13] > KEY4_THRESH))
     {
+		  bdt.MTD.NoFingerCnt4Doze = 0;
           bdt.PressKeyFlag1 = TOUCH_KEY_4;
     }
 }
@@ -478,6 +494,9 @@ void Report_Coordinate()
     if(touch_key_pressed&&(!bdt.PressKeyFlag1)){
         input_report_key(spidev->dev,key_pressed,0);
         input_sync((spidev->dev));
+		if(key_pressed == KEY_MENU){
+			set_finger_num(5);
+		}
         key_pressed = 0;
         touch_key_pressed = 0;
         printk("key released\n");
@@ -537,6 +556,9 @@ void Report_Coordinate()
 static irqreturn_t cn1100_irq_handler(int irq, void *dev_id)
 {
     if(spidev->i2c_ok){
+		if((bdt.ModeSelect==DOZE_MODE)&&(spidev->irq_count<10)){
+			goto out;
+		}
         disable_irq_nosync(spidev->irq);
 #ifdef CAL_TIME_CONSUMED
         if(0 == spidev->irq_interval){
@@ -550,6 +572,7 @@ static irqreturn_t cn1100_irq_handler(int irq, void *dev_id)
 #endif
         queue_work(spidev->workqueue,&spidev->main);
     }
+out:
     return IRQ_RETVAL(IRQ_HANDLED);
 }
 
@@ -951,7 +974,6 @@ static struct i2c_driver chm_ts_driver = {
 static int __init cn1100_spi_init(void)
 {
     int status = 0;
-    struct timespec tv;
 
     bd = kmalloc(sizeof(bd_t),GFP_KERNEL);
     if(!bd){

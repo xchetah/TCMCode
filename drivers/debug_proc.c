@@ -233,12 +233,12 @@ ssize_t chm_proc_read(struct file *file, char __user *buf, size_t size, loff_t *
         {
             len = sizeof(bdt.DeltaDat16A);
             wait_event_interruptible(spidev->waitq,(spidev->mode & CN1100_DATA_PREPARED));
-            
-            #ifdef SHOW_H_DATA
-            bdt.DeltaDat16A[0][0] = bdt.Left_h;
-            bdt.DeltaDat16A[0][1] = bdt.Right_h; 
-            bdt.DeltaDat16A[0][2] = bdt.Top_h;
-            bdt.DeltaDat16A[0][3] = bdt.Bottom_h;
+            #ifdef KEY_PRESS_DETECT
+            for(j=SRECV_NUM; j<RECV_NUM; j++) 
+                for(i=0;i<XMTR_NUM;i++)
+                {    
+				  bdt.DeltaDat16A[i][j] = bdt.DeltaDat_kp[i];
+                }  	
             #endif
             if(copy_to_user(buf,&bdt.DeltaDat16A[0][0],len)){
                 printk("copy failed\n");

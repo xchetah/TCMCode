@@ -1,3 +1,36 @@
+/******************************************************************************
+ * ¡ã?¨¨¡§?¨´¨®D(C) TRUECOREING
+ * DEPARTMENT:
+ * MANUAL_PERCENT:
+ * ???t??3?: CN1000_data.c 
+ * ???t¡À¨º¨º?:    
+ * ?¨²¨¨Y?a¨°a: 
+ * ???¨¹?¦Ì?¡Â:
+ * ¦Ì¡À?¡ã¡ã?¡À?: 
+ * ¡Á¡Â    ??: 
+ * ¨ª¨º3¨¦¨¨??¨²:
+ * ¦Ì¡À?¡ã?e¨¨?¨¨?: 
+ *
+ * DT??????1: ¡ä¨²??o?1?
+ * DT??¨¨??¨²: 2014-09-15
+ * ¡ã? ¡À? o?:
+ * DT ?? ¨¨?: Wangpc
+ * DT???¨²¨¨Y: 
+ *
+ * DT??????2: Add one feature that acquire 10 fingers then parse 5 fingers 
+ * DT??¨¨??¨²: 2014-11-12
+ * ¡ã? ¡À? o?:
+ * DT ?? ¨¨?: Wangpc(R01)
+ * DT???¨²¨¨Y: 
+ *
+ * DT??????3: Rebuild structure of register
+ * DT??¨¨??¨²: 2014-11-19
+ * ¡ã? ¡À? o?:
+ * DT ?? ¨¨?: Wangpc(R02)
+ * DT???¨²¨¨Y: 
+ *****************************************************************************/
+
+
 #ifndef TC1126S_REG_H
 #define  TC1126S_REG_H
 
@@ -46,11 +79,11 @@
 /**** 1.2    *********  REGISTER  **********************/
 /*******************************************************/
 
-#define FLAG_REG      0x1F      // FLAG for Frame and ADC transform
+#define FLAG_REG                0x1F      // FLAG for Frame and ADC transform
 
-#define OSCC_REG      0x20      // OSC control register
+#define OSCC_REG                0x20      // OSC control register
 
-#define ADCM_REG      0x21      // ADC Management
+#define ADCM_REG                0x21      // ADC Management
 #define ADCM_XMTR_STR_MIN       0
 #define ADCM_XMTR_STR_MID1      1
 #define ADCM_XMTR_STR_MID2      2
@@ -68,32 +101,32 @@
 #define ADCM_ADC_SPEED_DIV4     2
 #define ADCM_ADC_SPEED_DIV6     3
 
-#define ADCI_REG      0x22       // ADC Interrupt Type selection
+#define ADCI_REG                0x22       // ADC Interrupt Type selection
 
-#define DACC_REG      0x23       // DAC (Digital Value)
+#define DACC_REG                0x23       // DAC (Digital Value)
 
-#define DURV_REG      0x24       // Duration for both Reset and Integration
+#define DURV_REG                0x24       // Duration for both Reset and Integration
 
-#define DURS_REG      0x25       // Durtion of Stretch
+#define DURS_REG                0x25       // Durtion of Stretch
 
-#define BCNT_REG      0x26       // Burst Count
+#define BCNT_REG                0x26       // Burst Count
 
-#define RCVM_REG    0x27       // Receiver Management
+#define RCVM_REG                0x27       // Receiver Management
 
-#define REFH_REG      0x28       // Refernece High
+#define REFH_REG                0x28       // Refernece High
 
-#define REFL_REG      0x29       // Refernece Low
+#define REFL_REG                0x29       // Refernece Low
 
-#define REN0_REG      0x2A       // RECV Enable [11:0]
-#define REN0_RCVR_EN(x)         (1<<(x)) 
+#define REN0_REG                0x2A       // RECV Enable [11:0]
+#define REN0_RCVR_EN(x)        (1<<(x)) 
 
-#define RMP1_REG      0x2B       // RECV Enable [11:0]
+#define RMP1_REG                0x2B       // RECV Enable [11:0]
 
-#define RMP2_REG      0x2C       // RECV Enable 
+#define RMP2_REG                0x2C       // RECV Enable 
 
-#define RMP3_REG      0x2D       // RECV Enable 
+#define RMP3_REG                0x2D       // RECV Enable 
 
-#define TXEN_REG      0x2E       // Tansmitter Enable [27:24]
+#define TXEN_REG                0x2E       // Tansmitter Enable [27:24]
 
 
 
@@ -102,43 +135,43 @@
 // REG_0x2F is reserved
 //************************************************************
 
-#define TPL1_REG      0x30       // Tansmitter Plority [23:12]
+#define TPL1_REG                0x30       // Tansmitter Plority [23:12]
 
 //************************************************************
 // REG_0x31 is reserved
 //************************************************************
 
-#define TFC0_REG      0x32      // Tansmitter Input [11:0]
+#define TFC0_REG                0x32      // Tansmitter Input [11:0]
 
-#define TFC1_REG       0x33      // Tansmitter Input [23:12]
+#define TFC1_REG                0x33      // Tansmitter Input [23:12]
 
-#define TFC2_REG          0x34      // Tansmitter Input [27:24]
+#define TFC2_REG                0x34      // Tansmitter Input [27:24]
 
-#define DIAG_REG         0x35      // Diagnostic Control
+#define DIAG_REG                0x35      // Diagnostic Control
 
-#define TCRS_REG      0x36      // Test Control ---- Reset and Enable
+#define TCRS_REG                0x36      // Test Control ---- Reset and Enable
 
-#define TCEN_REG      0x37      // Test Control ---- Enable and Reset
+#define TCEN_REG                0x37      // Test Control ---- Enable and Reset
 
 //************************************************************
 // REG_0x38 is reserved
 //************************************************************
 
-#define PERD_REG      0x39      // Write Register ---- Period
+#define PERD_REG                0x39      // Write Register ---- Period
 
-#define PROB_REG      0x3A      // Write Register ---- Probe and Period
+#define PROB_REG                0x3A      // Write Register ---- Probe and Period
 
-#define FLEN_REG      0x3B      // Frame Length
+#define FLEN_REG                0x3B      // Frame Length
 
-#define TTHR_REG      0x3C      // RX CH Begin0
+#define TTHR_REG                0x3C      // RX CH Begin0
 
 //************************************************************
 // REG_0x3d is reserved
 //************************************************************
 
-#define RXCN_REG      0x3E      // RX CH Number
+#define RXCN_REG                0x3E      // RX CH Number
 
-#define FCTL_REG      0x3F      // TX CH Control
+#define FCTL_REG                0x3F      // TX CH Control
 
 
 //#define TTHR_REG    0x40      // TOUCH THR, etc
@@ -154,11 +187,11 @@
 // REG44 is changed from 0x38 (TC1126)
 //************************************************************
 
-#define RJCT_REG      0x42      // Read is moved from 0x39 to 0x42
+#define RJCT_REG                0x42      // Read is moved from 0x39 to 0x42
 
-#define REVN_REG      0x43      // Read is moved from 0x3A to 0x43
+#define REVN_REG                0x43      // Read is moved from 0x3A to 0x43
 
-#define DONE_REG      0x44      // Something is done in Status, Read Only
+#define DONE_REG                0x44      // Something is done in Status, Read Only
 
 #define FM0FG0_ADDR             0x45      // Frame0_Finger0_Address (11:0)
 #define FM0FG0_DELTA            0x46      // Frame0_Finger0_Delta   (11:0)
@@ -192,28 +225,28 @@
 #define TXMAP16_REG             0x50     // TX_CH_MAP16[15-0], 17th Time TX
 #define TXMAP17_REG             0x51     // TX_CH_MAP17[15-0], 18th Time TX
 
-#define TXMAP_TX_CH(x)      (1<<(x))  //Bitx, tx_ch_mapX, Mapping to TX_x signal
-#define TXMAP_TX_CH_0       (1<<0)  //Bit0, tx_ch_map0, Mapping to TX0 signal
-#define TXMAP_TX_CH_1       (1<<1)  //Bit1, tx_ch_map1, Mapping to TX1 signal
-#define TXMAP_TX_CH_2       (1<<2)  //Bit2, tx_ch_map2, Mapping to TX2 signal
-#define TXMAP_TX_CH_3       (1<<3)  //Bit3, tx_ch_map3, Mapping to TX3 signal
-#define TXMAP_TX_CH_4       (1<<4)  //Bit4, tx_ch_map4, Mapping to TX4 signal
-#define TXMAP_TX_CH_5       (1<<5)  //Bit5, tx_ch_map5, Mapping to TX5 signal
-#define TXMAP_TX_CH_6       (1<<6)  //Bit6, tx_ch_map6, Mapping to TX6 signal
-#define TXMAP_TX_CH_7       (1<<7)  //Bit7, tx_ch_map7, Mapping to TX7 signal
-#define TXMAP_TX_CH_8       (1<<8)  //Bit8, tx_ch_map8, Mapping to TX8 signal
-#define TXMAP_TX_CH_9       (1<<9)  //Bit9, tx_ch_map9, Mapping to TX9 signal
-#define TXMAP_TX_CH_10      (1<<10) //Bit10, tx_ch_map10, Mapping to TX10 signal
-#define TXMAP_TX_CH_11      (1<<11) //Bit11, tx_ch_map11, Mapping to TX11 signal
-#define TXMAP_TX_CH_12      (1<<12) //Bit12, tx_ch_map12, Mapping to TX12 signal
-#define TXMAP_TX_CH_13      (1<<13) //Bit13, tx_ch_map13, Mapping to TX13 signal
-#define TXMAP_TX_CH_14      (1<<14) //Bit14, tx_ch_map14, Mapping to TX14 signal
-#define TXMAP_TX_CH_15      (1<<15) //Bit15, tx_ch_map15, Mapping to TX15 signal
+#define TXMAP_TX_CH(x)         (1<<(x))  //Bitx, tx_ch_mapX, Mapping to TX_x signal
+#define TXMAP_TX_CH_0          (1<<0)   //Bit0, tx_ch_map0, Mapping to TX0 signal
+#define TXMAP_TX_CH_1          (1<<1)   //Bit1, tx_ch_map1, Mapping to TX1 signal
+#define TXMAP_TX_CH_2          (1<<2)   //Bit2, tx_ch_map2, Mapping to TX2 signal
+#define TXMAP_TX_CH_3          (1<<3)   //Bit3, tx_ch_map3, Mapping to TX3 signal
+#define TXMAP_TX_CH_4          (1<<4)   //Bit4, tx_ch_map4, Mapping to TX4 signal
+#define TXMAP_TX_CH_5          (1<<5)   //Bit5, tx_ch_map5, Mapping to TX5 signal
+#define TXMAP_TX_CH_6          (1<<6)   //Bit6, tx_ch_map6, Mapping to TX6 signal
+#define TXMAP_TX_CH_7          (1<<7)   //Bit7, tx_ch_map7, Mapping to TX7 signal
+#define TXMAP_TX_CH_8          (1<<8)   //Bit8, tx_ch_map8, Mapping to TX8 signal
+#define TXMAP_TX_CH_9          (1<<9)   //Bit9, tx_ch_map9, Mapping to TX9 signal
+#define TXMAP_TX_CH_10         (1<<10)  //Bit10, tx_ch_map10, Mapping to TX10 signal
+#define TXMAP_TX_CH_11         (1<<11)  //Bit11, tx_ch_map11, Mapping to TX11 signal
+#define TXMAP_TX_CH_12         (1<<12)  //Bit12, tx_ch_map12, Mapping to TX12 signal
+#define TXMAP_TX_CH_13         (1<<13)  //Bit13, tx_ch_map13, Mapping to TX13 signal
+#define TXMAP_TX_CH_14         (1<<14)  //Bit14, tx_ch_map14, Mapping to TX14 signal
+#define TXMAP_TX_CH_15         (1<<15)  //Bit15, tx_ch_map15, Mapping to TX15 signal
 
-#define TXMAPTOTX16ONLY_REG       0x52     // TX_CH_MAP to TX16 for "sometime" (First Time to 16Th Time)
-#define TXMAPTO16O_Bit(x)         (1<<(x))   // BitX: "Time Slut X"
+#define TXMAPTOTX16ONLY_REG     0x52      // TX_CH_MAP to TX16 for "sometime" (First Time to 16Th Time)
+#define TXMAPTO16O_Bit(x)      (1<<(x))   // BitX: "Time Slut X"
 
-#define TXMAPTOTX16MORE_REG       0x53
+#define TXMAPTOTX16MORE_REG     0x53
 
 
 //R02 -a

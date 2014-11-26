@@ -324,6 +324,9 @@ void Report_Coordinate()
 static irqreturn_t cn1100_irq_handler(int irq, void *dev_id)
 {
 	if(spidev->i2c_ok){
+		if((bdt.ModeSelect==DOZE_MODE)&&(spidev->irq_count<10)){
+			goto out;
+		}
 		disable_irq_nosync(spidev->irq);
 #ifdef CAL_TIME_CONSUMED
 		if(0 == spidev->irq_interval){
@@ -337,6 +340,7 @@ static irqreturn_t cn1100_irq_handler(int irq, void *dev_id)
 #endif
 		queue_work(spidev->workqueue,&spidev->main);
 	}
+out:
 	return IRQ_RETVAL(IRQ_HANDLED);
 }
 

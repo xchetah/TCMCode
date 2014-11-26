@@ -2,7 +2,7 @@
  * 版权所有(C) TRUECOREING
  * DEPARTMENT:
  * MANUAL_PERCENT:
- * 文件名称: CN1000_GlobalVal.h 
+ * 文件名称: CN1000_data.c 
  * 文件标识:    
  * 内容摘要: 
  * 其它说明:
@@ -46,7 +46,7 @@ typedef struct DeltaPData {
     uint8_t    LifeNumber;
     uint16_t   Finger_X_Reported;                      // Final report finger point X, Q8
     uint16_t   Finger_Y_Reported;                      // Final report finger point Y, Q8
-    EdgeCtrl   EdgeInfo;
+    EdgeCtrl   EdgeInfo; 
 
     uint16_t   StayCount;
     int32_t    Stay_XSum;
@@ -129,14 +129,14 @@ typedef struct
 {
     uint16_t Doze_FirstIn      : 2; // Bit1:0   Useful
     uint16_t Doze_OddNum       : 1; // Bit2     Useless now
-} MTDCtrl;
+} MTDCtrl;	
 
 typedef struct
 {
     uint16_t Flag       : 1; // Bit0     
     uint16_t WFNum      : 7; // Bit7:1   
     uint16_t BigNum     : 7; // Bit14:8  
-} FaceDetCtrl;
+} FaceDetCtrl;	
 
 typedef struct
 {
@@ -150,7 +150,7 @@ typedef struct
     uint32_t PreFingerExt      : 2; // Bit3:2
     uint32_t NoFingerCnt4Base  : 8; // Bit11:3
     uint32_t BaseUpdateCase    : 2; // Bit13:12
-} BBDCtrl;	
+} BBDCtrl;
 
 typedef struct
 {
@@ -174,7 +174,7 @@ typedef struct
     uint8_t        AdjustCount;
     uint8_t        AbnormalUpdateDelay;
     int16_t        DeltaSumMaxThreshold;
-    int32_t        DeltaSum;
+    int32_t        DeltaSum;	
 } BaseBufferDef;
 
 typedef struct
@@ -188,10 +188,10 @@ typedef struct
     uint32_t    MaxValueNoFinger;  // WholeProcess
     uint32_t    FinThrMin;         // WholeProcess
 
-    uint32_t    HighRefSet;    // 0,1,2,3
-    uint32_t    HighRefPlSet;  // 0,1
+    uint32_t    HighRefSet;        // 0,1,2,3
+    uint32_t    HighRefPlSet;      // 0,1
     uint32_t    HighRefGainSet;    // 0,1,2,3
-    uint32_t    LowRefSet;     // 0,1,2,3
+    uint32_t    LowRefSet;         // 0,1,2,3
     uint32_t    LowRefPlSet;       // 0,1
     uint32_t    LowRefGainSet;     // 0,1,2,3  注：穷举法中LowRefGainSet值需初始化为-1，以便从0开始穷举
 

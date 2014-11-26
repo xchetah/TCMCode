@@ -56,7 +56,7 @@ static const unsigned short normal_i2c[2] = {0x20,I2C_CLIENT_END};
 
 #define REPORT_DATA_ANDROID_4_0
 struct cn1100_spi_dev *spidev = NULL;
-uint16_t chip_addr = 0x5d;
+uint16_t chip_addr = 0x20;
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
 static void chm_ts_early_suspend(struct early_suspend *h);
@@ -77,9 +77,9 @@ void update_cfg(void){
 int ctp_wakeup(int status)
 {
     if (status == 1) { 
-        __gpio_set_value(config_info.wakeup_gpio.gpio, 1);
+        __gpio_set_value(225, 1);
     }else{
-        __gpio_set_value(config_info.wakeup_gpio.gpio,0);
+        __gpio_set_value(225,0);
     }
     msleep(10);
 
@@ -446,6 +446,9 @@ static int chm_ts_probe(struct i2c_client *client, const struct i2c_device_id *i
         dev_err(&spidev->client->dev, "I2C functionality not supported\n");
         return -ENODEV;
     }    
+	ctp_wakeup(0);
+	msleep(10);
+	ctp_wakeup(1);
     chip_addr = 0x20;
     value = SPI_read_singleData(0x20);
     printk("=============0x%x===========\n",value);
@@ -600,45 +603,11 @@ static int chm_ts_remove(struct i2c_client *client)
 int chm_ts_suspend(struct i2c_client *client,pm_message_t mesg)
 {
     int ret = 0;
-#if defined(SLEEP_EVENT_SIM)
-    int retry = 0;
-#endif
     spidev->mode |= CN1100_IS_SUSPENDED;
     hrtimer_cancel(&spidev->systic);
     flush_workqueue(spidev->workqueue);
-    printk("%s:1\n",__func__);
-#ifndef SLEEP_EVENT_SIM
     disable_irq_nosync(spidev->irq);
     ctp_wakeup(0);
-#else
-    spidev->irq_count = 255;
-    bdt.Prepare2SleepMode = 1;
-    spidev->mode &= ~CN1100_IS_SUSPENDED;
-    ret = wait_event_timeout(spidev->waitq,(spidev->mode & CN1100_IS_SUSPENDED),msecs_to_jiffies(500));
-    spidev->mode &= ~(CN1100_IS_SUSPENDED);
-    if(!ret){
-        printk("INT->1 TIMEOUT\n");
-        goto out;
-    }
-    printk("%s:2\n",__func__);
-
-    if(retry >= 10){
-        printk("Waiting irq time out\n");
-        goto out;
-    }
-    enable_irq(spidev->irq);
-    /* After Setting Sleep Mode,Waiting Until It Complete*/
-    if(spidev->mode & CN1100_USE_IRQ){
-        ret = wait_event_timeout(spidev->waitq,(spidev->mode & CN1100_IS_SUSPENDED),msecs_to_jiffies(500));
-        spidev->mode &= ~(CN1100_IS_SUSPENDED);
-        if(!ret){
-            printk("INT->2 TIMEOUT\n");
-            goto out;
-        }
-        printk("%s:3\n",__func__);
-    }
-out:
-#endif
     printk("suspend done\n");
     return ret;
 }
@@ -648,21 +617,10 @@ int chm_ts_resume(struct i2c_client *client)
     int ret = 0;
     printk("%s\n",__func__);
     spidev->mode &= ~(CN1100_IS_SUSPENDED);
+	ctp_wakeup(0);
+	msleep(10);
     ctp_wakeup(1);
 
-#ifdef SLEEP_EVENT_SIM
-    //	CN1100_Goto_AutoScanMode(iAUTOSCAN_MODE);
-    ret = SPI_read_singleData(0x1f);	
-    ret |= FLAG_CHIP_RST;
-    SPI_write_singleData(0x1f,(uint16_t)ret);
-    msleep(10);
-    cn1100_init();
-
-    if(spidev->mode & CN1100_USE_IRQ){
-        enable_irq(spidev->irq);
-    }
-#else
-    printk("System Return From Deep Sleep\n");
     get_chip_addr();
     msleep(10);
     if(spidev->i2c_ok){
@@ -673,7 +631,6 @@ int chm_ts_resume(struct i2c_client *client)
     if(spidev->mode & CN1100_USE_IRQ){
         enable_irq(spidev->irq);
     }
-#endif
     hrtimer_start(&spidev->systic, ktime_set(0, SCAN_SYSTIC_INTERVAL), HRTIMER_MODE_REL);
 
     return ret;
@@ -749,6 +706,7 @@ void ctp_print_info(struct ctp_config_info info)
     printk("info.revert_y_flag:%d\n",info.revert_y_flag);
     printk("info.exchange_x_y_flag:%d\n",info.exchange_x_y_flag);
     printk("info.irq_gpio_number:%d\n",info.irq_gpio.gpio);
+	config_info.wakeup_gpio.gpio=225;
     printk("info.wakeup_gpio_number:%d\n",info.wakeup_gpio.gpio);
 }    
 
