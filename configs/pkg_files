@@ -2,6 +2,7 @@ stm32/Projects/TC1126Only/CN1100_common.h
 stm32/Projects/TC1126Only/CN1100_Function.h
 stm32/Projects/TC1126Only/CN1100_GlobalVar.h
 stm32/Projects/TC1126Only/ctp_WHITESCREEN_15X10.h
+stm32/Projects/TC1126Only/ctp_FPCSCREEN_17X10.h
 stm32/Projects/TC1126Only/TC1126_hwService.c
 stm32/Projects/TC1126Only/TC1126_main.c
 stm32/Projects/TC1126Only/TC1126s_reg.h

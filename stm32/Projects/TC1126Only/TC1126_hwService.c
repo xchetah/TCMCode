@@ -2702,7 +2702,7 @@ void CN1100_FrameScanDoneInt_ISR()
         if(spidev->mode & CN1100_IS_SUSPENDED)
         {
             #ifndef CN1100_MTK
-            enable_irq(spidev->irq);
+            cn1100_set_irq(true);
             #endif
             return;
         }
@@ -2768,7 +2768,7 @@ void CN1100_FrameScanDoneInt_ISR()
 
             #ifdef CN1100_LINUX
                 #ifndef CN1100_MTK
-                enable_irq(spidev->irq);
+                cn1100_set_irq(true);
                 #endif
             #endif
 
@@ -2788,7 +2788,7 @@ void CN1100_FrameScanDoneInt_ISR()
                     TC1126_GotoDozeMode();
                     #ifdef CN1100_LINUX
 					  #ifndef CN1100_MTK
-                      enable_irq(spidev->irq);
+                      cn1100_set_irq(true);
 					  #endif
                     #endif
                     break;
@@ -2816,7 +2816,7 @@ void CN1100_FrameScanDoneInt_ISR()
                 }
 
                #ifndef CN1100_MTK
-                enable_irq(spidev->irq);
+                cn1100_set_irq(true);
                #endif
            #endif
 

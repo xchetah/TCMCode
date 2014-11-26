@@ -229,14 +229,14 @@
 /**** 1.8    *********  关于 触摸屏 类型  *****************************/
 /**********************************************************************/
 
-//#define WHITESCREEN_15X10               // White or Black screen DITO, 15X10
+#define WHITESCREEN_15X10               // White or Black screen DITO, 15X10
 //#define SITO_SCREEN_10X15             // Black Screen SITO, 15X10
 //#define ITO_BORDERLINE_15X10          // ITO走线 DITO 屏
 
 //#define PHONESCREEN_13X10               // 手机屏(单层ITO), GT960
 //#define SH_FEATUREPHONE_13X9            // 手机屏(单层ITO), GT1688 ( //// FREQY_HOP_ONLY has to be disabled ////)
 
-#define FPCSCREEN_17X10                   // FPC屏(DITO), GT960
+//#define FPCSCREEN_17X10                   // FPC屏(DITO), GT960
 
 //#define PCB_DITO_SCREEN_15X10         // PCB 标准 DITO 图案
 //#define PCB_RHOMBUS_15X10             // PCB - 菱形图案
@@ -422,7 +422,7 @@
 #ifdef WINNER_TWD                                    //for 全志通文达
 #define ISCANMODE_PERD_REG_VALUE             0x1C0
 #else
-#define ISCANMODE_PERD_REG_VALUE             0x140   //12.5ms   
+#define ISCANMODE_PERD_REG_VALUE             0x1c0   //12.5ms   
 #endif
 
   #define RAW_DATA_DIFF_THR                    1100

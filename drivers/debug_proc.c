@@ -666,3 +666,22 @@ void cn1100_reset(void)
     hrtimer_start(&spidev->systic, ktime_set(0, SCAN_SYSTIC_INTERVAL), HRTIMER_MODE_REL);
     #endif
 }
+
+void cn1100_set_irq(bool enable){
+#ifdef CN1100_LINUX
+	if(enable){
+  #ifdef CN1100_A31
+  	   sw_gpio_eint_set_enable(spidev->irq,1);
+  #else
+  	   enable_irq(spidev->irq);
+  #endif
+  	}else{
+  #ifdef CN1100_A31
+  	   sw_gpio_eint_set_enable(spidev->irq,0);
+  #else
+  	   disable_irq_nosync(spidev->irq);
+  #endif
+#endif
+	}
+
+}
