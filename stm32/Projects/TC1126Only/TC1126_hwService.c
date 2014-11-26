@@ -831,6 +831,16 @@ void TC1126_Init_GlobalVariables(void)
     bdt.BFD.bbdc.PreFingerExt      = FINGER_SHOW;
     bdt.BFD.bbdc.NoFingerCnt4Base  = 0;
     bdt.BFD.bbdc.BaseUpdateCase    = BASELINE_UPDATING_CASE;
+    #ifdef BSLN_WATERJUDGE
+    bdt.BFD.WaterProtectTime       = 0;
+    bdt.BFD.BufDeltSum             = 0;                          //两帧无指原始值的差值
+    bdt.BFD.BufDeltMax             = 0;   
+    bdt.BFD.BufAbnomalflag         = 0;
+    bdt.BFD.BufAbnomalProtectflag  = 0;
+    for (i = 0; i < XMTR_NUM; i++)
+    for (j = 0; j < RECV_NUM; j++)
+        bdt.BFD.BufDatSaved[i][j]  = 0;
+    #endif
     bdt.MTD.mtdc.Doze_FirstIn      = 0;
     bdt.MTD.mtdc.Doze_OddNum       = 0;
     bdt.MTD.NoFingerCnt4Doze       = 0;

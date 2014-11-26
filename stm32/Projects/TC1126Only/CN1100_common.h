@@ -332,6 +332,8 @@
 #define ABNORMAL_NUM_DIFF               37    // ((XMTR_NUM*RECV_NUM)>>2)
 #define ABNORMAL_HOLD_TIME              5
 
+//#define BSLN_WATERJUDGE
+
 #ifdef CN1100_WINNER
 #define BIGNOISE                       200
 #else  

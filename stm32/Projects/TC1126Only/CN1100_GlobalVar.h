@@ -175,6 +175,15 @@ typedef struct
     uint8_t        AbnormalUpdateDelay;
     int16_t        DeltaSumMaxThreshold;
     int32_t        DeltaSum;	
+    
+    #ifdef BSLN_WATERJUDGE
+    uint32_t       WaterProtectTime;
+    uint16_t       BufDatSaved[XMTR_NUM][RECV_NUM];     //保存上帧数据
+    int32_t        BufDeltSum;                          //两帧无指原始值的差值
+    int8_t         BufDeltMax;   
+    int8_t         BufAbnomalflag;
+    int8_t         BufAbnomalProtectflag;
+    #endif
 } BaseBufferDef;
 
 typedef struct

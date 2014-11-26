@@ -348,6 +348,56 @@ void Baseline_Fingerupdatenoise(void)
     }
 }
 
+/*******************************************************************************
+* Function Name  : 
+* Description    : 
+* Input          : 
+* Output         : 
+* Return         : 
+*******************************************************************************/
+void Baseline_FingerJuge(uint16_t *buffer)
+{
+    #ifdef BSLN_WATERJUDGE
+    uint16_t num,flag,x,y;
+    if(  bdt.BFD.BufDeltSum > 10  )   // ??????
+    {
+        bdt.PowerOnWithFinger = 1;
+        bdt.BFD.BufAbnomalProtectflag = 1;  //异常保护时间标志
+        bdt.BFD.BufAbnomalflag = 1;
+        bdt.BFD.WaterProtectTime = 0;
+        return;
+    }  // 处理有水上电
+    if(bdt.BFD.WaterProtectTime < 100 && bdt.BFD.BufAbnomalProtectflag == 1)
+    {
+        bdt.PowerOnWithFinger = 1;
+        return;
+    }
+    if(bdt.BFD.BufAbnomalflag == 1)
+    {
+        flag = 0;
+        x = bdt.FRM_MAX_X_XMTR;
+        y = bdt.FRM_MAX_Y_RECV;
+        num = abs16(bdt.BFD.BufDatSaved[x][y] - buffer[x*RECV_NUM + y]);
+        if(num < (bdt.MaxValueInFrame - (bdt.MaxValueInFrame >> 2)))
+        {
+            flag = 1;
+        }
+        if(flag == 1)
+        {
+             bdt.PowerOnWithFinger = 1;
+             bdt.BFD.BufAbnomalProtectflag = 1;  //异常保护时间标志
+             bdt.BFD.WaterProtectTime = 0; 
+             return;
+        }
+        else
+        {
+            bdt.BFD.BufAbnomalflag = 0;
+            bdt.BFD.BufAbnomalProtectflag = 0;  //无异常清零
+        }
+    }
+    #endif
+}
+
 
 /*******************************************************************************
 * Function Name  : 
@@ -368,6 +418,9 @@ void Baseline_FingerExistedHandled(uint16_t *buffer)
     Baseline_Fingerupdatenoise();
     Baseline_FingerupdateTX();
     Baseline_FingerupdateRX();
+    #ifdef BSLN_WATERJUDGE
+    Baseline_FingerJuge(buffer);
+    #endif
     if(bdt.PowerOnWithFinger)
         return;
      if(bdt.MinValueInFrame < (0-(bdt.PCBA.FrameMaxSample<<1)))
@@ -419,6 +472,40 @@ void Baseline_FingerExistedHandled(uint16_t *buffer)
         }
     }
     bdt.PowerOnWithFinger  = 0;
+}
+
+/*******************************************************************************
+* Function Name  : 
+* Description    : 
+* Input          : 
+* Output         : 
+* Return         : 
+*******************************************************************************/
+uint16_t Baseline_TwoFrameBufDelta(uint16_t *buffer)
+{
+	#ifdef BSLN_WATERJUDGE
+    uint16_t i,j;
+    uint16_t buf[XMTR_NUM * RECV_NUM];
+    bdt.BFD.BufDeltSum = 0;
+    bdt.BFD.BufDeltMax = 0;
+    for (i=0;i<XMTR_NUM;i++)
+        for (j=0;j<RECV_NUM;j++)
+        {
+            buf[ (i*RECV_NUM) + j] = abs16(buffer[(i*RECV_NUM) + j] - bdt.BFD.BufDatSaved[i][j]);
+            bdt.BFD.BufDeltSum+=buf[ (i*RECV_NUM) + j];
+            if(bdt.BFD.BufDeltMax < buf[ (i*RECV_NUM) + j])
+            {
+                bdt.BFD.BufDeltMax = buf[ (i*RECV_NUM) + j];
+            }
+        }
+                
+    bdt.BFD.BufDeltSum =  bdt.BFD.BufDeltSum >> 7;  //相邻两帧无指原始值的差值
+    if(bdt.BFD.BufDeltSum > 5 || bdt.BFD.BufDeltMax > 25)
+        return 1;
+    else 
+        return 0;
+                                  //根据原始值变化判断是否有水滴被擦除
+    #endif
 }
 
 
@@ -677,8 +764,16 @@ uint8_t Baseline_IsNeedUpdateBaseBuffer(void)
 *******************************************************************************/
 void Baseline_BaseBufferHandled(uint16_t *buffer)
 {
-    int i, j;
-    
+    int i, j,k;
+   /************************************************************************
+   *    if bufdata is abnormal, Hold for Protection Time
+   ************************************************************************/
+    #ifdef BSLN_WATERJUDGE
+    if( bdt.BFD.BufAbnomalProtectflag == 1)
+    {
+        bdt.BFD.WaterProtectTime++;
+    }
+    #endif
    /************************************************************************
    * After finger is just left, Hold for Protection Time
    ************************************************************************/
@@ -713,7 +808,9 @@ void Baseline_BaseBufferHandled(uint16_t *buffer)
         if(bdt.updatecount)
             bdt.updatecount--;
         #endif
-        
+        #ifdef BSLN_WATERJUDGE
+        k = Baseline_TwoFrameBufDelta(buffer); 
+        #endif
        /*******************************************************
        * Record how many time for the case of NO_FINGER
        *******************************************************/
@@ -727,7 +824,18 @@ void Baseline_BaseBufferHandled(uint16_t *buffer)
             bdt.BFD.bbdc.PreFingerExt = FINGER_SHOW;
             return;
         }
-        
+        #ifdef BSLN_WATERJUDGE
+        if(k > 0)
+        {  
+            /***************************************************
+             *              原始值错误停止更新
+            ***************************************************/
+            bdt.BFD.BufAbnomalflag = 1;  
+            bdt.BFD.bbdc.NoFingerCnt4Base = 0;
+            bdt.BFD.bbdc.PreFingerExt = FINGER_SHOW;
+            return;
+        }
+        #endif
         if(bdt.BFD.bbdc.PreFingerExt != bdt.BFD.bbdc.FingerExist)
         {
            /*******************************************************
@@ -7440,6 +7548,9 @@ void DataProc_WholeFramePostProcess(uint16_t *buffer)
     /*******************************************
     * Baseline Processing for every frame
     ********************************************/
+    #ifdef BSLN_WATERJUDGE
+    uint16_t i,j;
+    #endif
     #ifdef FREQHOP_BYSTRETCH
         if(TXSCAN_ENABLE == DataProc_FHBSOperatingSwitch())
         {
@@ -7490,6 +7601,16 @@ void DataProc_WholeFramePostProcess(uint16_t *buffer)
     
     #ifdef STM32VC_LCD
     LCD_Show_STM32(buffer);
+    #endif
+    #ifdef BSLN_WATERJUDGE
+    if(bdt.BFD.bbdc.FingerExist == NO_FINGER)
+    {
+         for(i=0;i<XMTR_NUM;i++)
+             for (j=0;j<RECV_NUM;j++)
+             {
+                bdt.BFD.BufDatSaved[i][j] = buffer[ (i*RECV_NUM) + j];
+             }
+    }// 无指时记录原始值供下帧用
     #endif
 }
 
