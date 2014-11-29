@@ -362,7 +362,7 @@ void Report_Coordinate_Wait4_SingleTime(int id,int X, int Y)
 		return ;
 
 
-
+        #ifdef PRESS_KEY_DETECT
 	if(mouse_key)
 	{
 
@@ -417,6 +417,7 @@ void Report_Coordinate_Wait4_SingleTime(int id,int X, int Y)
 
 	}
 	else
+        #endif
 	{
 		if(X > 0 || Y > 0){ 
 

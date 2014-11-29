@@ -2,7 +2,7 @@ A31   CN1100_A31     cn1100_a31    libtc1126A31.bin  Allwinner/Winner/linux-3.3 
 A23   CN1100_WINNER  cn1100_winner libtc1126A23.bin  Allwinner/Winner/linux-3.4        Allwinner/Winner/toolchain-3.4/bin/arm-linux-gnueabi-
 A33   CN1100_WINNER  cn1100_winner libtc1126A33.bin  Allwinner/Winner/linux-3.4-A33    Allwinner/Winner/toolchain-3.4/bin/arm-linux-gnueabi-
 RK30  CN1100_RK3026  cn1100_rk     libtc1126RK30.bin Rockchip/HengLong/Kernel-3.0.36   Rockchip/HengLong/Toolchain-3.0.36-Rockchip/bin/arm-eabi-
-RK29  CN1100_RK3026  cn1100_rk     libtc1126RK29.bin Rockchip/BX/kernel-3.0.36         Rockchip/HengLong/Toolchain-3.0.36-Rockchip/bin/arm-eabi-
+RK29  CN1100_RK29    cn1100_rk     libtc1126RK29.bin Rockchip/BX/kernel-3.0.36         Rockchip/HengLong/Toolchain-3.0.36-Rockchip/bin/arm-eabi-
 LX    CN1100_LX      cn1100_lx     libtc1126LX.bin   Datang/Wensheng/linux-3.10        Datang/Wensheng/arm-eabi-4.6/bin/arm-eabi-
 ATM   CN1100_ATM     cn1100_action libtc1126ATM.bin  Actions/Actions/linux-3.4-release Actions/Actions/toolchain-2011.09/bin/arm-none-linux-gnueabi-
 NUF   CN1100_NUF     cn1100_nuf    libtc1126NUF.bin  Nufront/nufront/kernel-3.4.0      Nufront/nufront/toolchain-2011.09/bin/arm-none-linux-gnueabi-

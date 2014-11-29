@@ -10,11 +10,17 @@
 int SCREEN_HIGH=800;
 int SCREEN_WIDTH=480;
 
+#ifdef CN1100_RK3206
 int CN1100_INT_PIN=RK30_PIN1_PB0;
 /*
  * If RESET_PIN not supported set CN1100_RESET_PIN=-1;
  */
 int CN1100_RESET_PIN=RK30_PIN3_PC1;
+#else
+/*TARGET: RK29*/
+int CN1100_INT_PIN=0;
+int CN1100_RESET_PIN=0;
+#endif
 
 #define REPORT_DATA_ANDROID_4_0
 struct cn1100_spi_dev *spidev = NULL;
